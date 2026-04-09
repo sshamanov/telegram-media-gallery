@@ -11,10 +11,4 @@ export default defineConfig({
       },
     }),
   ],
-  // Exclude src-reference from build — it is read-only reference material only
-  build: {
-    rollupOptions: {
-      external: (id) => id.includes('src-reference'),
-    },
-  },
 });
