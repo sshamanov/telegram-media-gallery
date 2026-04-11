@@ -4,16 +4,22 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "check": "svelte-check --tsconfig ./tsconfig.json",
     "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
-    "big-integer": "^1.6.52",
-    "buffer": "^6.0.3",
-    "telegram": "^2.26.22"
+    "@mtcute/web": "^0.29.6",
+    "photoswipe": "^5.4.4",
+    "qrcode": "^1.5.4",
+    "svelte": "^5.38.6"
   },
   "devDependencies": {
-    "vite": "^5.0.0",
-    "vite-plugin-node-polyfills": "^0.25.0"
+    "@sveltejs/vite-plugin-svelte": "^5.1.0",
+    "@tsconfig/svelte": "^5.0.4",
+    "@vitejs/plugin-basic-ssl": "^2.3.0",
+    "svelte-check": "^4.3.1",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.5"
   }
 }

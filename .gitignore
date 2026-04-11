@@ -3,5 +3,10 @@ dist/
 .env
 *.log
 
-# Kilo dev environment
-.kilo/
+tmp/
+temp/
+.kilo/node_modules/
+.kilo/bun.lock
+tsconfig.tsbuildinfo
+
+samples/
