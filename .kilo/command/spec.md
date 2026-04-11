@@ -1,5 +1,6 @@
 ---
 description: Write a feature spec before implementing
+agent: plan
 ---
 Write a feature spec for: $ARGUMENTS
 

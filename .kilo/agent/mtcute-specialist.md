@@ -1,7 +1,7 @@
 ---
 description: Specialist for mtcute API calls, media download/upload, rate limiting
 mode: subagent
-model: anthropic/claude-sonnet-4-6
+model: virtual/hard
 steps: 30
 ---
 You are a specialist in the `@mtcute/web` Telegram MTProto client library for browsers.

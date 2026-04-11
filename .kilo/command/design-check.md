@@ -1,5 +1,6 @@
 ---
 description: Check a component against the design spec in the plan
+agent: debug
 ---
 Check the component: $ARGUMENTS
 
