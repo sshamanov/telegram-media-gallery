@@ -1,24 +1,46 @@
 {
-  "model": "deepseek/deepseek-chat",
+  "$schema": "https://app.kilo.ai/config.json",
   "instructions": ["AGENTS.md"],
   "snapshot": true,
+  "model": "deepseek/deepseek-chat",
+  "disabled_providers": [
+    "myllmproxy"
+  ],
+  "enabled_providers": [
+    "deepseek",
+    "openai",
+    "anthropic",
+    "openrouter",
+    "huggingface"
+  ],
   "agent": {
     "code": {
       "model": "deepseek/deepseek-chat",
-      "reasoning": "off"
+      "temperature": 0.1
     },
     "plan": {
-      "model": "anthropic/claude-sonnet-4-6",
-      "reasoning": "medium"
+      "model": "openai/gpt-5.4",
+      "variant": "medium",
+      "temperature": 0.1
     },
     "debug": {
-      "model": "anthropic/claude-sonnet-4-6",
-      "reasoning": "medium"
+      "model": "openai/gpt-5.4",
+      "variant": "medium",
+      "temperature": 0.0
     },
     "ask": {
-      "model": "anthropic/claude-sonnet-4-6",
-      "reasoning": "medium"
+      "model": "openai/gpt-5.4",
+      "variant": "medium",
+      "temperature": 0.2
+    },
+    "orchestrator": {
+      "model": "openai/gpt-5.4",
+      "variant": "medium",
+      "temperature": 0.1
     }
+  },
+  "experimental": {
+    "openTelemetry": false
   },
   "permission": {
     "external_directory": "deny",
