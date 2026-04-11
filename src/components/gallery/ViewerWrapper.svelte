@@ -2,9 +2,10 @@
   import { derived, get, type Readable } from 'svelte/store'
   import { onDestroy } from 'svelte'
   import PhotoSwipe from 'photoswipe'
-  import { blobToFile } from '../../lib/files'
+  import { blobToFile, getCachedOrDownloadBlob } from '../../lib/files'
+  import { isOpfsAvailable, readOpfsBlob } from '../../lib/cache/opfs'
+  import { readCachedBlob } from '../../lib/cache/indexeddb'
   import { formatSize, isAudioItem, isDownloadOnlyItem, isImageItem, isPdfItem, isTextItem, isTextLikeFileName, isVideoItem, mediaKindLabel } from '../../lib/media'
-  import { readCachedBlob, writeCachedBlob } from '../../lib/cache/indexeddb'
   import { readTextBlob } from '../../lib/thumbnails'
   import {
     closeViewer,
@@ -13,7 +14,7 @@
     viewerIndex,
     viewerItems,
   } from '../../stores/gallery'
-  import { telegramAdapter } from '../../stores/telegram'
+  import { isOffline } from '../../stores/ui'
   import InfoPanel from './InfoPanel.svelte'
   import type { MediaItem } from '../../types/telegram'
   import type { SlideData } from 'photoswipe'
@@ -45,35 +46,35 @@
     $viewerIndex === null ? null : ($viewerItems[$viewerIndex] ?? $mediaItems[$viewerIndex] ?? null),
   )
 
-  function toBlob(buffer: Uint8Array, type: string): Blob {
-    const cloned = new Uint8Array(buffer.byteLength)
-    cloned.set(buffer)
-    return new Blob([cloned], { type })
+  async function isCachedLocally(item: MediaItem, kind: 'thumb' | 'full'): Promise<boolean> {
+    if (kind === 'full' && isOpfsAvailable()) {
+      const mimeType = item.mimeType || 'application/octet-stream'
+      const blob = await readOpfsBlob(item.dialogId, item.messageId, mimeType)
+      return blob !== null
+    }
+    const cacheKey = `${item.dialogId}:${item.messageId}:${kind}`
+    const blob = await readCachedBlob(cacheKey, kind)
+    return blob !== null
   }
 
   async function getCachedOrDownloadedBlob(item: MediaItem, kind: 'thumb' | 'full', token: number): Promise<Blob | null> {
-    const cacheKey = `${item.dialogId}:${item.messageId}:${kind}`
-    const cached = await readCachedBlob(cacheKey, kind)
-    if (cached || token !== pswpOpenToken) {
-      return cached
+    // When offline, only return cached blobs — never attempt download
+    if ($isOffline) {
+      if (kind === 'full' && isOpfsAvailable()) {
+        const mimeType = item.mimeType || 'application/octet-stream'
+        return readOpfsBlob(item.dialogId, item.messageId, mimeType)
+      }
+      const cacheKey = `${item.dialogId}:${item.messageId}:${kind}`
+      return readCachedBlob(cacheKey, kind)
     }
 
-    const buffer = kind === 'thumb'
-      ? await telegramAdapter.downloadThumbnail(item.media)
-      : await telegramAdapter.downloadFull(item.media, (pct) => {
-          if (token === pswpOpenToken) {
-            loadProgress = pct
-          }
-        })
+    if (token !== pswpOpenToken) return null
 
-    if (!buffer || token !== pswpOpenToken) {
-      return null
-    }
-
-    const mimeType = kind === 'thumb' ? 'image/jpeg' : item.mimeType || 'application/octet-stream'
-    const blob = toBlob(buffer, mimeType)
-    await writeCachedBlob(cacheKey, blob, kind)
-    return token === pswpOpenToken ? blob : null
+    return getCachedOrDownloadBlob(item, kind, {
+      onProgress: (pct) => {
+        if (token === pswpOpenToken) loadProgress = pct
+      },
+    }).then((blob) => (token === pswpOpenToken ? blob : null))
   }
 
   function revokeUrls(content: ViewerContent): void {
@@ -108,6 +109,19 @@
 
   function markLoaded(event: { content: { onLoaded: () => void } }): void {
     event.content.onLoaded()
+  }
+
+  function renderOfflinePlaceholder(content: ViewerContent): void {
+    const wrapper = createShell('viewer-fallback viewer-offline')
+    const icon = document.createElement('div')
+    icon.className = 'viewer-offline-icon'
+    icon.textContent = '📵'
+    const title = document.createElement('h3')
+    title.textContent = 'Not available offline'
+    const sub = document.createElement('p')
+    sub.textContent = 'This item is not cached. Connect to load it.'
+    wrapper.append(icon, title, sub)
+    content.element = wrapper
   }
 
   function renderDownloadOnly(content: ViewerContent, item: MediaItem): void {
@@ -195,6 +209,16 @@
 
   async function handleContentLoad(content: ViewerContent, item: MediaItem, token: number, event: { content: { onLoaded: () => void }; preventDefault: () => void }): Promise<void> {
     event.preventDefault()
+
+    // Offline: check cache first, show placeholder if not cached
+    if ($isOffline) {
+      const cached = await isCachedLocally(item, 'full')
+      if (!cached) {
+        renderOfflinePlaceholder(content)
+        markLoaded(event)
+        return
+      }
+    }
 
     if (isTextItem(item) || isTextLikeFileName(item.filename)) {
       const fullBlob = await getCachedOrDownloadedBlob(item, 'full', token)
@@ -447,12 +471,12 @@
   <div class="viewer-ui">
     <div class="topbar">
       <button class="button ghost" type="button" on:click={closeOverlay}>✕</button>
-      <button class="button ghost" type="button" on:click={downloadCurrent} title="Download">⬇</button>
+      <button class="button ghost" type="button" on:click={downloadCurrent} title="Download" disabled={$isOffline}>⬇</button>
       {#if $activeItem && typeof navigator.share === 'function' && typeof navigator.canShare === 'function'}
-        <button class="button ghost" type="button" on:click={shareCurrent} title="Share" disabled={$activeItem.size > shareLimitBytes}>↑</button>
+        <button class="button ghost" type="button" on:click={shareCurrent} title="Share" disabled={$isOffline || $activeItem.size > shareLimitBytes}>↑</button>
       {/if}
       {#if $activeItem && isImageItem($activeItem) && typeof navigator.clipboard?.write === 'function' && typeof ClipboardItem !== 'undefined'}
-        <button class="button ghost" type="button" on:click={copyCurrent} title="Copy image">⧉</button>
+        <button class="button ghost" type="button" on:click={copyCurrent} title="Copy image" disabled={$isOffline}>⧉</button>
       {/if}
       <button class="button ghost" class:info-active={showInfo} type="button" on:click={() => (showInfo = !showInfo)} title="Toggle info panel — shows filename, size, date, sender">ⓘ Info</button>
     </div>
@@ -612,6 +636,17 @@
   :global(.viewer-audio-title),
   :global(.viewer-text-wrap pre) {
     color: var(--text-primary);
+  }
+
+  :global(.viewer-offline) {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 12px;
+  }
+
+  :global(.viewer-offline-icon) {
+    font-size: 3rem;
   }
 
   :global(.viewer-fallback h3),

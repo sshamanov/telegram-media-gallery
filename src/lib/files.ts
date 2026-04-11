@@ -1,4 +1,5 @@
 import { readCachedBlob, writeCachedBlob } from './cache/indexeddb'
+import { isOpfsAvailable, readOpfsBlob, writeOpfsBlob } from './cache/opfs'
 import { getTelegramAdapter } from './telegram/adapter'
 import type { MediaItem } from '../types/telegram'
 
@@ -14,29 +15,44 @@ export function mediaCacheKey(item: MediaItem, kind: CachedMediaKind): string {
   return `${item.dialogId}:${item.messageId}:${kind}`
 }
 
+/**
+ * Returns a cached blob for the item, or downloads and caches it.
+ * Full media: OPFS (Phase 3) when available, else IndexedDB.
+ * Thumbnails: always IndexedDB.
+ */
 export async function getCachedOrDownloadBlob(
   item: MediaItem,
   kind: CachedMediaKind,
   opts?: { onProgress?: (pct: number) => void; abortSignal?: AbortSignal },
 ): Promise<Blob | null> {
-  const cacheKey = mediaCacheKey(item, kind)
-  const cached = await readCachedBlob(cacheKey, kind)
-  if (cached) {
-    return cached
+  const mimeType = kind === 'thumb' ? 'image/jpeg' : item.mimeType || 'application/octet-stream'
+
+  // --- read from cache ---
+  if (kind === 'full' && isOpfsAvailable()) {
+    const opfsBlob = await readOpfsBlob(item.dialogId, item.messageId, mimeType)
+    if (opfsBlob) return opfsBlob
+  } else {
+    const idbBlob = await readCachedBlob(mediaCacheKey(item, kind), kind)
+    if (idbBlob) return idbBlob
   }
 
+  // --- download ---
   const adapter = getTelegramAdapter()
   const buffer = kind === 'thumb'
     ? await adapter.downloadThumbnail(item.media)
     : await adapter.downloadFull(item.media, opts?.onProgress, opts?.abortSignal)
 
-  if (!buffer) {
-    return null
+  if (!buffer) return null
+
+  const blob = cloneBufferToBlob(buffer, mimeType)
+
+  // --- write to cache ---
+  if (kind === 'full' && isOpfsAvailable()) {
+    await writeOpfsBlob(item.dialogId, item.messageId, mimeType, blob)
+  } else {
+    await writeCachedBlob(mediaCacheKey(item, kind), blob, kind)
   }
 
-  const mimeType = kind === 'thumb' ? 'image/jpeg' : item.mimeType || 'application/octet-stream'
-  const blob = cloneBufferToBlob(buffer, mimeType)
-  await writeCachedBlob(cacheKey, blob, kind)
   return blob
 }
 
@@ -56,19 +72,13 @@ export function saveBlob(blob: Blob, fileName: string): void {
 export function parseFloodWaitSeconds(error: unknown): number | null {
   const message = error instanceof Error ? error.message : String(error)
   const match = message.match(/FLOOD_WAIT(?:_|\s)(\d+)/)
-  if (!match) {
-    return null
-  }
-
+  if (!match) return null
   const seconds = Number(match[1])
   return Number.isFinite(seconds) && seconds > 0 ? seconds : null
 }
 
 export function isAbortError(error: unknown): boolean {
-  if (error instanceof DOMException && error.name === 'AbortError') {
-    return true
-  }
-
+  if (error instanceof DOMException && error.name === 'AbortError') return true
   const message = error instanceof Error ? error.message : String(error)
   return message.includes('AbortError') || message.includes('aborted')
 }

@@ -6,19 +6,44 @@
   import ViewerWrapper from './components/gallery/ViewerWrapper.svelte'
   import OfflineBanner from './components/ui/OfflineBanner.svelte'
   import Toast from './components/ui/Toast.svelte'
+  import MigrationScreen from './components/ui/MigrationScreen.svelte'
   import { currentDialog, loadInitialMedia } from './stores/gallery'
   import { setDialogs } from './stores/dialogs'
   import { authState, authStatus, session, telegramAdapter } from './stores/telegram'
   import { isOffline, pushToast } from './stores/ui'
+  import { migrateIndexedDbToOpfs } from './lib/cache/opfs'
+  import { isOpfsAvailable } from './lib/cache/opfs'
+
+  const MIGRATION_KEY = 'opfs-migration-v1-done'
 
   let dialogsLoaded = false
+  let migrating = false
+  let migrationProgress = 0   // 0–100
+
+  async function runMigrationIfNeeded(): Promise<void> {
+    if (!isOpfsAvailable()) return
+    if (localStorage.getItem(MIGRATION_KEY)) return
+
+    migrating = true
+    migrationProgress = 0
+
+    try {
+      await migrateIndexedDbToOpfs((done, total) => {
+        migrationProgress = total > 0 ? Math.round((done / total) * 100) : 100
+      })
+      localStorage.setItem(MIGRATION_KEY, '1')
+    } catch {
+      // Partial migration is fine — missing items re-downloaded on demand
+    } finally {
+      migrating = false
+    }
+  }
 
   async function loadDialogs(): Promise<void> {
     try {
       const dialogs = await telegramAdapter.getDialogs()
       setDialogs(dialogs)
       dialogsLoaded = true
-      return
     } catch {
       setDialogs([])
       pushToast({ kind: 'error', text: 'Failed to load dialogs', dismissible: true })
@@ -34,21 +59,27 @@
   }
 
   onMount(() => {
-    const handleOnline = () => isOffline.set(false)
+    const handleOnline = async () => {
+      isOffline.set(false)
+      // Silent refresh when connection restores
+      if ($authState === 'connected') {
+        dialogsLoaded = false
+      }
+    }
     const handleOffline = () => isOffline.set(true)
 
     const initialize = async (): Promise<void> => {
       isOffline.set(!navigator.onLine)
+
+      // Run OPFS migration before rendering main UI
+      await runMigrationIfNeeded()
 
       if ($session.session) {
         authStatus.set('Reconnecting...')
         const connected = await telegramAdapter.reconnect($session.session)
         authState.set(connected ? 'connected' : 'idle')
         authStatus.set(connected ? 'Connected' : 'Connect to Telegram')
-
-        if (connected) {
-          dialogsLoaded = false
-        }
+        if (connected) dialogsLoaded = false
       }
 
       if ($authState === 'connected') {
@@ -58,7 +89,7 @@
 
     window.addEventListener('online', handleOnline)
     window.addEventListener('offline', handleOffline)
-    initialize()
+    void initialize()
 
     return () => {
       window.removeEventListener('online', handleOnline)
@@ -69,15 +100,19 @@
 
 <OfflineBanner />
 
-<main class="app-shell">
-  {#if $authState !== 'connected'}
-    <AuthScreen />
-  {:else if $currentDialog}
-    <GalleryGrid />
-  {:else}
-    <DialogList />
-  {/if}
-</main>
+{#if migrating}
+  <MigrationScreen progress={migrationProgress} />
+{:else}
+  <main class="app-shell">
+    {#if $authState !== 'connected'}
+      <AuthScreen />
+    {:else if $currentDialog}
+      <GalleryGrid />
+    {:else}
+      <DialogList />
+    {/if}
+  </main>
+{/if}
 
 <ViewerWrapper />
 <Toast />

@@ -66,6 +66,40 @@ export async function writeCachedBlob(id: string, blob: Blob, kind: 'thumb' | 'f
   })
 }
 
+export interface CacheEntry {
+  id: string
+  blob: Blob
+  updatedAt: number
+}
+
+export async function listAllFullMedia(): Promise<CacheEntry[]> {
+  return withStore<CacheEntry[]>(FULL, 'readonly', (store, resolve) => {
+    const request = store.getAll()
+    request.onsuccess = () => resolve((request.result as CacheEntry[]) ?? [])
+    request.onerror = () => resolve([])
+  })
+}
+
+export async function deleteCachedBlobById(id: string, kind: 'thumb' | 'full'): Promise<void> {
+  return withStore(kind === 'thumb' ? THUMBS : FULL, 'readwrite', (store, resolve, reject) => {
+    const request = store.delete(id)
+    request.onsuccess = () => resolve(undefined)
+    request.onerror = () => reject(request.error ?? new Error('Failed to delete cache entry'))
+  })
+}
+
+export async function getThumbCacheInfo(): Promise<{ itemCount: number; totalBytes: number }> {
+  const entries = await withStore<CacheEntry[]>(THUMBS, 'readonly', (store, resolve) => {
+    const request = store.getAll()
+    request.onsuccess = () => resolve((request.result as CacheEntry[]) ?? [])
+    request.onerror = () => resolve([])
+  })
+  return {
+    itemCount: entries.length,
+    totalBytes: entries.reduce((sum, e) => sum + e.blob.size, 0),
+  }
+}
+
 export async function clearAllCachedMedia(): Promise<void> {
   await Promise.all([
     withStore(THUMBS, 'readwrite', (store, resolve, reject) => {
