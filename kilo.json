@@ -1,7 +1,53 @@
 {
-  "model": "anthropic/claude-sonnet-4-6",
+  "model": "virtual/general",
+  "small_model": "virtual/small",
   "instructions": ["AGENTS.md"],
   "snapshot": true,
+  "provider": {
+    "virtual": {
+      "type": "virtual-quota-fallback",
+      "profiles": {
+        "hard": {
+          "models": [
+            "anthropic/claude-sonnet-4-6",
+            "openai/gpt-5.4",
+            "deepseek/deepseek-reasoning"
+          ]
+        },
+        "general": {
+          "models": [
+            "deepseek/deepseek-chat",
+            "openrouter/deepseek-v3.2",
+            "huggingface/deepseek-v3.2",
+            "venice/deepseek-v3.2"
+          ]
+        },
+        "small": {
+          "models": [
+            "openrouter/qwen-2.5-coder-32b",
+            "huggingface/codellama-34b"
+          ]
+        }
+      }
+    }
+  },
+  "agent": {
+    "code": {
+      "model": "virtual/general",
+      "reasoning": "off"
+    },
+    "plan": {
+      "model": "virtual/hard",
+      "reasoning": "medium"
+    },
+    "debug": {
+      "model": "virtual/hard",
+      "reasoning": "medium"
+    },
+    "ask": {
+      "model": "virtual/hard"
+    }
+  },
   "permission": {
     "external_directory": "deny",
     "bash": "allow",
