@@ -7,9 +7,10 @@
   import OfflineBanner from './components/ui/OfflineBanner.svelte'
   import Toast from './components/ui/Toast.svelte'
   import MigrationScreen from './components/ui/MigrationScreen.svelte'
+  import ReconnectBanner from './components/ui/ReconnectBanner.svelte'
   import { currentDialog, loadInitialMedia } from './stores/gallery'
   import { setDialogs } from './stores/dialogs'
-  import { authState, authStatus, session, telegramAdapter } from './stores/telegram'
+  import { authState, authStatus, session, telegramAdapter, handleDisconnect } from './stores/telegram'
   import { isOffline, pushToast } from './stores/ui'
   import { migrateIndexedDbToOpfs, isOpfsAvailable } from './lib/cache/opfs'
   import { applyTheme, settings } from './stores/settings'
@@ -69,9 +70,12 @@
 
     const handleOnline = async () => {
       isOffline.set(false)
-      // Silent refresh when connection restores
       if ($authState === 'connected') {
+        // Silent refresh when connection restores
         dialogsLoaded = false
+      } else if ($authState !== 'idle') {
+        // Was disconnected mid-session — try to reconnect
+        void handleDisconnect()
       }
     }
     const handleOffline = () => isOffline.set(true)
@@ -108,6 +112,7 @@
 </script>
 
 <OfflineBanner />
+<ReconnectBanner />
 
 {#if migrating}
   <MigrationScreen progress={migrationProgress} />
