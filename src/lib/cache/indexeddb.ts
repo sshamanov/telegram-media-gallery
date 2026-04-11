@@ -1,0 +1,82 @@
+const DB_NAME = 'telegram-gallery-cache'
+const DB_VERSION = 1
+const THUMBS = 'thumbnails'
+const FULL = 'full-media'
+
+type StoreName = typeof THUMBS | typeof FULL
+
+interface CacheRow {
+  id: string
+  blob: Blob
+  updatedAt: number
+}
+
+let dbPromise: Promise<IDBDatabase> | null = null
+
+function getDb(): Promise<IDBDatabase> {
+  if (!dbPromise) {
+    dbPromise = new Promise((resolve, reject) => {
+      const request = indexedDB.open(DB_NAME, DB_VERSION)
+
+      request.onupgradeneeded = () => {
+        const db = request.result
+        if (!db.objectStoreNames.contains(THUMBS)) {
+          db.createObjectStore(THUMBS, { keyPath: 'id' })
+        }
+        if (!db.objectStoreNames.contains(FULL)) {
+          db.createObjectStore(FULL, { keyPath: 'id' })
+        }
+      }
+
+      request.onsuccess = () => resolve(request.result)
+      request.onerror = () => reject(request.error ?? new Error('Failed to open IndexedDB'))
+    })
+  }
+
+  return dbPromise
+}
+
+async function withStore<T>(storeName: StoreName, mode: IDBTransactionMode, run: (store: IDBObjectStore, resolve: (value: T) => void, reject: (error: unknown) => void) => void): Promise<T> {
+  const db = await getDb()
+
+  return new Promise<T>((resolve, reject) => {
+    const transaction = db.transaction(storeName, mode)
+    const store = transaction.objectStore(storeName)
+
+    run(store, resolve, reject)
+
+    transaction.onerror = () => reject(transaction.error ?? new Error('IndexedDB transaction failed'))
+    transaction.onabort = () => reject(transaction.error ?? new Error('IndexedDB transaction aborted'))
+  })
+}
+
+export async function readCachedBlob(id: string, kind: 'thumb' | 'full'): Promise<Blob | null> {
+  return withStore(kind === 'thumb' ? THUMBS : FULL, 'readonly', (store, resolve) => {
+    const request = store.get(id)
+    request.onsuccess = () => resolve((request.result as CacheRow | undefined)?.blob ?? null)
+    request.onerror = () => resolve(null)
+  })
+}
+
+export async function writeCachedBlob(id: string, blob: Blob, kind: 'thumb' | 'full'): Promise<void> {
+  return withStore(kind === 'thumb' ? THUMBS : FULL, 'readwrite', (store, resolve, reject) => {
+    const request = store.put({ id, blob, updatedAt: Date.now() } satisfies CacheRow)
+    request.onsuccess = () => resolve(undefined)
+    request.onerror = () => reject(request.error ?? new Error('Failed to write cache entry'))
+  })
+}
+
+export async function clearAllCachedMedia(): Promise<void> {
+  await Promise.all([
+    withStore(THUMBS, 'readwrite', (store, resolve, reject) => {
+      const request = store.clear()
+      request.onsuccess = () => resolve(undefined)
+      request.onerror = () => reject(request.error ?? new Error('Failed to clear thumbnail cache'))
+    }),
+    withStore(FULL, 'readwrite', (store, resolve, reject) => {
+      const request = store.clear()
+      request.onsuccess = () => resolve(undefined)
+      request.onerror = () => reject(request.error ?? new Error('Failed to clear full-media cache'))
+    }),
+  ])
+}
