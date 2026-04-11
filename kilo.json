@@ -1,0 +1,26 @@
+{
+  "model": "anthropic/claude-sonnet-4-6",
+  "instructions": ["AGENTS.md"],
+  "snapshot": true,
+  "permission": {
+    "external_directory": "deny",
+    "bash": "allow",
+    "edit": {
+      "src/**": "allow",
+      "public/**": "allow",
+      "tmp/**": "allow",
+      "temp/**": "allow",
+      "*.md": "allow",
+      "*.json": "allow",
+      "*.ts": "allow",
+      "*.svelte": "allow",
+      "*.css": "allow",
+      "*.html": "allow",
+      "*.webmanifest": "allow",
+      ".kilo/**": "allow",
+      "node_modules/**": "deny",
+      "src-reference/**": "deny",
+      ".env": "deny"
+    }
+  }
+}
