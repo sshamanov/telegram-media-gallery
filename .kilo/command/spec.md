@@ -1,6 +1,6 @@
 ---
 description: Write a feature spec before implementing
-agent: plan
+agent: hard-route
 ---
 Write a feature spec for: $ARGUMENTS
 

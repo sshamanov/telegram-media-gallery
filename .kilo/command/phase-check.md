@@ -1,6 +1,6 @@
 ---
 description: Audit implementation against active phase acceptance criteria
-agent: debug
+agent: hard-route
 ---
 Read TECHNICAL_MIGRATION_PLAN.md and identify the current active phase
 based on what is already implemented in src/.

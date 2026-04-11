@@ -1,6 +1,6 @@
 ---
 description: Check a component against the design spec in the plan
-agent: debug
+agent: hard-route
 ---
 Check the component: $ARGUMENTS
 

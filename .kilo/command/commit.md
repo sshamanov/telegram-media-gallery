@@ -1,6 +1,6 @@
 ---
 description: Check phase criteria then commit with a conventional commit message
-agent: debug
+agent: hard-route
 ---
 Before committing, do the following in order:
 

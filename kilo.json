@@ -1,51 +1,23 @@
 {
-  "model": "virtual/general",
-  "small_model": "virtual/small",
+  "model": "deepseek/deepseek-chat",
   "instructions": ["AGENTS.md"],
   "snapshot": true,
-  "provider": {
-    "virtual": {
-      "type": "virtual-quota-fallback",
-      "profiles": {
-        "hard": {
-          "models": [
-            "anthropic/claude-sonnet-4-6",
-            "openai/gpt-5.4",
-            "deepseek/deepseek-reasoning"
-          ]
-        },
-        "general": {
-          "models": [
-            "deepseek/deepseek-chat",
-            "openrouter/deepseek-v3.2",
-            "huggingface/deepseek-v3.2",
-            "venice/deepseek-v3.2"
-          ]
-        },
-        "small": {
-          "models": [
-            "openrouter/qwen-2.5-coder-32b",
-            "huggingface/codellama-34b"
-          ]
-        }
-      }
-    }
-  },
   "agent": {
     "code": {
-      "model": "virtual/general",
+      "model": "deepseek/deepseek-chat",
       "reasoning": "off"
     },
     "plan": {
-      "model": "virtual/hard",
+      "model": "anthropic/claude-sonnet-4-6",
       "reasoning": "medium"
     },
     "debug": {
-      "model": "virtual/hard",
+      "model": "anthropic/claude-sonnet-4-6",
       "reasoning": "medium"
     },
     "ask": {
-      "model": "virtual/hard"
+      "model": "anthropic/claude-sonnet-4-6",
+      "reasoning": "medium"
     }
   },
   "permission": {
