@@ -11,8 +11,8 @@
   import { setDialogs } from './stores/dialogs'
   import { authState, authStatus, session, telegramAdapter } from './stores/telegram'
   import { isOffline, pushToast } from './stores/ui'
-  import { migrateIndexedDbToOpfs } from './lib/cache/opfs'
-  import { isOpfsAvailable } from './lib/cache/opfs'
+  import { migrateIndexedDbToOpfs, isOpfsAvailable } from './lib/cache/opfs'
+  import { applyTheme, settings } from './stores/settings'
 
   const MIGRATION_KEY = 'opfs-migration-v1-done'
 
@@ -58,7 +58,15 @@
     void loadInitialMedia()
   }
 
+  // Apply theme immediately and whenever setting changes
+  $: applyTheme($settings.theme)
+
   onMount(() => {
+    // Also track system preference changes for 'system' theme
+    const mq = window.matchMedia('(prefers-color-scheme: light)')
+    const handleMq = () => applyTheme($settings.theme)
+    mq.addEventListener('change', handleMq)
+
     const handleOnline = async () => {
       isOffline.set(false)
       // Silent refresh when connection restores
@@ -94,6 +102,7 @@
     return () => {
       window.removeEventListener('online', handleOnline)
       window.removeEventListener('offline', handleOffline)
+      mq.removeEventListener('change', handleMq)
     }
   })
 </script>

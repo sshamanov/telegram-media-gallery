@@ -68,12 +68,15 @@ export interface MediaItem {
   media: TgMedia
 }
 
+export type AppTheme = 'dark' | 'light' | 'system'
+
 export interface AppSettings {
   thumbCacheLimit: number
   fullCacheLimit: number
   maxCacheSizeMb: number
   gridColumns: number
   defaultHiddenFilters: GalleryFilterId[]
+  theme: AppTheme
 }
 
 export interface ToastMessage {

@@ -1,7 +1,8 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import { galleryFilters } from '../../lib/media'
-  import { settings, updateSettings } from '../../stores/settings'
+  import { settings, updateSettings, applyTheme } from '../../stores/settings'
+  import type { AppTheme } from '../../types/telegram'
   import { pushToast } from '../../stores/ui'
   import { clearAllCachedMedia, getThumbCacheInfo } from '../../lib/cache/indexeddb'
   import { clearOpfsMedia, getOpfsStorageInfo, isOpfsAvailable } from '../../lib/cache/opfs'
@@ -58,8 +59,15 @@
     }
   }
 
+  const themes: Array<{ value: AppTheme; label: string }> = [
+    { value: 'dark', label: 'Dark' },
+    { value: 'light', label: 'Light' },
+    { value: 'system', label: 'System' },
+  ]
+
   async function save(): Promise<void> {
     updateSettings(draft)
+    applyTheme(draft.theme)
     pushToast({ kind: 'success', text: 'Settings saved', dismissible: true })
   }
 
@@ -113,6 +121,18 @@
     <span>Default grid columns</span>
     <input class="field" bind:value={draft.gridColumns} type="number" min="1" max="8" />
   </label>
+
+  <fieldset class="theme-section">
+    <legend>Theme</legend>
+    <div class="theme-options">
+      {#each themes as t}
+        <label class="checkbox-row">
+          <input type="radio" name="theme" value={t.value} bind:group={draft.theme} />
+          <span>{t.label}</span>
+        </label>
+      {/each}
+    </div>
+  </fieldset>
 
   <fieldset class="filter-defaults">
     <legend>Default hidden types</legend>
@@ -190,7 +210,8 @@
   }
 
   .filter-defaults,
-  .storage-section {
+  .storage-section,
+  .theme-section {
     display: grid;
     gap: 10px;
     padding: 14px;
@@ -203,7 +224,8 @@
     color: var(--text-secondary);
   }
 
-  .filter-options {
+  .filter-options,
+  .theme-options {
     display: flex;
     gap: 12px;
     flex-wrap: wrap;

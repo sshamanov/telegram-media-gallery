@@ -22,6 +22,27 @@
   --content-width: 1280px;
 }
 
+/* ── Light theme override ───────────────────────────────────── */
+[data-theme="light"] {
+  --bg-base:      #f0f2f5;
+  --bg-surface:   #ffffff;
+  --bg-elevated:  #e4e8ed;
+  --bg-overlay:   rgba(0, 0, 0, 0.7);
+  --text-primary:   #111111;
+  --text-secondary: #555555;
+  --text-muted:     #999999;
+  --border:         #d0d7de;
+  --border-focus:   #0088cc;
+  --shadow-lg: 0 24px 80px rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="light"] body {
+  background:
+    radial-gradient(circle at top right, rgba(0, 136, 204, 0.08), transparent 26%),
+    radial-gradient(circle at bottom left, rgba(255, 152, 0, 0.04), transparent 22%),
+    linear-gradient(180deg, #e8ecf0 0%, var(--bg-base) 45%, #eaeef2 100%);
+}
+
 * {
   box-sizing: border-box;
 }
