@@ -239,3 +239,5 @@ Commit target:
 ## Recommendation
 
 Implement this in 5 logical commits, inspection-first. Keep `kilo.json` in place, use exact locally verified provider/model IDs, and route built-in agents through virtual fallback chains rather than embedding provider secrets into the repo.
+
+> **Project status tracked in [`.kilo/status.md`](../status.md).**

@@ -102,3 +102,4 @@ src/main.ts                  <- entry point
 - kilo-dev-process.md           - MVP architecture, function-level analysis
 - TECHNICAL_MIGRATION_PLAN.md   - full plan with phases, flows, design spec
 - src-reference/main.js         - original MVP code (behavior reference only)
+- .kilo/status.md               - project status, progress tracking, plan cross‑references
