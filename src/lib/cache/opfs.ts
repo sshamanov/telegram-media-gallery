@@ -155,7 +155,6 @@ export async function migrateIndexedDbToOpfs(
 ): Promise<number> {
   if (!isOpfsAvailable()) return 0
 
-  // Import IndexedDB helpers lazily to avoid circular deps
   const { listAllFullMedia, deleteCachedBlobById } = await import('./indexeddb')
   const entries = await listAllFullMedia()
   let migrated = 0
