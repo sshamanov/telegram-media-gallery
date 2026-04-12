@@ -107,6 +107,7 @@
   class:selection-mode={selectionMode}
   class="list-row panel"
   type="button"
+  data-media-id={item.id}
   on:click={handleClick}
   on:pointercancel={clearLongPress}
   on:pointerdown={handlePointerDown}
@@ -152,6 +153,13 @@
   .list-row.selected {
     border-color: rgba(0, 136, 204, 0.65);
     background: rgba(0, 136, 204, 0.14);
+  }
+
+  /* Keyboard focus indicator */
+  .list-row:focus-visible {
+    outline: 3px solid var(--border-focus);
+    outline-offset: 2px;
+    z-index: 1;
   }
 
   .thumb,

@@ -25,6 +25,7 @@ export interface TelegramAdapter {
 let currentAdapter: TelegramAdapter | null = null
 let storedApiId = localStorage.getItem('telegram.apiId') ?? import.meta.env.VITE_TELEGRAM_API_ID ?? ''
 let storedApiHash = localStorage.getItem('telegram.apiHash') ?? import.meta.env.VITE_TELEGRAM_API_HASH ?? ''
+let useMock = localStorage.getItem('telegram.useMock') === 'true'
 
 export function setTelegramAdapter(adapter: TelegramAdapter): void {
   currentAdapter = adapter
@@ -36,6 +37,15 @@ export function getTelegramAdapter(): TelegramAdapter {
   }
 
   return currentAdapter
+}
+
+export function setUseMock(enabled: boolean): void {
+  useMock = enabled
+  localStorage.setItem('telegram.useMock', enabled ? 'true' : 'false')
+}
+
+export function getUseMock(): boolean {
+  return useMock
 }
 
 export function setTelegramApiCredentials(apiId: string, apiHash: string): void {

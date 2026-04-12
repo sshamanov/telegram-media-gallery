@@ -123,6 +123,7 @@
   class:selection-mode={selectionMode}
   class="media-card"
   type="button"
+  data-media-id={item.id}
   on:click={handleClick}
   on:pointercancel={clearLongPress}
   on:pointerdown={handlePointerDown}
@@ -178,6 +179,13 @@
     inset: 0;
     background: rgba(0, 136, 204, 0.26);
     box-shadow: inset 0 0 0 2px rgba(0, 136, 204, 0.9);
+  }
+
+  /* Keyboard focus indicator */
+  .media-card:focus-visible {
+    outline: 3px solid var(--border-focus);
+    outline-offset: 2px;
+    z-index: 1;
   }
 
   img,

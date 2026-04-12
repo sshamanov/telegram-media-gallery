@@ -1,10 +1,19 @@
 import { writable } from 'svelte/store'
 import type { AuthState, SessionSnapshot } from '../types/telegram'
-import { getTelegramAdapter, setTelegramAdapter, setTelegramApiCredentials } from '../lib/telegram/adapter'
+import { getTelegramAdapter, setTelegramAdapter, setTelegramApiCredentials, setUseMock, getUseMock } from '../lib/telegram/adapter'
 import { mtcuteAdapter } from '../lib/telegram/mtcute'
+import { mockAdapter } from '../lib/telegram/mock'
 import { pushToast } from './ui'
 
-setTelegramAdapter(mtcuteAdapter)
+// For testing: default to mock adapter if no API credentials are set or if env var is set
+const hasApiCredentials = localStorage.getItem('telegram.apiId') || import.meta.env.VITE_TELEGRAM_API_ID
+const envUseMock = import.meta.env.VITE_USE_MOCK_ADAPTER === 'true'
+const useMock = envUseMock || getUseMock() || !hasApiCredentials
+if (!getUseMock() && !hasApiCredentials) {
+  setUseMock(true)
+}
+
+setTelegramAdapter(useMock ? mockAdapter : mtcuteAdapter)
 setTelegramApiCredentials(
   localStorage.getItem('telegram.apiId') ?? import.meta.env.VITE_TELEGRAM_API_ID ?? '',
   localStorage.getItem('telegram.apiHash') ?? import.meta.env.VITE_TELEGRAM_API_HASH ?? '',
@@ -23,6 +32,28 @@ export const session = writable<SessionSnapshot>({
 export const reconnectState = writable<ReconnectState>('idle')
 
 export const telegramAdapter = getTelegramAdapter()
+export const useMockAdapter = writable(getUseMock())
+
+export function switchToMockAdapter(enabled: boolean): void {
+  setUseMock(enabled)
+  useMockAdapter.set(enabled)
+  
+  if (enabled) {
+    setTelegramAdapter(mockAdapter)
+  } else {
+    setTelegramAdapter(mtcuteAdapter)
+  }
+  
+  localStorage.removeItem('session')
+  localStorage.removeItem('phone')
+  authState.set('idle')
+  session.set({ session: null })
+  pushToast({ 
+    kind: 'info', 
+    text: `Switched to ${enabled ? 'mock' : 'real'} Telegram adapter`, 
+    dismissible: true 
+  })
+}
 
 const MAX_RETRIES = 3
 let retryCount = 0

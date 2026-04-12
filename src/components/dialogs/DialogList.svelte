@@ -4,10 +4,11 @@
   import { authState, telegramAdapter } from '../../stores/telegram'
   import { setActiveDialog } from '../../stores/gallery'
   import { pushToast } from '../../stores/ui'
-  import SettingsPanel from '../settings/SettingsPanel.svelte'
+  import { tooltip } from '../../lib/dom/tooltips'
+  import { navigateToSettings, navigateToGallery } from '../../lib/routing'
   import type { Dialog } from '../../types/telegram'
 
-  let tab: 'galleries' | 'groups' | 'chats' | 'settings' = 'galleries'
+  let tab: 'galleries' | 'groups' | 'chats' = 'galleries'
   let currentTabCount = 0
   let filteredDialogs: Dialog[] = []
 
@@ -27,6 +28,7 @@
 
   function openDialog(dialog: Dialog): void {
     setActiveDialog(dialog)
+    navigateToGallery(dialog.id)
   }
 
   async function refreshDialogs(): Promise<void> {
@@ -38,11 +40,13 @@
     }
   }
 
-  function switchTab(nextTab: 'galleries' | 'groups' | 'chats' | 'settings'): void {
+  function switchTab(nextTab: 'galleries' | 'groups' | 'chats'): void {
     tab = nextTab
-    if (nextTab !== 'settings') {
-      void refreshDialogs()
-    }
+    void refreshDialogs()
+  }
+
+  function openSettings(): void {
+    navigateToSettings()
   }
 
   async function logout(): Promise<void> {
@@ -59,23 +63,23 @@
       <h1>Telegram Gallery</h1>
       <p class="muted">Browse your galleries, groups, and chats.</p>
     </div>
-    <button class="button danger" type="button" on:click={logout}>Logout</button>
+    <div class="header-actions">
+      <button class="button secondary" type="button" on:click={openSettings} aria-label="Settings" use:tooltip={{ text: 'Settings' }}>⚙</button>
+      <button class="button danger" type="button" on:click={logout}>Logout</button>
+    </div>
   </header>
 
   <div class="tabs">
     <button class:active={tab === 'galleries'} class="tab" type="button" on:click={() => switchTab('galleries')}>Galleries</button>
     <button class:active={tab === 'groups'} class="tab" type="button" on:click={() => switchTab('groups')}>Groups</button>
     <button class:active={tab === 'chats'} class="tab" type="button" on:click={() => switchTab('chats')}>Chats</button>
-    <button class:active={tab === 'settings'} class="tab" type="button" on:click={() => switchTab('settings')}>⚙</button>
   </div>
 
-  {#if tab !== 'settings' && currentTabCount > 20}
+  {#if currentTabCount > 20}
     <input class="search" bind:value={$dialogSearch} placeholder="Search dialogs..." />
   {/if}
 
-  {#if tab === 'settings'}
-    <SettingsPanel />
-  {:else if tab === 'galleries'}
+  {#if tab === 'galleries'}
     <div class="list">
       {#if $galleries.length === 0}
         <div class="empty muted">No galleries yet. Add groups or chats to pin them here.</div>
@@ -105,6 +109,12 @@
     gap: 16px;
     align-items: center;
     margin-bottom: 18px;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
   }
 
   h1 {

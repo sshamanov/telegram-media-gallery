@@ -28,7 +28,11 @@ These rules override everything else. No exceptions. No creative interpretations
 3. **Never modify system configuration.**
    No `/etc/`, no `~/.bashrc`, no `~/.gitconfig`, no system service files.
 
-4. **All builds run inside Docker with `--network host`.**
+4. **No external access under any circumstances.**
+   Never access external networks, remote services, web pages, APIs, package registries,
+   or any resource outside the local project environment.
+
+5. **All builds run inside Docker with `--network host`.**
    Docker networking is permanently disabled on this system.
    Every `docker run` must include `--network host`.
    Standard build pattern:
@@ -44,7 +48,7 @@ These rules override everything else. No exceptions. No creative interpretations
      node:20-alpine npm run dev -- --host
    ```
 
-5. **Temporary files use `./tmp/`, never system `/tmp/`.**
+6. **Temporary files use `./tmp/`, never system `/tmp/`.**
    `./tmp/` is gitignored. Create it with `mkdir -p ./tmp` if needed.
 
 ## Commit discipline

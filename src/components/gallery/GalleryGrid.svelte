@@ -5,6 +5,12 @@
   import MediaItemCard from './MediaItem.svelte'
   import MediaListRow from './MediaListRow.svelte'
   import { getTelegramAdapter } from '../../lib/telegram/adapter'
+  import { trapFocus } from '../../lib/dom/focus-trap'
+  import { pullToRefresh } from '../../lib/dom/pull-to-refresh'
+  import { tooltip } from '../../lib/dom/tooltips'
+  import { getOnboardingManager, createHintElement } from '../../lib/onboarding'
+  import { navigateToDialogList } from '../../lib/routing'
+  import { masonry, shouldUseMasonryLayout, isVisualContent } from '../../lib/dom/masonry'
   import {
     cancelUploadQueue,
     cancelUploadQueueItem,
@@ -13,6 +19,7 @@
     galleryViewMode,
     hasMoreMedia,
     isLoadingMore,
+    loadInitialMedia,
     loadMoreMedia,
     loadState,
     mediaItems,
@@ -45,6 +52,7 @@
   let sentinel: HTMLDivElement | null = null
   let fileInput: HTMLInputElement | null = null
   let loadObserver: IntersectionObserver | null = null
+  let forwardSheet: HTMLElement | null = null
   let lastDialogId: string | null = null
   let buffering = false
   let activeFilter: GalleryFilterId = 'all'
@@ -58,6 +66,10 @@
   let forwardTargetId = ''
   let forwarding = false
   let forwardTab: 'galleries' | 'groups' | 'chats' = 'galleries'
+  
+  // Keyboard navigation
+  let keyboardFocusIndex = -1
+  let gridContainer: HTMLElement | null = null
   let downloadState: DownloadState = {
     active: false,
     current: 0,
@@ -80,6 +92,7 @@
   $: selectedItems = visibleItems.filter((item) => selectedIds.includes(item.id))
   $: selectedCount = selectedItems.length
   $: selectedSingleItem = selectedCount === 1 ? selectedItems[0] : null
+  $: useMasonryLayout = shouldUseMasonryLayout(visibleItems) && $galleryViewMode === 'grid'
   $: galleryTargets = filterDialogs($galleries, forwardQuery)
   $: groupTargets = filterDialogs(
     $allDialogs.filter((dialog) => dialog.kind === 'group'),
@@ -97,6 +110,27 @@
   $: canShareFiles = typeof navigator !== 'undefined'
     && typeof navigator.share === 'function'
     && typeof navigator.canShare === 'function'
+  
+  // Focus trapping for forward sheet
+  let forwardSheetCleanup: (() => void) | null = null
+  
+  $: if (showForwardSheet && forwardSheet) {
+    // Clean up previous trap if exists
+    if (forwardSheetCleanup) {
+      forwardSheetCleanup()
+      forwardSheetCleanup = null
+    }
+    
+    // Set up new focus trap
+    forwardSheetCleanup = trapFocus(forwardSheet, {
+      onEscape: () => showForwardSheet = false
+    })
+  } else if (forwardSheetCleanup) {
+    // Clean up when sheet closes
+    forwardSheetCleanup()
+    forwardSheetCleanup = null
+  }
+  
   $: canCopyImage = typeof navigator !== 'undefined'
     && typeof navigator.clipboard?.write === 'function'
     && typeof ClipboardItem !== 'undefined'
@@ -139,524 +173,6 @@
     }
   }
 
-  function back(): void {
-    if ($currentDialog && scroller) {
-      storeScrollPosition($currentDialog.id, scroller.scrollTop)
-    }
-    clearSelection()
-    setActiveDialog(null)
-  }
-
-  function handleScroll(): void {
-    if ($currentDialog && scroller) {
-      storeScrollPosition($currentDialog.id, scroller.scrollTop)
-    }
-
-    if (!scroller || $isLoadingMore || !$hasMoreMedia || $mediaItems.length === 0) {
-      return
-    }
-
-    const remainingPixels = scroller.scrollHeight - (scroller.scrollTop + scroller.clientHeight)
-
-    if (remainingPixels < scroller.clientHeight * 2) {
-      void loadMoreMedia()
-      void ensureBufferedViewport()
-    }
-  }
-
-  async function restoreScroll(dialogId: string): Promise<void> {
-    await tick()
-    if (!scroller) {
-      return
-    }
-
-    scroller.scrollTop = $scrollPositions[dialogId] ?? 0
-  }
-
-  function connectObserver(): void {
-    loadObserver?.disconnect()
-    if (!scroller || !sentinel) {
-      return
-    }
-
-    loadObserver = new IntersectionObserver((entries) => {
-      if (entries.some((entry) => entry.isIntersecting)) {
-        void loadMoreMedia()
-      }
-    }, {
-      root: scroller,
-      rootMargin: '1200px 0px',
-    })
-
-    loadObserver.observe(sentinel)
-  }
-
-  async function ensureBufferedViewport(): Promise<void> {
-    if (!scroller || buffering) {
-      return
-    }
-
-    buffering = true
-
-    try {
-      for (let attempt = 0; attempt < 50; attempt += 1) {
-        if (!$hasMoreMedia || $isLoadingMore || !scroller) {
-          break
-        }
-
-        const remainingPixels = scroller.scrollHeight - (scroller.scrollTop + scroller.clientHeight)
-        if (remainingPixels > scroller.clientHeight * 1.5 && scroller.scrollHeight > scroller.clientHeight) {
-          break
-        }
-
-        await loadMoreMedia()
-        await tick()
-      }
-    } finally {
-      buffering = false
-    }
-  }
-
-  function toggleViewMode(): void {
-    setGalleryViewMode($galleryViewMode === 'grid' ? 'list' : 'grid')
-  }
-
-  function selectFilter(filterId: GalleryFilterId): void {
-    if (filterId !== 'all' && counts[filterId] === 0) {
-      return
-    }
-
-    activeFilter = filterId
-    pruneSelection()
-  }
-
-  function filterDialogs(dialogs: Dialog[], query: string): Dialog[] {
-    const normalized = query.trim().toLowerCase()
-    if (!normalized) {
-      return dialogs
-    }
-
-    return dialogs.filter((dialog) =>
-      dialog.title.toLowerCase().includes(normalized)
-      || dialog.subtitle.toLowerCase().includes(normalized)
-      || (dialog.username ?? '').toLowerCase().includes(normalized),
-    )
-  }
-
-  function clearSelection(): void {
-    selectionMode = false
-    selectedIds = []
-    selectionAnchor = null
-    showForwardSheet = false
-    forwardQuery = ''
-    forwardTargetId = ''
-  }
-
-  function pruneSelection(): void {
-    const visibleIds = new Set(visibleItems.map((item) => item.id))
-    selectedIds = selectedIds.filter((itemId) => visibleIds.has(itemId))
-    if (selectedIds.length === 0) {
-      selectionMode = false
-      selectionAnchor = null
-    } else if (selectionAnchor && !visibleIds.has(selectionAnchor)) {
-      selectionAnchor = selectedIds[selectedIds.length - 1] ?? null
-    }
-  }
-
-  function enterSelection(itemId: string): void {
-    selectionMode = true
-    selectedIds = [itemId]
-    selectionAnchor = itemId
-  }
-
-  function toggleSelection(itemId: string): void {
-    selectionMode = true
-    selectedIds = selectedIds.includes(itemId)
-      ? selectedIds.filter((currentId) => currentId !== itemId)
-      : [...selectedIds, itemId]
-    selectionAnchor = itemId
-
-    if (selectedIds.length === 0) {
-      selectionMode = false
-      selectionAnchor = null
-    }
-  }
-
-  function selectRange(itemId: string): void {
-    const ids = visibleItems.map((item) => item.id)
-    const anchor = selectionAnchor ?? itemId
-    const start = ids.indexOf(anchor)
-    const end = ids.indexOf(itemId)
-    if (start < 0 || end < 0) {
-      enterSelection(itemId)
-      return
-    }
-
-    const lower = Math.min(start, end)
-    const upper = Math.max(start, end)
-    selectedIds = ids.slice(lower, upper + 1)
-    selectionMode = selectedIds.length > 0
-    selectionAnchor = anchor
-  }
-
-  function selectAllVisible(): void {
-    if (visibleItems.length === 0) {
-      return
-    }
-
-    selectionMode = true
-    selectedIds = visibleItems.map((item) => item.id)
-    selectionAnchor = visibleItems[0]?.id ?? null
-  }
-
-  function handleItemActivate(itemId: string, event: MouseEvent): void {
-    if (event.shiftKey) {
-      selectRange(itemId)
-      return
-    }
-
-    if (selectionMode || event.ctrlKey || event.metaKey) {
-      toggleSelection(itemId)
-      return
-    }
-
-    openById(itemId)
-  }
-
-  function handleItemLongPress(itemId: string): void {
-    if (!selectionMode) {
-      navigator.vibrate?.(50)
-      enterSelection(itemId)
-      return
-    }
-
-    toggleSelection(itemId)
-  }
-
-  function requestUpload(mode: UploadModeType): void {
-    pendingUploadMode = mode
-    setUploadMode(mode)
-    showUploadSheet = false
-    fileInput?.click()
-  }
-
-  async function handleUpload(event: Event): Promise<void> {
-    const input = event.currentTarget as HTMLInputElement
-    const files = input.files ? Array.from(input.files) : []
-    if (files.length === 0) {
-      return
-    }
-
-    try {
-      await enqueueUploadToCurrentDialog(files, pendingUploadMode)
-      const completeCount = $uploadQueueState.items.filter((item) => item.status === 'complete').length
-      const failedCount = $uploadQueueState.items.filter((item) => item.status === 'error').length
-      const cancelledCount = $uploadQueueState.items.filter((item) => item.status === 'cancelled').length
-      const parts = [`Uploaded ${completeCount} file${completeCount === 1 ? '' : 's'}`]
-      if (failedCount > 0) {
-        parts.push(`${failedCount} failed`)
-      }
-      if (cancelledCount > 0) {
-        parts.push(`${cancelledCount} cancelled`)
-      }
-      pushToast({ kind: failedCount > 0 ? 'warning' : 'success', text: parts.join(', '), dismissible: true })
-    } catch (error) {
-      pushToast({ kind: 'error', text: error instanceof Error ? error.message : 'Upload failed', dismissible: true })
-    } finally {
-      input.value = ''
-    }
-  }
-
-  function cancelDownloads(): void {
-    if (!downloadState.active) {
-      return
-    }
-
-    downloadCancelRequested = true
-    downloadAbortController?.abort()
-  }
-
-  async function withFloodWait<T>(run: (signal: AbortSignal) => Promise<T>): Promise<T> {
-    while (true) {
-      const controller = new AbortController()
-      downloadAbortController = controller
-
-      try {
-        downloadState.waitingSeconds = null
-        return await run(controller.signal)
-      } catch (error) {
-        if (controller.signal.aborted) {
-          throw error
-        }
-
-        const waitSeconds = parseFloodWaitSeconds(error)
-        if (!waitSeconds) {
-          throw error
-        }
-
-        downloadState.waitingSeconds = waitSeconds
-        for (let remaining = waitSeconds; remaining > 0; remaining -= 1) {
-          downloadState.waitingSeconds = remaining
-          await sleep(1000)
-        }
-      } finally {
-        if (downloadAbortController === controller) {
-          downloadAbortController = null
-        }
-      }
-    }
-  }
-
-  async function tryDownloadToDirectory(items: MediaItem[]): Promise<boolean> {
-    if (typeof window.showDirectoryPicker !== 'function') {
-      return false
-    }
-
-    try {
-      const directory = await window.showDirectoryPicker()
-      let completed = 0
-
-      for (const [index, item] of items.entries()) {
-        if (downloadCancelRequested) {
-          break
-        }
-
-        downloadState.current = index + 1
-        downloadState.fileName = item.filename
-        downloadState.progress = 0
-
-        try {
-          const blob = await withFloodWait((signal) => getCachedOrDownloadBlob(item, 'full', {
-            abortSignal: signal,
-            onProgress: (progress) => {
-              downloadState.progress = progress
-            },
-          }).then((result) => {
-            if (!result) {
-              throw new Error('Download failed')
-            }
-            return result
-          }))
-          const handle = await directory.getFileHandle(item.filename, { create: true })
-          const writable = await handle.createWritable()
-          await writable.write(blob)
-          await writable.close()
-          completed += 1
-        } catch (error) {
-          if (isAbortError(error) && downloadCancelRequested) {
-            break
-          }
-
-          downloadState.skipped += 1
-        }
-      }
-
-      const attempted = completed + downloadState.skipped
-      if (downloadCancelRequested) {
-        pushToast({ kind: 'warning', text: `Downloaded ${completed} / ${items.length}, cancelled`, dismissible: true })
-      } else if (downloadState.skipped > 0) {
-        pushToast({ kind: 'warning', text: `Downloaded ${completed} / ${items.length}, ${downloadState.skipped} failed`, dismissible: true })
-      } else if (attempted > 0) {
-        pushToast({ kind: 'success', text: `Downloaded ${completed} files`, dismissible: true })
-      }
-
-      return true
-    } catch {
-      return false
-    }
-  }
-
-  async function downloadSelected(): Promise<void> {
-    if (selectedItems.length === 0) {
-      return
-    }
-
-    downloadCancelRequested = false
-    downloadState = {
-      active: true,
-      current: 0,
-      total: selectedItems.length,
-      skipped: 0,
-      fileName: null,
-      progress: 0,
-      waitingSeconds: null,
-    }
-
-    const usedDirectory = await tryDownloadToDirectory(selectedItems)
-    if (!usedDirectory) {
-      let completed = 0
-
-      for (const [index, item] of selectedItems.entries()) {
-        if (downloadCancelRequested) {
-          break
-        }
-
-        downloadState.current = index + 1
-        downloadState.fileName = item.filename
-        downloadState.progress = 0
-
-        try {
-          const blob = await withFloodWait((signal) => getCachedOrDownloadBlob(item, 'full', {
-            abortSignal: signal,
-            onProgress: (progress) => {
-              downloadState.progress = progress
-            },
-          }).then((result) => {
-            if (!result) {
-              throw new Error('Download failed')
-            }
-            return result
-          }))
-          saveBlob(blob, item.filename)
-          completed += 1
-          await sleep(100)
-        } catch (error) {
-          if (isAbortError(error) && downloadCancelRequested) {
-            break
-          }
-
-          downloadState.skipped += 1
-        }
-      }
-
-      if (downloadCancelRequested) {
-        pushToast({ kind: 'warning', text: `Downloaded ${completed} / ${selectedItems.length}, cancelled`, dismissible: true })
-      } else if (downloadState.skipped > 0) {
-        pushToast({ kind: 'warning', text: `Downloaded ${completed} / ${selectedItems.length}, ${downloadState.skipped} failed`, dismissible: true })
-      } else {
-        pushToast({ kind: 'success', text: `Downloaded ${completed} files`, dismissible: true })
-      }
-    }
-
-    downloadState.active = false
-    downloadState.fileName = null
-    downloadState.progress = 0
-    downloadState.waitingSeconds = null
-    if (!downloadCancelRequested) {
-      clearSelection()
-    }
-  }
-
-  async function shareItems(items: MediaItem[]): Promise<void> {
-    if (!canShareFiles || items.length === 0) {
-      return
-    }
-
-    const tooLarge = items.find((item) => item.size > shareLimitBytes)
-    if (tooLarge) {
-      pushToast({ kind: 'warning', text: 'File too large to share directly. Use Download instead.', dismissible: true })
-      return
-    }
-
-    try {
-      const files: File[] = []
-      for (const item of items) {
-        const blob = await getCachedOrDownloadBlob(item, 'full')
-        if (!blob) {
-          throw new Error(`Unable to prepare ${item.filename}`)
-        }
-        files.push(blobToFile(blob, item.filename))
-      }
-
-      if (!navigator.canShare({ files })) {
-        pushToast({ kind: 'warning', text: 'Sharing is not supported on this device', dismissible: true })
-        return
-      }
-
-      await navigator.share({ files, title: items.length === 1 ? items[0].filename : `Share ${items.length} items` })
-      clearSelection()
-    } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') {
-        return
-      }
-      pushToast({ kind: 'error', text: error instanceof Error ? error.message : 'Share failed', dismissible: true })
-    }
-  }
-
-  async function copySelectedImage(): Promise<void> {
-    if (!canCopyImage || !selectedSingleItem) {
-      return
-    }
-
-    try {
-      const blob = await getCachedOrDownloadBlob(selectedSingleItem, 'full')
-      if (!blob) {
-        throw new Error('Unable to prepare image')
-      }
-
-      await navigator.clipboard.write([
-        new ClipboardItem({ [blob.type || 'image/png']: blob }),
-      ])
-      pushToast({ kind: 'success', text: 'Image copied to clipboard', dismissible: true })
-    } catch (error) {
-      pushToast({ kind: 'error', text: error instanceof Error ? error.message : 'Copy failed', dismissible: true })
-    }
-  }
-
-  function openForwardSheet(): void {
-    if (selectedItems.length === 0) {
-      return
-    }
-
-    showForwardSheet = true
-    forwardQuery = ''
-    forwardTargetId = ''
-  }
-
-  async function forwardSelected(): Promise<void> {
-    if (!$currentDialog || !forwardTargetId || selectedItems.length === 0) {
-      return
-    }
-
-    forwarding = true
-
-    try {
-      await withForwardFloodWait(() =>
-        Promise.resolve(getTelegramAdapter().forwardMessages(
-          forwardTargetId,
-          $currentDialog.id,
-          selectedItems.map((item) => item.messageId),
-        )),
-      )
-      const target = [...$galleries, ...$allDialogs].find((dialog) => dialog.id === forwardTargetId)
-      pushToast({ kind: 'success', text: `Forwarded ${selectedItems.length} items to ${target?.title ?? 'selected chat'}`, dismissible: true })
-      clearSelection()
-    } catch (error) {
-      pushToast({ kind: 'error', text: error instanceof Error ? error.message : 'Forward failed', dismissible: true })
-    } finally {
-      forwarding = false
-    }
-  }
-
-  async function withForwardFloodWait<T>(run: () => Promise<T>): Promise<T> {
-    while (true) {
-      try {
-        return await run()
-      } catch (error) {
-        const waitSeconds = parseFloodWaitSeconds(error)
-        if (!waitSeconds) {
-          throw error
-        }
-
-        pushToast({ kind: 'info', text: `Waiting ${waitSeconds}s for Telegram rate limit`, dismissible: true })
-        await sleep(waitSeconds * 1000)
-      }
-    }
-  }
-
-  function handleKeydown(event: KeyboardEvent): void {
-    if (event.key === 'Escape') {
-      if (showForwardSheet) {
-        showForwardSheet = false
-        return
-      }
-
-      if (selectionMode) {
-        clearSelection()
-      }
-    }
-  }
-
   $: if ($currentDialog?.id && lastDialogId !== $currentDialog.id) {
     lastDialogId = $currentDialog.id
     activeFilter = 'all'
@@ -673,20 +189,47 @@
   $: if ($mediaItems.length >= 0) {
     connectObserver()
     void ensureBufferedViewport()
+    // Reset keyboard focus when items change
+    resetKeyboardFocus()
   }
 
   onMount(() => {
-    window.addEventListener('keydown', handleKeydown)
+    // Focus the grid container so it can receive keyboard events
+    setTimeout(() => {
+      gridContainer?.focus()
+    }, 100)
+
+    // Show onboarding hints
+    setTimeout(() => {
+      const onboarding = getOnboardingManager()
+      const hints = onboarding.getHintsForContext('gallery')
+      
+      if (hints.length > 0) {
+        const hint = hints[0] // Show highest priority hint
+        const hintElement = createHintElement(hint, () => {
+          onboarding.dismissHint(hint.id)
+        })
+        
+        document.body.appendChild(hintElement)
+        
+        // Auto-dismiss after 10 seconds
+        setTimeout(() => {
+          if (hintElement.parentElement) {
+            hintElement.remove()
+            onboarding.markHintAsShown(hint.id)
+          }
+        }, 10000)
+      }
+    }, 2000) // Wait 2 seconds before showing hint
   })
 
   onDestroy(() => {
     loadObserver?.disconnect()
-    window.removeEventListener('keydown', handleKeydown)
   })
 </script>
 
 {#if $currentDialog}
-  <section bind:this={scroller} class="gallery-shell" on:scroll={handleScroll}>
+  <section bind:this={scroller} class="gallery-shell" on:scroll={handleScroll} bind:this={gridContainer} on:keydown={handleKeyDown} use:pullToRefresh={{ onRefresh: handleRefresh }} aria-label="Gallery">
     <header class="panel gallery-header">
       <button class="button ghost" type="button" on:click={back}>← Back</button>
       <div class="title-block">
@@ -699,23 +242,23 @@
       {#if selectionMode}
         <div class="actions selection-actions">
           <div class="selection-count">{selectedCount} selected</div>
-          <button class="button secondary" type="button" on:click={selectAllVisible}>Select all</button>
-          <button class="button secondary" type="button" on:click={downloadSelected} disabled={selectedCount === 0}>⬇ Download</button>
-          <button class="button secondary" type="button" on:click={openForwardSheet} disabled={selectedCount === 0}>→ Forward</button>
-          {#if canShareFiles}
-            <button class="button secondary" type="button" on:click={() => shareItems(selectedItems)} disabled={selectedCount === 0}>↑ Share</button>
-          {/if}
-          <button class="button secondary" type="button" on:click={copySelectedImage} disabled={!canCopyImage} title={canCopyImage ? 'Copy image' : 'Select one image to copy'}>⧉ Copy</button>
-          <button class="button ghost" type="button" on:click={clearSelection}>✕ Cancel</button>
+           <button class="button secondary" type="button" on:click={selectAllVisible} aria-label="Select all visible items" use:tooltip={{ text: 'Select all visible items' }}>Select all</button>
+           <button class="button secondary" type="button" on:click={downloadSelected} disabled={selectedCount === 0} aria-label="Download selected items" use:tooltip={{ text: 'Download selected items' }}>⬇ Download</button>
+           <button class="button secondary" type="button" on:click={openForwardSheet} disabled={selectedCount === 0} aria-label="Forward selected items" use:tooltip={{ text: 'Forward selected items' }}>→ Forward</button>
+           {#if canShareFiles}
+             <button class="button secondary" type="button" on:click={() => shareItems(selectedItems)} disabled={selectedCount === 0} aria-label="Share selected items" use:tooltip={{ text: 'Share selected items' }}>↑ Share</button>
+           {/if}
+           <button class="button secondary" type="button" on:click={copySelectedImage} disabled={!canCopyImage} title={canCopyImage ? 'Copy image' : 'Select one image to copy'} aria-label="Copy selected image" use:tooltip={{ text: 'Copy selected image' }}>⧉ Copy</button>
+           <button class="button ghost" type="button" on:click={clearSelection} aria-label="Cancel selection" use:tooltip={{ text: 'Cancel selection' }}>✕ Cancel</button>
         </div>
       {:else}
         <div class="actions">
-          <button class="button secondary" type="button" on:click={toggleViewMode}>{$galleryViewMode === 'grid' ? '⊟' : '⊞'}</button>
-          <button class="button secondary" type="button">{$settings.gridColumns}x</button>
-          <button class="button {$galleryIds.includes($currentDialog.id) ? 'danger' : 'secondary'}" type="button" on:click={() => toggleGallery($currentDialog.id)}>
+          <button class="button secondary" type="button" on:click={toggleViewMode} aria-label="Toggle view mode" use:tooltip={{ text: 'Toggle view mode' }}>{$galleryViewMode === 'grid' ? '⊟' : '⊞'}</button>
+          <button class="button secondary" type="button" aria-label="Grid columns" use:tooltip={{ text: 'Grid columns' }}>{$settings.gridColumns}x</button>
+          <button class="button {$galleryIds.includes($currentDialog.id) ? 'danger' : 'secondary'}" type="button" on:click={() => toggleGallery($currentDialog.id)} aria-label="Toggle gallery bookmark" use:tooltip={{ text: $galleryIds.includes($currentDialog.id) ? 'Remove from galleries' : 'Add to galleries' }}>
             ★
           </button>
-          <button class="button secondary" type="button" on:click={() => (showUploadSheet = !showUploadSheet)}>⬆ Upload</button>
+          <button class="button secondary" type="button" on:click={() => (showUploadSheet = !showUploadSheet)} aria-label="Upload media" use:tooltip={{ text: 'Upload media' }}>⬆ Upload</button>
         </div>
       {/if}
     </header>
@@ -744,7 +287,7 @@
     </div>
 
     {#if $galleryViewMode === 'grid'}
-      <div class="grid" style={gridTemplate}>
+      <div class="grid" class:masonry-grid={useMasonryLayout} style={useMasonryLayout ? '' : gridTemplate} use:masonry={{ enabled: useMasonryLayout }}>
         {#each visibleItems as item (item.id)}
           <MediaItemCard
             item={item}
@@ -752,6 +295,8 @@
             selectionMode={selectionMode}
             onActivate={handleItemActivate}
             onLongPress={handleItemLongPress}
+            data-masonry-item
+            data-visual-content={isVisualContent(item)}
           />
         {/each}
       </div>
@@ -842,8 +387,7 @@
 
   {#if showForwardSheet}
     <button class="sheet-backdrop" type="button" aria-label="Close forward picker" on:click={() => (showForwardSheet = false)}></button>
-    <section class="panel forward-sheet">
-      <!-- Fixed header -->
+    <section class="panel forward-sheet" bind:this={forwardSheet}>
       <div class="sheet-head">
         <div class="sheet-title-row">
           <div>

@@ -7,6 +7,7 @@
   import { readCachedBlob } from '../../lib/cache/indexeddb'
   import { formatSize, isAudioItem, isDownloadOnlyItem, isImageItem, isPdfItem, isTextItem, isTextLikeFileName, isVideoItem, mediaKindLabel } from '../../lib/media'
   import { readTextBlob } from '../../lib/thumbnails'
+  import { createGallerySwipeGestures } from '../../lib/dom/swipe-gestures'
   import {
     closeViewer,
     mediaItems,
@@ -461,14 +462,43 @@
     pswp.close()
   }
 
+  $: if ($viewerIndex !== null && viewerUiElement) {
+    setupSwipeGestures()
+  } else {
+    teardownSwipeGestures()
+  }
+
   onDestroy(() => {
     pswpOpenToken += 1
     pswp?.destroy()
+    teardownSwipeGestures()
   })
+
+  let viewerUiElement: HTMLElement | null = null
+  let swipeGesturesManager: { destroy: () => void } | null = null
+
+  function setupSwipeGestures(): void {
+    if (!viewerUiElement) return
+    
+    // Clean up previous swipe gestures
+    swipeGesturesManager?.destroy()
+    
+    // Set up new swipe gestures for gallery navigation
+    swipeGesturesManager = createGallerySwipeGestures(viewerUiElement, {
+      onNext: () => next(),
+      onPrevious: () => prev(),
+      onClose: () => closeOverlay()
+    })
+  }
+
+  function teardownSwipeGestures(): void {
+    swipeGesturesManager?.destroy()
+    swipeGesturesManager = null
+  }
 </script>
 
-{#if $viewerIndex !== null}
-  <div class="viewer-ui">
+ {#if $viewerIndex !== null}
+  <div class="viewer-ui" bind:this={viewerUiElement}>
     <div class="topbar">
       <button class="button ghost" type="button" on:click={closeOverlay}>✕</button>
       <button class="button ghost" type="button" on:click={downloadCurrent} title="Download" disabled={$isOffline}>⬇</button>
@@ -478,11 +508,11 @@
       {#if $activeItem && isImageItem($activeItem) && typeof navigator.clipboard?.write === 'function' && typeof ClipboardItem !== 'undefined'}
         <button class="button ghost" type="button" on:click={copyCurrent} title="Copy image" disabled={$isOffline}>⧉</button>
       {/if}
-      <button class="button ghost" class:info-active={showInfo} type="button" on:click={() => (showInfo = !showInfo)} title="Toggle info panel — shows filename, size, date, sender">ⓘ Info</button>
+      <button class="button ghost" class:info-active={showInfo} type="button" on:click={() => (showInfo = !showInfo)} title="Toggle info panel — shows filename, size, date, sender" aria-label="Toggle info panel">ⓘ Info</button>
     </div>
 
-    <button class="nav left" type="button" on:click={prev}>←</button>
-    <button class="nav right" type="button" on:click={next}>→</button>
+    <button class="nav left" type="button" on:click={prev} aria-label="Previous media">←</button>
+    <button class="nav right" type="button" on:click={next} aria-label="Next media">→</button>
 
     {#if $activeItem}
       <div class="caption">{$viewerIndex + 1} / {($viewerItems.length || $mediaItems.length)} - {mediaKindLabel($activeItem)} - {formatSize($activeItem.size)} - {loadProgress}%</div>

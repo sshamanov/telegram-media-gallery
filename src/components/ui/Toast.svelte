@@ -7,7 +7,7 @@
     <article class={`toast ${toast.kind}`}>
       <span>{toast.text}</span>
       {#if toast.dismissible}
-        <button class="close" type="button" on:click={() => dismissToast(toast.id)}>✕</button>
+        <button class="close" type="button" on:click={() => dismissToast(toast.id)} aria-label="Dismiss notification">✕</button>
       {/if}
     </article>
   {/each}

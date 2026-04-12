@@ -4,9 +4,12 @@
   import { settings, updateSettings, applyTheme } from '../../stores/settings'
   import type { AppTheme } from '../../types/telegram'
   import { pushToast } from '../../stores/ui'
-  import { clearAllCachedMedia, getThumbCacheInfo } from '../../lib/cache/indexeddb'
+   import { clearAllCachedMedia, getThumbCacheInfo } from '../../lib/cache/indexeddb'
   import { clearOpfsMedia, getOpfsStorageInfo, isOpfsAvailable } from '../../lib/cache/opfs'
   import type { GalleryFilterId } from '../../types/telegram'
+  import { switchToMockAdapter } from '../../stores/telegram'
+  import { useMockAdapter } from '../../stores/telegram'
+  import CacheIndicator from '../ui/CacheIndicator.svelte'
 
   interface StorageInfo {
     thumbs: { itemCount: number; totalBytes: number } | null
@@ -189,7 +192,29 @@
           <button class="button danger compact-btn" type="button" on:click={clearSwCache}>Clear</button>
         </div>
       </div>
-    {/if}
+     {/if}
+  </fieldset>
+
+  <!-- Cache indicator -->
+  <div class="cache-indicator-section">
+    <CacheIndicator />
+  </div>
+
+  <fieldset class="development-section">
+    <legend>Development</legend>
+    <div class="checkbox-row">
+      <input
+        type="checkbox"
+        id="useMockAdapter"
+        bind:checked={$useMockAdapter}
+        on:change={() => switchToMockAdapter($useMockAdapter)}
+      />
+      <label for="useMockAdapter">Use mock Telegram adapter</label>
+    </div>
+    <div class="muted development-note">
+      Mock adapter provides sample data without requiring Telegram API credentials.
+      Switching will log you out.
+    </div>
   </fieldset>
 
   <div class="actions">
@@ -270,9 +295,31 @@
     flex-shrink: 0;
   }
 
-  .actions {
+  .development-section {
+    display: grid;
+    gap: 10px;
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--surface-warning);
+  }
+
+  .development-note {
+    font-size: 0.85rem;
+    line-height: 1.4;
+    margin-top: 4px;
+  }
+
+   .actions {
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
+  }
+  
+  .cache-indicator-section {
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.02);
   }
 </style>

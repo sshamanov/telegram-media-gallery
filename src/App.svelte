@@ -8,18 +8,25 @@
   import Toast from './components/ui/Toast.svelte'
   import MigrationScreen from './components/ui/MigrationScreen.svelte'
   import ReconnectBanner from './components/ui/ReconnectBanner.svelte'
-  import { currentDialog, loadInitialMedia } from './stores/gallery'
-  import { setDialogs } from './stores/dialogs'
+  import SettingsScreen from './components/settings/SettingsScreen.svelte'
+  import { currentDialog, loadInitialMedia, setActiveDialog } from './stores/gallery'
+  import { allDialogs, galleries, setDialogs } from './stores/dialogs'
   import { authState, authStatus, session, telegramAdapter, handleDisconnect } from './stores/telegram'
   import { isOffline, pushToast } from './stores/ui'
   import { migrateIndexedDbToOpfs, isOpfsAvailable } from './lib/cache/opfs'
   import { applyTheme, settings } from './stores/settings'
+  import { getKeyboardShortcutsManager } from './lib/dom/keyboard-shortcuts'
+  import { createRouterStore, type Route } from './lib/routing'
+  import { routeTransition } from './lib/dom/transitions'
 
   const MIGRATION_KEY = 'opfs-migration-v1-done'
 
   let dialogsLoaded = false
   let migrating = false
   let migrationProgress = 0   // 0–100
+  
+  // Router store
+  const router = createRouterStore()
 
   async function runMigrationIfNeeded(): Promise<void> {
     if (!isOpfsAvailable()) return
@@ -59,10 +66,31 @@
     void loadInitialMedia()
   }
 
+  // Sync router with app state
+  $: if ($authState === 'connected') {
+    // When router changes to gallery route, set current dialog
+    if ($router.type === 'gallery') {
+      const dialog = [...$galleries, ...$allDialogs].find(d => d.id === $router.dialogId)
+      if (dialog && (!$currentDialog || $currentDialog.id !== dialog.id)) {
+        setActiveDialog(dialog)
+      }
+    }
+  }
+
   // Apply theme immediately and whenever setting changes
   $: applyTheme($settings.theme)
 
   onMount(() => {
+    // Initialize keyboard shortcuts manager
+    getKeyboardShortcutsManager()
+    
+    // Listen for navigation events
+    const handleOpenSettings = () => {
+      router.navigate({ type: 'settings' })
+    }
+    
+    document.addEventListener('open-settings', handleOpenSettings)
+    
     // Also track system preference changes for 'system' theme
     const mq = window.matchMedia('(prefers-color-scheme: light)')
     const handleMq = () => applyTheme($settings.theme)
@@ -107,6 +135,8 @@
       window.removeEventListener('online', handleOnline)
       window.removeEventListener('offline', handleOffline)
       mq.removeEventListener('change', handleMq)
+      document.removeEventListener('open-settings', handleOpenSettings)
+      router.destroy()
     }
   })
 </script>
@@ -116,15 +146,19 @@
 
 {#if migrating}
   <MigrationScreen progress={migrationProgress} />
-{:else}
+   {:else}
   <main class="app-shell">
-    {#if $authState !== 'connected'}
-      <AuthScreen />
-    {:else if $currentDialog}
-      <GalleryGrid />
-    {:else}
-      <DialogList />
-    {/if}
+    <div class="route-container" use:routeTransition>
+      {#if $authState !== 'connected'}
+        <AuthScreen />
+      {:else if $router.type === 'settings'}
+        <SettingsScreen />
+      {:else if $currentDialog && $router.type === 'gallery' && $router.dialogId === $currentDialog.id}
+        <GalleryGrid />
+      {:else}
+        <DialogList />
+      {/if}
+    </div>
   </main>
 {/if}
 
