@@ -81,7 +81,7 @@ Never use `--no-verify`.
 9. **No alert/confirm**: use the Toast store and component.
 10. **TypeScript strict**: no `any`, no type assertions outside adapter files.
 11. **Progressive jpeg**: every commit is a working, usable app. No stubs.
-12. **src-reference/ is read-only**: never modify or import from it.
+12. **Reference code is archived in legacy-archive branch**: original MVP code preserved in git history.
 
 ## Architecture
 src/lib/telegram/adapter.ts  <- TelegramAdapter interface (the only import contract)
@@ -105,5 +105,5 @@ src/main.ts                  <- entry point
 ## Reference files
 - kilo-dev-process.md           - MVP architecture, function-level analysis
 - TECHNICAL_MIGRATION_PLAN.md   - full plan with phases, flows, design spec
-- src-reference/main.js         - original MVP code (behavior reference only)
+- legacy-archive branch         - original MVP code preserved in git history
 - .kilo/status.md               - project status, progress tracking, plan cross‑references
