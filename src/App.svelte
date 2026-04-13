@@ -16,7 +16,7 @@
   import { migrateIndexedDbToOpfs, isOpfsAvailable } from './lib/cache/opfs'
   import { applyTheme, settings } from './stores/settings'
   import { getKeyboardShortcutsManager } from './lib/dom/keyboard-shortcuts'
-  import { createRouterStore, type Route } from './lib/routing'
+  import { createRouterStore } from './lib/routing'
   import { routeTransition } from './lib/dom/transitions'
 
   const MIGRATION_KEY = 'opfs-migration-v1-done'

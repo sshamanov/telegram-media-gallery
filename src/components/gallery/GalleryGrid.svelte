@@ -229,7 +229,7 @@
 </script>
 
 {#if $currentDialog}
-  <section bind:this={scroller} class="gallery-shell" on:scroll={handleScroll} bind:this={gridContainer} on:keydown={handleKeyDown} use:pullToRefresh={{ onRefresh: handleRefresh }} aria-label="Gallery">
+  <section bind:this={scroller} class="gallery-shell" on:scroll={handleScroll} bind:this={gridContainer} on:keydown={handleKeyDown} use:pullToRefresh={{ onRefresh: handleRefresh }} aria-label="Gallery" tabindex="0">
     <header class="panel gallery-header">
       <button class="button ghost" type="button" on:click={back}>← Back</button>
       <div class="title-block">
@@ -432,7 +432,7 @@
           {forwarding ? 'Forwarding...' : `Forward ${selectedCount} items`}
         </button>
       </div>
-    </section>
+  </section>
   {/if}
 {/if}
 
