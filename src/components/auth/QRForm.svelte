@@ -2,7 +2,7 @@
   import { onDestroy, onMount } from 'svelte'
   import QRCode from 'qrcode'
   import { setTelegramApiCredentials } from '../../lib/telegram/adapter'
-  import { authState, authStatus, session, telegramAdapter } from '../../stores/telegram'
+  import { authState, authStatus, session, getCurrentAdapter } from '../../stores/telegram'
 
   let canvas: HTMLCanvasElement | null = null
   let expiresIn = 0
@@ -60,7 +60,7 @@
     authStatus.set('Loading QR code…')
 
     try {
-      for await (const qr of telegramAdapter.startQRLogin(requestPassword)) {
+       for await (const qr of getCurrentAdapter().startQRLogin(requestPassword)) {
         expiresIn = Math.max(0, Math.round((qr.expires - Date.now()) / 1000))
         await QRCode.toCanvas(canvas, qr.token, {
           margin: 1,
@@ -76,7 +76,7 @@
         authStatus.set('Scan the QR code with Telegram on your phone')
       }
 
-      const nextSession = telegramAdapter.getSession()
+       const nextSession = getCurrentAdapter().getSession()
       if (nextSession) {
         localStorage.setItem('session', nextSession)
         session.set({ phone: localStorage.getItem('phone') ?? undefined, session: nextSession })

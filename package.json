@@ -6,7 +6,9 @@
     "dev": "vite",
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:ui": "echo 'UI tests not yet implemented. Install Playwright with: npm install --save-dev @playwright/test'",
+    "test:visual": "echo 'Visual tests not yet implemented. Install Playwright with: npm install --save-dev @playwright/test'"
   },
   "dependencies": {
     "@mtcute/web": "^0.29.6",

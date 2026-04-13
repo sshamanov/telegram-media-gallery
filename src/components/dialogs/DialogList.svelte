@@ -1,7 +1,7 @@
 <script lang="ts">
   import DialogItem from './DialogItem.svelte'
   import { allDialogs, dialogSearch, galleries, galleryIds, setDialogs, toggleGallery } from '../../stores/dialogs'
-  import { authState, telegramAdapter } from '../../stores/telegram'
+  import { authState, getCurrentAdapter } from '../../stores/telegram'
   import { setActiveDialog } from '../../stores/gallery'
   import { pushToast } from '../../stores/ui'
   import { tooltip } from '../../lib/dom/tooltips'
@@ -33,7 +33,7 @@
 
   async function refreshDialogs(): Promise<void> {
     try {
-      const dialogs = await telegramAdapter.getDialogs()
+       const dialogs = await getCurrentAdapter().getDialogs()
       setDialogs(dialogs)
     } catch {
       pushToast({ kind: 'error', text: 'Failed to refresh dialogs', dismissible: true })
@@ -50,7 +50,7 @@
   }
 
   async function logout(): Promise<void> {
-    await telegramAdapter.logout()
+     await getCurrentAdapter().logout()
     localStorage.removeItem('session')
     authState.set('idle')
     pushToast({ kind: 'info', text: 'Session cleared', dismissible: true })
@@ -82,7 +82,7 @@
   {#if tab === 'galleries'}
     <div class="list">
       {#if $galleries.length === 0}
-        <div class="empty muted">No galleries yet. Add groups or chats to pin them here.</div>
+        <div class="empty muted">No gallery dialogs found. Gallery-type dialogs appear here automatically.</div>
       {:else}
         {#each $galleries as dialog (dialog.id)}
           <DialogItem dialog={dialog} isGallery={true} onToggle={toggleGallery} onOpen={openDialog} />

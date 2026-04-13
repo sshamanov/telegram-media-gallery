@@ -35,10 +35,13 @@ class Router {
   private previousRoute: Route | null = null
   private listeners: Array<(route: Route) => void> = []
   private isInitialized = false
+  private boundHandleHashChange: (event: HashChangeEvent) => void
 
   constructor() {
     // Initialize from current URL hash
     this.parseHash(window.location.hash)
+    // Bind the handler once and store it
+    this.boundHandleHashChange = this.handleHashChange.bind(this)
   }
 
   /**
@@ -47,7 +50,7 @@ class Router {
   init(): void {
     if (this.isInitialized) return
     
-    window.addEventListener('hashchange', this.handleHashChange.bind(this))
+    window.addEventListener('hashchange', this.boundHandleHashChange)
     this.isInitialized = true
     
     // Trigger initial route
@@ -58,7 +61,7 @@ class Router {
    * Clean up router
    */
   destroy(): void {
-    window.removeEventListener('hashchange', this.handleHashChange.bind(this))
+    window.removeEventListener('hashchange', this.boundHandleHashChange)
     this.listeners = []
     this.isInitialized = false
   }

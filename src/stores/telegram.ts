@@ -1,5 +1,6 @@
 import { writable } from 'svelte/store'
 import type { AuthState, SessionSnapshot } from '../types/telegram'
+import type { TelegramAdapter } from '../lib/telegram/adapter'
 import { getTelegramAdapter, setTelegramAdapter, setTelegramApiCredentials, setUseMock, getUseMock } from '../lib/telegram/adapter'
 import { mtcuteAdapter } from '../lib/telegram/mtcute'
 import { mockAdapter } from '../lib/telegram/mock'
@@ -31,7 +32,13 @@ export const session = writable<SessionSnapshot>({
 })
 export const reconnectState = writable<ReconnectState>('idle')
 
+export function getCurrentAdapter(): TelegramAdapter {
+  return getTelegramAdapter()
+}
+
+// For backward compatibility during migration
 export const telegramAdapter = getTelegramAdapter()
+
 export const useMockAdapter = writable(getUseMock())
 
 export function switchToMockAdapter(enabled: boolean): void {
@@ -82,7 +89,7 @@ async function attemptReconnect(): Promise<void> {
   }
 
   try {
-    const connected = await telegramAdapter.reconnect(snap)
+    const connected = await getTelegramAdapter().reconnect(snap)
     if (connected) {
       reconnectState.set('idle')
       authState.set('connected')

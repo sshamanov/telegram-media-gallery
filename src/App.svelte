@@ -11,7 +11,7 @@
   import SettingsScreen from './components/settings/SettingsScreen.svelte'
   import { currentDialog, loadInitialMedia, setActiveDialog } from './stores/gallery'
   import { allDialogs, galleries, setDialogs } from './stores/dialogs'
-  import { authState, authStatus, session, telegramAdapter, handleDisconnect } from './stores/telegram'
+  import { authState, authStatus, session, getCurrentAdapter, handleDisconnect } from './stores/telegram'
   import { isOffline, pushToast } from './stores/ui'
   import { migrateIndexedDbToOpfs, isOpfsAvailable } from './lib/cache/opfs'
   import { applyTheme, settings } from './stores/settings'
@@ -49,7 +49,7 @@
 
   async function loadDialogs(): Promise<void> {
     try {
-      const dialogs = await telegramAdapter.getDialogs()
+       const dialogs = await getCurrentAdapter().getDialogs()
       setDialogs(dialogs)
       dialogsLoaded = true
     } catch {
@@ -116,7 +116,7 @@
 
       if ($session.session) {
         authStatus.set('Reconnecting...')
-        const connected = await telegramAdapter.reconnect($session.session)
+         const connected = await getCurrentAdapter().reconnect($session.session)
         authState.set(connected ? 'connected' : 'idle')
         authStatus.set(connected ? 'Connected' : 'Connect to Telegram')
         if (connected) dialogsLoaded = false

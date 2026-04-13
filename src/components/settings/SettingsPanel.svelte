@@ -226,22 +226,29 @@
 <style>
   .settings-grid {
     display: grid;
-    gap: 14px;
+    gap: 18px;
   }
 
   label {
     display: grid;
-    gap: 8px;
+    gap: 10px;
+    line-height: 1.5;
+  }
+
+  .field {
+    padding: 12px 14px;
+    min-height: 44px;
   }
 
   .filter-defaults,
   .storage-section,
   .theme-section {
     display: grid;
-    gap: 10px;
-    padding: 14px;
-    border: 1px solid var(--border);
-    border-radius: 14px;
+    gap: 12px;
+    padding: 16px;
+    border: 2px solid var(--border-focus);
+    border-radius: 16px;
+    background: var(--bg-elevated);
   }
 
   legend,
@@ -258,20 +265,23 @@
 
   .checkbox-row {
     display: inline-flex;
-    gap: 8px;
+    gap: 10px;
     align-items: center;
+    min-height: 24px;
+    line-height: 1.4;
   }
 
   .storage-rows {
     display: grid;
-    gap: 12px;
+    gap: 14px;
   }
 
   .storage-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 12px;
+    gap: 16px;
+    min-height: 44px;
   }
 
   .storage-label {
@@ -297,10 +307,10 @@
 
   .development-section {
     display: grid;
-    gap: 10px;
-    padding: 14px;
-    border: 1px solid var(--border);
-    border-radius: 14px;
+    gap: 12px;
+    padding: 16px;
+    border: 2px solid var(--border-focus);
+    border-radius: 16px;
     background: var(--surface-warning);
   }
 
@@ -312,14 +322,15 @@
 
    .actions {
     display: flex;
-    gap: 10px;
+    gap: 12px;
     flex-wrap: wrap;
+    margin-top: 8px;
   }
   
   .cache-indicator-section {
-    padding: 14px;
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    background: rgba(255, 255, 255, 0.02);
+    padding: 16px;
+    border: 2px solid var(--border-focus);
+    border-radius: 16px;
+    background: var(--bg-elevated);
   }
 </style>

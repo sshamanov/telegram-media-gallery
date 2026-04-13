@@ -42,9 +42,17 @@
 
   .settings-content {
     background: var(--bg-surface);
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border);
+    border-radius: 20px;
+    border: 2px solid var(--border-focus);
     overflow: hidden;
+    padding: 20px;
+  }
+
+  @media (max-width: 768px) {
+    .settings-content {
+      padding: 16px;
+      border-radius: 16px;
+    }
   }
 
   @media (max-width: 768px) {

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { setTelegramApiCredentials } from '../../lib/telegram/adapter'
-  import { authState, authStatus, phone, phoneCodeHash, session, telegramAdapter } from '../../stores/telegram'
+  import { authState, authStatus, phone, phoneCodeHash, session, getCurrentAdapter } from '../../stores/telegram'
   import { pushToast } from '../../stores/ui'
 
   export let hideCredentials: boolean
@@ -9,6 +9,10 @@
   let apiHash = import.meta.env.VITE_TELEGRAM_API_HASH ?? ''
   let code = ''
   let password = ''
+  
+  type Step = 'phone' | 'code' | 'password'
+  let step: Step = 'phone'
+  let needs2FA = false
 
   async function handleSendCode(): Promise<void> {
     const value = $phone.trim()
@@ -22,9 +26,11 @@
 
     try {
       setTelegramApiCredentials(apiId, apiHash)
-      const result = await telegramAdapter.sendCode(value)
+      const result = await getCurrentAdapter().sendCode(value)
       phoneCodeHash.set(result.phoneCodeHash)
       localStorage.setItem('phone', value)
+      step = 'code'
+      needs2FA = false
       authStatus.set('Code sent. Check Telegram.')
       authState.set('idle')
     } catch (error) {
@@ -44,14 +50,16 @@
     authStatus.set('Verifying code...')
 
     try {
-      const result = await telegramAdapter.signIn($phone, code, hash)
+      const result = await getCurrentAdapter().signIn($phone, code, hash)
       if (result === '2fa_required') {
-        authStatus.set('2FA required')
+        step = 'password'
+        needs2FA = true
+        authStatus.set('2FA password required')
         authState.set('idle')
         return
       }
 
-      const nextSession = telegramAdapter.getSession()
+      const nextSession = getCurrentAdapter().getSession()
       localStorage.setItem('session', nextSession ?? '')
       session.set({ phone: $phone, session: nextSession })
       authStatus.set('Connected')
@@ -67,8 +75,8 @@
     authStatus.set('Checking password...')
 
     try {
-      await telegramAdapter.signIn2FA(password)
-      const nextSession = telegramAdapter.getSession()
+      await getCurrentAdapter().signIn2FA(password)
+      const nextSession = getCurrentAdapter().getSession()
       localStorage.setItem('session', nextSession ?? '')
       session.set({ phone: $phone, session: nextSession })
       authStatus.set('Connected')
@@ -78,6 +86,15 @@
       authState.set('error')
     }
   }
+
+  function resetForm(): void {
+    step = 'phone'
+    needs2FA = false
+    code = ''
+    password = ''
+    phoneCodeHash.set(null)
+    authStatus.set('Connect to Telegram')
+  }
 </script>
 
 <div class="stack">
@@ -86,23 +103,61 @@
     <input class="field" bind:value={apiHash} placeholder="API Hash" />
   {/if}
 
-  <input class="field" bind:value={$phone} placeholder="Phone number" />
-  <button class="button" type="button" on:click={handleSendCode} disabled={$authState === 'connecting'}>
-    Send Code
-  </button>
+  <input 
+    class="field" 
+    bind:value={$phone} 
+    placeholder="Phone number" 
+    on:keydown={(e) => e.key === 'Enter' && step === 'phone' && handleSendCode()}
+  />
 
-  {#if $phoneCodeHash}
-    <input class="field" bind:value={code} placeholder="Verification code" />
+  {#if step === 'phone'}
+    <button class="button" type="button" on:click={handleSendCode} disabled={$authState === 'connecting'}>
+      Send Code
+    </button>
+  {:else if step === 'code'}
+    <input 
+      class="field" 
+      bind:value={code} 
+      placeholder="Verification code" 
+      on:keydown={(e) => e.key === 'Enter' && handleSubmitCode()}
+    />
     <button class="button secondary" type="button" on:click={handleSubmitCode} disabled={$authState === 'connecting'}>
       Submit Code
     </button>
-    <input class="field" bind:value={password} type="password" placeholder="2FA Password" />
-    <button class="button ghost" type="button" on:click={handleSubmitPassword} disabled={$authState === 'connecting'}>
-      Submit Password
+    <p class="help muted">Enter the code sent to your Telegram app.</p>
+  {:else if step === 'password'}
+    <input 
+      class="field" 
+      bind:value={code} 
+      placeholder="Verification code" 
+      on:keydown={(e) => e.key === 'Enter' && handleSubmitCode()}
+      disabled
+    />
+    <button class="button secondary" type="button" on:click={handleSubmitCode} disabled={$authState === 'connecting'}>
+      Submit Code
     </button>
+    {#if needs2FA}
+      <input 
+        class="field" 
+        bind:value={password} 
+        type="password" 
+        placeholder="2FA Password" 
+        on:keydown={(e) => e.key === 'Enter' && handleSubmitPassword()}
+      />
+      <button class="button ghost" type="button" on:click={handleSubmitPassword} disabled={$authState === 'connecting'}>
+        Submit Password
+      </button>
+      <p class="help muted">Your account has 2-step verification enabled.</p>
+    {/if}
   {/if}
 
   <p class="status muted">{$authStatus}</p>
+  
+  {#if step !== 'phone'}
+    <button class="button ghost small" type="button" on:click={resetForm}>
+      ← Back to phone entry
+    </button>
+  {/if}
 </div>
 
 <style>
@@ -115,5 +170,16 @@
     min-height: 1.3rem;
     margin: 0;
     font-size: 0.92rem;
+  }
+
+  .help {
+    margin: 4px 0 0;
+    font-size: 0.85rem;
+    line-height: 1.3;
+  }
+
+  .small {
+    font-size: 0.85rem;
+    padding: 6px 12px;
   }
 </style>
