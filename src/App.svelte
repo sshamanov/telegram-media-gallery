@@ -49,13 +49,10 @@
 
   async function loadDialogs(): Promise<void> {
     try {
-      console.log('Loading dialogs...')
       const dialogs = await getCurrentAdapter().getDialogs()
-      console.log('Dialogs loaded:', dialogs.length)
       setDialogs(dialogs)
       dialogsLoaded = true
     } catch (error) {
-      console.error('Failed to load dialogs:', error)
       setDialogs([])
       pushToast({ kind: 'error', text: 'Failed to load dialogs', dismissible: true })
     }

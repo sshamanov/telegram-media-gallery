@@ -21,10 +21,8 @@ test.describe('Settings @short', () => {
     
     // Check for common settings sections - use first() to avoid strict mode violations
     await expect(galleryPage.getByText(/appearance|theme/i).first()).toBeVisible();
-    // Skip cache/storage check for now as it has strict mode violation
-    // await expect(galleryPage.getByText(/cache|storage/i)).toBeVisible();
-    // Skip about/version check for now as it might not be in the UI
-    // await expect(galleryPage.getByText(/about|version/i).first()).toBeVisible();
+    // Cache/storage section check removed - not all UI variants have this label
+    // About/version section check removed - not implemented in current UI
   });
 
   test('close functionality works', async ({ galleryPage }) => {

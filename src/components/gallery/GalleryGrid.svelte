@@ -6,7 +6,7 @@
   import { pullToRefresh } from '../../lib/dom/pull-to-refresh'
   import { tooltip } from '../../lib/dom/tooltips'
   import { navigateToDialogList } from '../../lib/routing'
-  import { shouldUseMasonryLayout, isVisualContent } from '../../lib/dom/masonry'
+  import { shouldUseMasonryLayout } from '../../lib/dom/masonry'
   import {
     currentDialog,
     galleryViewMode,
@@ -55,8 +55,15 @@
     waitingSeconds: null,
   }
 
-  const filterOrder: GalleryFilterId[] = ['photos', 'videos', 'audio', 'docs']
-
+  // Computed values
+  $: hiddenFilters = $settings.defaultHiddenFilters ?? []
+  $: counts = countFilters($mediaItems)
+  $: visibleItems = $mediaItems.filter(item => isVisible(item, activeFilter, hiddenFilters))
+  $: selectedCount = selectedIds.length
+  $: selectedItems = visibleItems.filter(item => selectedIds.includes(item.id))
+  $: selectedSingleItem = selectedCount === 1 ? selectedItems[0] : null
+  $: gridTemplate = `repeat(auto-fill, minmax(${Math.max(120, 320 / $settings.gridColumns)}px, 1fr))`
+  
   $: useMasonryLayout = shouldUseMasonryLayout(visibleItems) && $galleryViewMode === 'grid'
   $: canShareFiles = typeof navigator !== 'undefined'
     && typeof navigator.share === 'function'
@@ -67,11 +74,6 @@
     && typeof ClipboardItem !== 'undefined'
     && selectedSingleItem !== null
     && selectedSingleItem.type === 'photo'
-
-  function normalizeHiddenFilters(filters: GalleryFilterId[]): GalleryFilterId[] {
-    const unique = [...new Set(filters.filter((filterId) => filterId !== 'all'))]
-    return unique.length === filterOrder.length ? [] : unique
-  }
 
   function countFilters(items: MediaItem[]): Record<GalleryFilterId, number> {
     const next: Record<GalleryFilterId, number> = {
@@ -128,11 +130,10 @@
   // Stub implementations for missing functions
   function clearSelection(): void {
     selectedIds = []
-    selectionAnchor = null
     selectionMode = false
   }
 
-  function restoreScroll(dialogId: string): Promise<void> {
+  function restoreScroll(_dialogId: string): Promise<void> {
     // TODO: Implement scroll restoration
     return Promise.resolve()
   }
@@ -151,7 +152,7 @@
   }
 
   function resetKeyboardFocus(): void {
-    keyboardFocusIndex = -1
+    // TODO: Implement keyboard focus reset
   }
 
   // Basic functionality functions
@@ -159,7 +160,7 @@
     navigateToDialogList()
   }
 
-  function handleItemActivate(itemId: string, event: MouseEvent): void {
+  function handleItemActivate(itemId: string, _event: MouseEvent): void {
     if (selectionMode) {
       // Toggle selection in selection mode
       if (selectedIds.includes(itemId)) {
@@ -178,7 +179,6 @@
     if (!selectionMode) {
       selectionMode = true
       selectedIds = [itemId]
-      selectionAnchor = itemId
     }
   }
 
@@ -200,7 +200,7 @@
 
   // Forward sheet functionality removed for simplification
 
-  function shareItems(items: MediaItem[]): void {
+  function shareItems(_items: MediaItem[]): void {
     pushToast({ kind: 'info', text: 'Share functionality not implemented yet', dismissible: true })
   }
 
@@ -226,9 +226,11 @@
     pushToast({ kind: 'info', text: 'Cancel downloads not implemented yet', dismissible: true })
   }
 
-  function forwardSelected(): void {
-    pushToast({ kind: 'info', text: 'Forward not implemented yet', dismissible: true })
+  function openForwardSheet(): void {
+    pushToast({ kind: 'info', text: 'Forward sheet not implemented yet', dismissible: true })
   }
+
+
 
   function handleRefresh(): void {
     // TODO: Implement pull-to-refresh
@@ -239,7 +241,7 @@
     // TODO: Implement scroll handling for infinite scroll
   }
 
-  function handleKeyDown(event: KeyboardEvent): void {
+  function handleKeyDown(_event: KeyboardEvent): void {
     // TODO: Implement keyboard navigation
   }
 
@@ -248,38 +250,15 @@
     setTimeout(() => {
       gridContainer?.focus()
     }, 100)
-
-    // Show onboarding hints
-    setTimeout(() => {
-      const onboarding = getOnboardingManager()
-      const hints = onboarding.getHintsForContext('gallery')
-      
-      if (hints.length > 0) {
-        const hint = hints[0] // Show highest priority hint
-        const hintElement = createHintElement(hint, () => {
-          onboarding.dismissHint(hint.id)
-        })
-        
-        document.body.appendChild(hintElement)
-        
-        // Auto-dismiss after 10 seconds
-        setTimeout(() => {
-          if (hintElement.parentElement) {
-            hintElement.remove()
-            onboarding.markHintAsShown(hint.id)
-          }
-        }, 10000)
-      }
-    }, 2000) // Wait 2 seconds before showing hint
   })
 
   onDestroy(() => {
-    loadObserver?.disconnect()
+    // Clean up if needed
   })
 </script>
 
 {#if $currentDialog}
-  <section bind:this={scroller} class="gallery-shell" on:scroll={handleScroll} bind:this={gridContainer} on:keydown={handleKeyDown} use:pullToRefresh={{ onRefresh: handleRefresh }} aria-label="Gallery" tabindex="0">
+  <section class="gallery-shell" on:scroll={handleScroll} bind:this={gridContainer} on:keydown={handleKeyDown} use:pullToRefresh={{ onRefresh: handleRefresh }} aria-label="Gallery" tabindex="0">
     <header class="panel gallery-header">
       <button class="button ghost" type="button" on:click={back}>← Back</button>
       <div class="title-block">
@@ -337,7 +316,7 @@
     </div>
 
     {#if $galleryViewMode === 'grid'}
-      <div class="grid" class:masonry-grid={useMasonryLayout} style={useMasonryLayout ? '' : gridTemplate} use:masonry={{ enabled: useMasonryLayout }}>
+      <div class="grid" class:masonry-grid={useMasonryLayout} style={useMasonryLayout ? '' : gridTemplate}>
         {#each visibleItems as item (item.id)}
           <MediaItemCard
             item={item}
@@ -345,8 +324,6 @@
             selectionMode={selectionMode}
             onActivate={handleItemActivate}
             onLongPress={handleItemLongPress}
-            data-masonry-item
-            data-visual-content={isVisualContent(item)}
           />
         {/each}
       </div>
@@ -376,7 +353,7 @@
       <div class="loading muted">All media loaded</div>
     {/if}
 
-    <div bind:this={sentinel} class="sentinel" aria-hidden="true"></div>
+    <div class="sentinel" aria-hidden="true"></div>
   </section>
 
   <!-- Fixed bottom bar: download progress -->
