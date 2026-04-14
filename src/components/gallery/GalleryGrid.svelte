@@ -18,7 +18,7 @@
     setGalleryViewMode,
     totalMessageCount,
   } from '../../stores/gallery'
-  import { allDialogs, galleries, galleryIds, toggleGallery } from '../../stores/dialogs'
+  import { galleryIds, toggleGallery } from '../../stores/dialogs'
   import { settings } from '../../stores/settings'
   import { pushToast } from '../../stores/ui'
   import type { GalleryFilterId, MediaItem, UploadMode as UploadModeType } from '../../types/telegram'

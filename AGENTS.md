@@ -41,17 +41,22 @@ These rules override everything else. No exceptions. No creative interpretations
      -v "$(pwd)":/app -w /app \
      node:20-alpine <command>
    ```
-   Dev server pattern (exposes port to host directly via host networking):
-   ```
-   docker run --rm --network host \
-     -v "$(pwd)":/app -w /app \
-     node:20-alpine npm run dev -- --host
-   ```
+    Dev server pattern (exposes port to host directly via host networking):
+    ```
+    docker run --rm --network host \
+      -v "$(pwd)":/app -w /app \
+      node:20-alpine npm run dev -- --host --port 5173
+    ```
 
-6. **Temporary files use `./tmp/`, never system `/tmp/`.**
-   `./tmp/` is gitignored. Create it with `mkdir -p ./tmp` if needed.
+ 6. **Temporary files use `./tmp/`, never system `/tmp/`.**
+    `./tmp/` is gitignored. Create it with `mkdir -p ./tmp` if needed.
 
-## Commit discipline
+ 7. **Dev server must always use port 5173. If port is in use, kill the process.**
+    The test environment depends on consistent port 5173. Never allow the dev server
+    to fall back to another port. Before starting dev server, ensure port 5173 is free.
+    Example: `lsof -ti:5173 | xargs kill -9 2>/dev/null || true`
+
+ ## Commit discipline
 
 **Commit after every logical block of work. Do not batch multiple features into one commit.**
 
@@ -102,8 +107,88 @@ src/main.ts                  <- entry point
 | Gallery bookmarks     | stores/dialogs   | localStorage           |
 | User settings         | stores/settings  | localStorage           |
 
+## UI Testing Rules
+
+### Test Suites
+1. **Short Test** (`npm run test:short`): Basic flows only
+   - Authentication (phone/QR)
+   - Dialog navigation
+   - Gallery view transitions
+   - Basic UI interactions
+   - No uploads/downloads/sharing
+   - Timeout: 60 seconds max
+
+2. **Long Test** (`npm run test:long`): Full coverage
+   - All short test features PLUS:
+   - Upload/download flows
+   - Sharing functionality
+   - Cache management
+   - Error states
+   - Mobile responsiveness
+   - Performance testing
+   - Timeout: 5 minutes max
+
+### When to Run Tests
+
+#### Short Test (MANDATORY):
+- ✅ After every logical block of work
+- ✅ Before updating APPLICATION_SPEC.md
+- ✅ Before completing a plan/phase
+- ✅ On every commit
+- ✅ Before moving to next task
+
+#### Long Test (TRIGGER-BASED):
+- 🔄 When changing authentication logic
+- 🔄 When modifying navigation flows  
+- 🔄 When updating core UI components
+- 🔄 When changing data fetching logic
+- 🔄 Before major releases
+- 🔄 Manual trigger when needed
+
+### Test Environment
+- Real Playwright test files with assertions (not placeholder scripts)
+- Always use mock adapter (`VITE_USE_MOCK_ADAPTER=true`)
+- Sample data in `samples/` directory
+- Run in headless mode for CI
+- Test both desktop and mobile viewports
+- MCP Playwright is for debugging only, not a substitute for automated tests
+
+### Failure Handling
+- Test failures MUST be addressed immediately
+- Update tests if behavior changes intentionally
+- Document test changes in commit messages
+- Never skip tests to "save time"
+
+### Kilo Commands
+```bash
+# Development workflow
+kilo test:short    # Run short test suite
+kilo test:long     # Run long test suite  
+kilo test:all      # Run both suites
+
+# CI/CD integration
+kilo ci:test       # Run appropriate tests based on changes
+```
+
+### Docker Compose Test Setup
+The project uses Docker Compose for running tests:
+- **App service**: Runs dev server on port 5173 with `VITE_USE_MOCK_ADAPTER=true`
+- **Playwright service**: Waits for app to be ready, then runs tests against `https://localhost:5173`
+
+**Important**: When running tests, use Docker Compose, not direct `npm run test:short`:
+```bash
+# Run tests using Docker Compose (correct way)
+docker-compose up --build playwright
+
+# Or to run specific test suite:
+docker-compose run --rm playwright npx playwright test --config=playwright.config.ts --grep "@short" --project=desktop-chrome
+```
+
+**Never run `npm run test:short` directly in Docker** - it will try to launch both dev server and browser in same container, which conflicts with the proper separation.
+
 ## Reference files
-- kilo-dev-process.md           - MVP architecture, function-level analysis
-- TECHNICAL_MIGRATION_PLAN.md   - full plan with phases, flows, design spec
-- legacy-archive branch         - original MVP code preserved in git history
-- .kilo/status.md               - project status, progress tracking, plan cross‑references
+- TESTING_STRATEGY.md          - Comprehensive testing strategy and requirements
+- kilo-dev-process.md          - MVP architecture, function-level analysis
+- TECHNICAL_MIGRATION_PLAN.md  - full plan with phases, flows, design spec
+- legacy-archive branch        - original MVP code preserved in git history
+- .kilo/status.md              - project status, progress tracking, plan cross‑references

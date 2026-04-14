@@ -7,8 +7,7 @@
    import { clearAllCachedMedia, getThumbCacheInfo } from '../../lib/cache/indexeddb'
   import { clearOpfsMedia, getOpfsStorageInfo, isOpfsAvailable } from '../../lib/cache/opfs'
   import type { GalleryFilterId } from '../../types/telegram'
-  import { switchToMockAdapter } from '../../stores/telegram'
-  import { useMockAdapter } from '../../stores/telegram'
+
   import CacheIndicator from '../ui/CacheIndicator.svelte'
 
   interface StorageInfo {
@@ -200,22 +199,7 @@
     <CacheIndicator />
   </div>
 
-  <fieldset class="development-section">
-    <legend>Development</legend>
-    <div class="checkbox-row">
-      <input
-        type="checkbox"
-        id="useMockAdapter"
-        bind:checked={$useMockAdapter}
-        on:change={() => switchToMockAdapter($useMockAdapter)}
-      />
-      <label for="useMockAdapter">Use mock Telegram adapter</label>
-    </div>
-    <div class="muted development-note">
-      Mock adapter provides sample data without requiring Telegram API credentials.
-      Switching will log you out.
-    </div>
-  </fieldset>
+
 
   <div class="actions">
     <button class="button" type="button" on:click={save}>Save Settings</button>
@@ -305,20 +289,7 @@
     flex-shrink: 0;
   }
 
-  .development-section {
-    display: grid;
-    gap: 12px;
-    padding: 16px;
-    border: 2px solid var(--border-focus);
-    border-radius: 16px;
-    background: var(--surface-warning);
-  }
 
-  .development-note {
-    font-size: 0.85rem;
-    line-height: 1.4;
-    margin-top: 4px;
-  }
 
    .actions {
     display: flex;

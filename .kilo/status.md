@@ -56,7 +56,7 @@ The Telegram Gallery rewrite is **feature‑complete** and addresses all 10 tech
 
 ## In‑Progress Tasks
 1. **Final testing and verification** – browser testing of new UI/UX features.
-2. **Mock‑data system** – described in `samples/INDEX.md` but not yet implemented (optional for future automated testing).
+2. **Playwright browser installation** – need to install browsers for CI execution.
 
 ---
 
@@ -67,7 +67,7 @@ All sprints from the [UI/UX Improvement Plan][plan-ux] are **fully implemented**
 - [x] Create `src/lib/telegram/mock.ts` adapter
 - [x] Generate `samples/dialogs.json` and `samples/dialog-media/` JSON files
 - [x] Set up environment switch (`VITE_USE_MOCK_ADAPTER=true`)
-- [x] Create automated UI test scripts (`npm run test:ui`, `npm run test:visual`)
+- [x] Create real Playwright test suites (`npm run test:short`, `npm run test:long`)
 
 ### ✅ Sprint 1 – Accessibility & Mobile Foundation
 - [x] ARIA labels for icon‑only buttons (1.1)

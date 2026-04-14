@@ -7,8 +7,12 @@
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "build": "vite build",
     "preview": "vite preview",
-    "test:ui": "echo 'UI tests not yet implemented. Install Playwright with: npm install --save-dev @playwright/test'",
-    "test:visual": "echo 'Visual tests not yet implemented. Install Playwright with: npm install --save-dev @playwright/test'"
+    "test:install-browsers": "playwright install chromium",
+    "test:short": "playwright test --config=playwright.config.ts --grep \"@short\" --project=desktop-chrome",
+    "test:long": "playwright test --config=playwright.config.ts --grep \"@long\" --project=desktop-chrome",
+    "test:all": "playwright test --config=playwright.config.ts",
+    "test:ui": "playwright test --config=playwright.config.ts --grep \"@short\" --project=desktop-chrome",
+    "test:visual": "echo 'Visual regression tests would use Playwright screenshot comparison'"
   },
   "dependencies": {
     "@mtcute/web": "^0.29.6",
@@ -17,6 +21,7 @@
     "svelte": "^5.38.6"
   },
   "devDependencies": {
+    "@playwright/test": "^1.59.1",
     "@sveltejs/vite-plugin-svelte": "^5.1.0",
     "@tsconfig/svelte": "^5.0.4",
     "@vitejs/plugin-basic-ssl": "^2.3.0",

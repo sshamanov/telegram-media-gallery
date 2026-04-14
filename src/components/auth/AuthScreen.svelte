@@ -2,8 +2,6 @@
   import { onMount } from 'svelte'
   import PhoneForm from './PhoneForm.svelte'
   import QRForm from './QRForm.svelte'
-  import { useMockAdapter, switchToMockAdapter } from '../../stores/telegram'
-
   let mode: 'phone' | 'qr' = 'phone'
   let webCryptoAvailable = true
 
@@ -12,14 +10,9 @@
   onMount(() => {
     webCryptoAvailable = Boolean(window.isSecureContext && window.crypto?.subtle)
   })
-
-  function toggleMockMode(): void {
-    const newValue = !$useMockAdapter
-    switchToMockAdapter(newValue)
-  }
 </script>
 
-<section class="auth-screen">
+<section class="auth-screen" data-testid="auth-screen-root">
   <div class="hero">
     <p class="eyebrow">Telegram media hub</p>
     <h1>Telegram Gallery</h1>
@@ -33,28 +26,43 @@
       </div>
     {/if}
 
-    <div class="tabs">
-      <button class:active={mode === 'phone'} class="tab" type="button" on:click={() => (mode = 'phone')}>Phone</button>
-      <button class:active={mode === 'qr'} class="tab" type="button" on:click={() => (mode = 'qr')}>QR Code</button>
+    <div class="tabs" role="tablist" aria-label="Authentication method">
+      <button
+        class:active={mode === 'phone'}
+        class="tab"
+        type="button"
+        role="tab"
+        aria-selected={mode === 'phone'}
+        aria-controls="phone-tabpanel"
+        id="phone-tab"
+        on:click={() => (mode = 'phone')}
+      >
+        Phone
+      </button>
+      <button
+        class:active={mode === 'qr'}
+        class="tab"
+        type="button"
+        role="tab"
+        aria-selected={mode === 'qr'}
+        aria-controls="qr-tabpanel"
+        id="qr-tab"
+        on:click={() => (mode = 'qr')}
+      >
+        QR Code
+      </button>
     </div>
 
-    <div class="mock-toggle">
-      <label class="toggle-label">
-        <input type="checkbox" bind:checked={$useMockAdapter} on:change={toggleMockMode} />
-        <span class="toggle-slider"></span>
-        <span class="toggle-text">Use mock data</span>
-      </label>
-      {#if $useMockAdapter}
-        <div class="mock-hint muted">
-          Mock mode: any phone works, code 123456 triggers 2FA (password: "password")
-        </div>
-      {/if}
-    </div>
+
 
     {#if mode === 'phone'}
-      <PhoneForm {hideCredentials} />
+      <div role="tabpanel" id="phone-tabpanel" aria-labelledby="phone-tab" tabindex="0">
+        <PhoneForm {hideCredentials} />
+      </div>
     {:else}
-      <QRForm />
+      <div role="tabpanel" id="qr-tabpanel" aria-labelledby="qr-tab" tabindex="0">
+        <QRForm />
+      </div>
     {/if}
   </div>
 </section>
@@ -119,67 +127,7 @@
     background: var(--bg-elevated);
   }
 
-  .mock-toggle {
-    margin-bottom: 18px;
-    padding: 12px;
-    background: rgba(255, 255, 255, 0.02);
-    border-radius: 12px;
-    border: 1px solid var(--border-subtle);
-  }
 
-  .toggle-label {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-  }
-
-  .toggle-label input {
-    display: none;
-  }
-
-  .toggle-slider {
-    position: relative;
-    width: 36px;
-    height: 20px;
-    background: var(--bg-input);
-    border-radius: 999px;
-    transition: background 0.2s;
-  }
-
-  .toggle-slider::before {
-    content: '';
-    position: absolute;
-    width: 16px;
-    height: 16px;
-    background: var(--text-primary);
-    border-radius: 50%;
-    top: 2px;
-    left: 2px;
-    transition: transform 0.2s;
-  }
-
-  .toggle-label input:checked + .toggle-slider {
-    background: var(--accent);
-  }
-
-  .toggle-label input:checked + .toggle-slider::before {
-    transform: translateX(16px);
-  }
-
-  .toggle-text {
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-  }
-
-  .mock-hint {
-    margin-top: 8px;
-    font-size: 0.8rem;
-    line-height: 1.3;
-    padding: 6px 8px;
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 6px;
-  }
 
   @media (max-width: 860px) {
     .auth-screen {

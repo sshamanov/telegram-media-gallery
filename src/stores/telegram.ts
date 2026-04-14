@@ -1,7 +1,7 @@
 import { writable } from 'svelte/store'
 import type { AuthState, SessionSnapshot } from '../types/telegram'
 import type { TelegramAdapter } from '../lib/telegram/adapter'
-import { getTelegramAdapter, setTelegramAdapter, setTelegramApiCredentials, setUseMock, getUseMock } from '../lib/telegram/adapter'
+import { getTelegramAdapter, setTelegramAdapter, setTelegramApiCredentials, setUseMock } from '../lib/telegram/adapter'
 import { mtcuteAdapter } from '../lib/telegram/mtcute'
 import { mockAdapter } from '../lib/telegram/mock'
 import { pushToast } from './ui'
@@ -10,9 +10,17 @@ import { pushToast } from './ui'
 const hasApiCredentials = localStorage.getItem('telegram.apiId') || import.meta.env.VITE_TELEGRAM_API_ID
 const envUseMockValue = import.meta.env.VITE_USE_MOCK_ADAPTER
 const envUseMock = envUseMockValue === 'true' || envUseMockValue === '1' || envUseMockValue === 'True' || envUseMockValue === 'TRUE'
-const useMock = envUseMock || getUseMock() || !hasApiCredentials
-if (!getUseMock() && !hasApiCredentials) {
-  setUseMock(true)
+
+// If env var is explicitly set (true or false), use it. Otherwise default based on credentials
+let useMock: boolean
+if (envUseMockValue !== undefined) {
+  // Environment variable is explicitly set
+  useMock = envUseMock
+  setUseMock(useMock) // Update module variable
+} else {
+  // No environment variable, default based on credentials
+  useMock = !hasApiCredentials
+  setUseMock(useMock)
 }
 
 setTelegramAdapter(useMock ? mockAdapter : mtcuteAdapter)
@@ -40,7 +48,7 @@ export function getCurrentAdapter(): TelegramAdapter {
 // For backward compatibility during migration
 export const telegramAdapter = getTelegramAdapter()
 
-export const useMockAdapter = writable(getUseMock())
+export const useMockAdapter = writable(useMock)
 
 export function switchToMockAdapter(enabled: boolean): void {
   setUseMock(enabled)

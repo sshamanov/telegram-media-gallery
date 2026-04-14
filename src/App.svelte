@@ -49,10 +49,13 @@
 
   async function loadDialogs(): Promise<void> {
     try {
-       const dialogs = await getCurrentAdapter().getDialogs()
+      console.log('Loading dialogs...')
+      const dialogs = await getCurrentAdapter().getDialogs()
+      console.log('Dialogs loaded:', dialogs.length)
       setDialogs(dialogs)
       dialogsLoaded = true
-    } catch {
+    } catch (error) {
+      console.error('Failed to load dialogs:', error)
       setDialogs([])
       pushToast({ kind: 'error', text: 'Failed to load dialogs', dismissible: true })
     }
@@ -147,16 +150,24 @@
 {#if migrating}
   <MigrationScreen progress={migrationProgress} />
    {:else}
-  <main class="app-shell">
+    <main class="app-shell">
     <div class="route-container" use:routeTransition>
       {#if $authState !== 'connected'}
-        <AuthScreen />
+        <div data-testid="auth-screen">
+          <AuthScreen />
+        </div>
       {:else if $router.type === 'settings'}
-        <SettingsScreen />
+        <div data-testid="settings-screen">
+          <SettingsScreen />
+        </div>
       {:else if $currentDialog && $router.type === 'gallery' && $router.dialogId === $currentDialog.id}
-        <GalleryGrid />
+        <div data-testid="gallery-screen">
+          <GalleryGrid />
+        </div>
       {:else}
-        <DialogList />
+        <div data-testid="dialogs-screen">
+          <DialogList />
+        </div>
       {/if}
     </div>
   </main>

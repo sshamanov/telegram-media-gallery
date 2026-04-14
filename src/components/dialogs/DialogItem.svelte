@@ -7,7 +7,7 @@
   export let onOpen: (dialog: Dialog) => void
 </script>
 
-<div class="dialog-item panel" role="button" tabindex="0" on:click={() => onOpen(dialog)} on:keydown={(event) => event.key === 'Enter' && onOpen(dialog)}>
+<div class="dialog-item panel" role="button" tabindex="0" on:click={() => onOpen(dialog)} on:keydown={(event) => (event.key === 'Enter' || event.key === ' ') && onOpen(dialog)} data-dialog-id={dialog.id} data-testid="dialog-item">
   <div class="avatar-wrap">
     {#if dialog.avatarUrl}
       <img class="avatar image" src={dialog.avatarUrl} alt={dialog.title} loading="lazy" />
@@ -19,7 +19,7 @@
     <div class="title">{dialog.title}</div>
     <div class="meta muted">{dialog.subtitle}</div>
   </div>
-  <button class={`button ${isGallery ? 'danger' : 'secondary'}`} type="button" on:click|stopPropagation={() => onToggle(dialog.id)}>
+  <button class={`button ${isGallery ? 'danger' : 'secondary'}`} type="button" on:click|stopPropagation={() => onToggle(dialog.id)} data-testid="dialog-toggle-button">
     {isGallery ? 'Remove' : 'Add'}
   </button>
 </div>

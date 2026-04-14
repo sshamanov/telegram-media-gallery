@@ -57,7 +57,7 @@
   }
 </script>
 
-<section class="panel dialogs-shell">
+<section class="panel dialogs-shell" data-testid="dialog-list">
   <header class="header">
     <div>
       <h1>Telegram Gallery</h1>
@@ -69,20 +69,56 @@
     </div>
   </header>
 
-  <div class="tabs">
-    <button class:active={tab === 'galleries'} class="tab" type="button" on:click={() => switchTab('galleries')}>Galleries</button>
-    <button class:active={tab === 'groups'} class="tab" type="button" on:click={() => switchTab('groups')}>Groups</button>
-    <button class:active={tab === 'chats'} class="tab" type="button" on:click={() => switchTab('chats')}>Chats</button>
+  <div class="tabs" role="tablist" aria-label="Dialog categories">
+    <button
+      class:active={tab === 'galleries'}
+      class="tab"
+      type="button"
+      role="tab"
+      aria-selected={tab === 'galleries'}
+      aria-controls="galleries-tabpanel"
+      id="galleries-tab"
+      on:click={() => switchTab('galleries')}
+      data-testid="galleries-tab"
+    >
+      Galleries
+    </button>
+    <button
+      class:active={tab === 'groups'}
+      class="tab"
+      type="button"
+      role="tab"
+      aria-selected={tab === 'groups'}
+      aria-controls="groups-tabpanel"
+      id="groups-tab"
+      on:click={() => switchTab('groups')}
+      data-testid="groups-tab"
+    >
+      Groups
+    </button>
+    <button
+      class:active={tab === 'chats'}
+      class="tab"
+      type="button"
+      role="tab"
+      aria-selected={tab === 'chats'}
+      aria-controls="chats-tabpanel"
+      id="chats-tab"
+      on:click={() => switchTab('chats')}
+      data-testid="chats-tab"
+    >
+      Chats
+    </button>
   </div>
 
   {#if currentTabCount > 20}
-    <input class="search" bind:value={$dialogSearch} placeholder="Search dialogs..." />
+    <input class="search" bind:value={$dialogSearch} placeholder="Search dialogs..." data-testid="dialog-search" />
   {/if}
 
   {#if tab === 'galleries'}
-    <div class="list">
+    <div class="list" role="tabpanel" id="galleries-tabpanel" aria-labelledby="galleries-tab" tabindex="0" data-testid="galleries-list">
       {#if $galleries.length === 0}
-        <div class="empty muted">No gallery dialogs found. Gallery-type dialogs appear here automatically.</div>
+        <div class="empty muted" data-testid="empty-galleries">No gallery dialogs found. Gallery-type dialogs appear here automatically.</div>
       {:else}
         {#each $galleries as dialog (dialog.id)}
           <DialogItem dialog={dialog} isGallery={true} onToggle={toggleGallery} onOpen={openDialog} />
@@ -90,7 +126,7 @@
       {/if}
     </div>
   {:else}
-    <div class="list">
+    <div class="list" role="tabpanel" id={tab === 'groups' ? 'groups-tabpanel' : 'chats-tabpanel'} aria-labelledby={tab === 'groups' ? 'groups-tab' : 'chats-tab'} tabindex="0" data-testid={tab === 'groups' ? 'groups-list' : 'chats-list'}>
       {#each filteredDialogs as dialog (dialog.id)}
         <DialogItem dialog={dialog} isGallery={$galleryIds.includes(dialog.id)} onToggle={toggleGallery} onOpen={openDialog} />
       {/each}

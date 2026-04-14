@@ -64,10 +64,11 @@ All Telegram API calls go through `src/lib/telegram/adapter.ts` interface. Never
 - `src/lib/telegram/mock.ts`: Mock data for testing
 
 **Adapter Switching**:
-- Environment: `VITE_USE_MOCK_ADAPTER=true|1|True|TRUE` (supports multiple truthy values)
-- UI Toggle: Available in AuthScreen (pre-login) and SettingsPanel (post-login)
-- Storage: `localStorage.getItem('telegram.useMock')`
-- Function: `switchToMockAdapter(enabled: boolean)` in `stores/telegram.ts`
+- Environment: `VITE_USE_MOCK_ADAPTER=true|1|True|TRUE|false|0|False|FALSE` (supports multiple boolean values)
+- No UI Toggle: Removed from AuthScreen and SettingsPanel
+- No localStorage persistence: `telegram.useMock` storage removed
+- Function: `switchToMockAdapter(enabled: boolean)` in `stores/telegram.ts` (available for programmatic use)
+- Default: If no env var and no API credentials, defaults to mock (true)
 
 ### Mock Mode Behavior
 - **Phone**: Any phone number accepted

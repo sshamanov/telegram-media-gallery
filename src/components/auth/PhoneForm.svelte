@@ -97,7 +97,7 @@
   }
 </script>
 
-<div class="stack">
+<div class="stack" data-auth-step={step} data-testid="phone-form">
   {#if !hideCredentials}
     <input class="field" bind:value={apiId} placeholder="API ID" />
     <input class="field" bind:value={apiHash} placeholder="API Hash" />
@@ -108,10 +108,11 @@
     bind:value={$phone} 
     placeholder="Phone number" 
     on:keydown={(e) => e.key === 'Enter' && step === 'phone' && handleSendCode()}
+    data-testid="phone-input"
   />
 
   {#if step === 'phone'}
-    <button class="button" type="button" on:click={handleSendCode} disabled={$authState === 'connecting'}>
+    <button class="button" type="button" on:click={handleSendCode} disabled={$authState === 'connecting'} data-testid="send-code-button">
       Send Code
     </button>
   {:else if step === 'code'}
@@ -120,8 +121,9 @@
       bind:value={code} 
       placeholder="Verification code" 
       on:keydown={(e) => e.key === 'Enter' && handleSubmitCode()}
+      data-testid="verification-code-input"
     />
-    <button class="button secondary" type="button" on:click={handleSubmitCode} disabled={$authState === 'connecting'}>
+    <button class="button secondary" type="button" on:click={handleSubmitCode} disabled={$authState === 'connecting'} data-testid="submit-code-button">
       Submit Code
     </button>
     <p class="help muted">Enter the code sent to your Telegram app.</p>
@@ -143,15 +145,16 @@
         type="password" 
         placeholder="2FA Password" 
         on:keydown={(e) => e.key === 'Enter' && handleSubmitPassword()}
+        data-testid="2fa-password-input"
       />
-      <button class="button ghost" type="button" on:click={handleSubmitPassword} disabled={$authState === 'connecting'}>
+      <button class="button ghost" type="button" on:click={handleSubmitPassword} disabled={$authState === 'connecting'} data-testid="submit-password-button">
         Submit Password
       </button>
       <p class="help muted">Your account has 2-step verification enabled.</p>
     {/if}
   {/if}
 
-  <p class="status muted">{$authStatus}</p>
+  <p class="status muted" aria-live="polite" data-testid="auth-status">{$authStatus}</p>
   
   {#if step !== 'phone'}
     <button class="button ghost small" type="button" on:click={resetForm}>

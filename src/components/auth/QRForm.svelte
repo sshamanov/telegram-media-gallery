@@ -97,7 +97,7 @@
   onDestroy(() => { clearCountdown() })
 </script>
 
-<div class="qr-form">
+<div class="qr-form" data-testid="qr-form">
   <p class="muted">Scan this QR code with Telegram on your phone to log in.</p>
 
   {#if !hideCredentials}
@@ -107,15 +107,15 @@
     </div>
   {/if}
 
-  <canvas bind:this={canvas} width="256" height="256"></canvas>
+  <canvas bind:this={canvas} width="256" height="256" data-testid="qr-canvas"></canvas>
 
   <div class="row">
     <span class="muted">Expires in {expiresIn}s</span>
-    <button class="button ghost" type="button" on:click={start} disabled={running}>Refresh</button>
+    <button class="button ghost" type="button" on:click={start} disabled={running} data-testid="qr-refresh-button">Refresh</button>
   </div>
 
   {#if needs2FA}
-    <div class="twofa-block">
+    <div class="twofa-block" data-testid="qr-2fa-section">
       <p class="muted">Your account has 2-step verification enabled.</p>
       <input
         class="field"
@@ -123,8 +123,9 @@
         bind:value={password2FA}
         placeholder="2FA password"
         on:keydown={(e) => e.key === 'Enter' && submit2FA()}
+        data-testid="qr-2fa-password-input"
       />
-      <button class="button" type="button" on:click={submit2FA} disabled={!password2FA.trim()}>
+      <button class="button" type="button" on:click={submit2FA} disabled={!password2FA.trim()} data-testid="qr-2fa-submit-button">
         Submit
       </button>
     </div>
