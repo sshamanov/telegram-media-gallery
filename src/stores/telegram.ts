@@ -8,7 +8,8 @@ import { pushToast } from './ui'
 
 // For testing: default to mock adapter if no API credentials are set or if env var is set
 const hasApiCredentials = localStorage.getItem('telegram.apiId') || import.meta.env.VITE_TELEGRAM_API_ID
-const envUseMock = import.meta.env.VITE_USE_MOCK_ADAPTER === 'true'
+const envUseMockValue = import.meta.env.VITE_USE_MOCK_ADAPTER
+const envUseMock = envUseMockValue === 'true' || envUseMockValue === '1' || envUseMockValue === 'True' || envUseMockValue === 'TRUE'
 const useMock = envUseMock || getUseMock() || !hasApiCredentials
 if (!getUseMock() && !hasApiCredentials) {
   setUseMock(true)

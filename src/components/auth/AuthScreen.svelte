@@ -2,14 +2,10 @@
   import { onMount } from 'svelte'
   import PhoneForm from './PhoneForm.svelte'
   import QRForm from './QRForm.svelte'
-  import { getUseMock, setUseMock, setTelegramAdapter } from '../../lib/telegram/adapter'
-  import { mockAdapter } from '../../lib/telegram/mock'
-  import { mtcuteAdapter } from '../../lib/telegram/mtcute'
-  import { pushToast } from '../../stores/ui'
+  import { useMockAdapter, switchToMockAdapter } from '../../stores/telegram'
 
   let mode: 'phone' | 'qr' = 'phone'
   let webCryptoAvailable = true
-  let useMock = getUseMock()
 
   const hideCredentials = Boolean(import.meta.env.VITE_TELEGRAM_API_ID && import.meta.env.VITE_TELEGRAM_API_HASH)
 
@@ -18,19 +14,8 @@
   })
 
   function toggleMockMode(): void {
-    useMock = !useMock
-    setUseMock(useMock)
-    setTelegramAdapter(useMock ? mockAdapter : mtcuteAdapter)
-    
-    // Clear any existing session when switching adapters
-    localStorage.removeItem('session')
-    localStorage.removeItem('phone')
-    
-    pushToast({
-      kind: 'info',
-      text: `Switched to ${useMock ? 'mock' : 'real'} Telegram adapter`,
-      dismissible: true
-    })
+    const newValue = !$useMockAdapter
+    switchToMockAdapter(newValue)
   }
 </script>
 
@@ -55,11 +40,11 @@
 
     <div class="mock-toggle">
       <label class="toggle-label">
-        <input type="checkbox" bind:checked={useMock} on:change={toggleMockMode} />
+        <input type="checkbox" bind:checked={$useMockAdapter} on:change={toggleMockMode} />
         <span class="toggle-slider"></span>
         <span class="toggle-text">Use mock data</span>
       </label>
-      {#if useMock}
+      {#if $useMockAdapter}
         <div class="mock-hint muted">
           Mock mode: any phone works, code 123456 triggers 2FA (password: "password")
         </div>
