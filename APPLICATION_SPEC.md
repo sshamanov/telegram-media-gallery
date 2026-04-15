@@ -62,6 +62,8 @@ All Telegram API calls go through `src/lib/telegram/adapter.ts`. Feature code mu
 - There is no UI toggle for switching mock mode.
 - Programmatic switching remains available via `switchToMockAdapter(enabled)` in `src/stores/telegram.ts`.
 - If no environment override is present and Telegram API credentials are absent, the app defaults to mock mode.
+- `docker-compose.yml` is reserved for manual app-server usage and must not force mock mode.
+- `docker-compose.test.yml` is the dedicated Playwright/agent test compose path and may force mock mode for deterministic test runs.
 
 ### Mock Mode Behavior
 - **Phone**: any phone number is accepted

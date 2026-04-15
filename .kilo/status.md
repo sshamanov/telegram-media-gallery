@@ -1,6 +1,6 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-15 21:20 +02:00
+**Last Updated:** 2026-04-15 22:49 +02:00
 **Current Phase:** Phase 1 complete, ready for Phase 2 actions implementation
 **Active Plan:** `.kilo/plans/1776176222439-sunny-river.md`
 **Branch:** `main`
@@ -45,6 +45,8 @@
 - `completed` Add bulk download (chained individual downloads)
 - `completed` Implement forward to Telegram chat functionality
 - `completed` Fix mock media and grid controls (plan: `.kilo/plans/1776256839612-quiet-orchid.md`)
+- `in_progress` Investigate real Telegram auth failure for phone code and QR 2FA flows
+- `completed` Separate manual compose workflow from agent Playwright/mock compose workflow
 - `pending` Add Android Share API integration
 - `pending` Implement copy to clipboard (images only)
 - `pending` Enhance upload with progress panel and queue UX
@@ -69,6 +71,8 @@
 - 2026-04-15 18:15 +02:00 - Completed Phase 2 forward functionality: added forward queue state, forward button to selection header, dialog picker component, progress tracking UI, and test coverage.
 - 2026-04-15 21:33 +02:00 - Activated `.kilo/plans/1776256839612-quiet-orchid.md` to fix mock media mismatch and grid-columns button.
 - 2026-04-15 21:45 +02:00 - Completed mock media and grid controls fix: updated samples/dialogs.json to match dialog-media files, hardened mock file resolution, implemented grid-columns cycling button, added test coverage for both features.
+- 2026-04-15 22:31 +02:00 - Investigated real Telegram auth failure reports for phone code delivery and QR 2FA completion; added targeted debug logging to mtcute adapter and auth forms before behavior changes.
+- 2026-04-15 22:49 +02:00 - Confirmed auth failure was caused by manual compose forcing mock mode in prior workflow assumptions; split compose usage so `docker-compose.yml` is manual app-only and `docker-compose.test.yml` is dedicated to agent/Playwright mock validation.
 
 ## Current Blockers And Known Gaps
 
@@ -77,6 +81,8 @@
 - Upload mode selector (Send as media vs Send as file) needs refinement for large files.
 - Code-rule cleanup for direct production `console.*` removal is now complete.
 - Mock media thumbnails and grid-columns button are now fixed.
+- Real Telegram auth has an active regression investigation: phone code flow and QR 2FA completion may fail without sufficient UI-visible diagnostics.
+- Manual compose workflow previously forced mock mode and masked real auth; compose separation is now being corrected.
 
 ### Process/documentation blockers
 - Validation for the latest markdown-only rewrite has been intentionally deferred because the user explicitly requested no code, Playwright, or test work in that block.
@@ -91,6 +97,12 @@
 - Product-level drift may still exist in code paths not rewritten in this documentation-only block; those are tracked as blockers rather than accepted support.
 
 ## Last Validation
+- 2026-04-15 22:50 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:20-alpine npm run check`
+  - Result: passed with 0 errors, 6 warnings (pre-existing accessibility warnings in DialogPicker and GalleryGrid)
+  - Main note: compose split and documentation updates type-check cleanly; manual compose no longer forces mock mode.
+- 2026-04-15 22:31 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:20-alpine npm run check`
+  - Result: passed with 0 errors, 6 warnings (pre-existing accessibility warnings in DialogPicker and GalleryGrid)
+  - Main note: auth diagnostics/logging changes type-check cleanly; no behavior fix applied yet.
 - 2026-04-15 21:45 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:20-alpine npm run check`
   - Result: passed with 0 errors, 6 warnings (accessibility warnings in DialogPicker and GalleryGrid)
   - Main note: type checking passes cleanly after mock media fix and grid-columns implementation.

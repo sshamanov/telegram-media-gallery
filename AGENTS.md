@@ -196,18 +196,25 @@ kilo ci:test       # Run appropriate tests based on changes
 ```
 
 ### Docker Compose Test Setup
-The project uses Docker Compose for running tests:
-- **App service**: Runs dev server on port 5173 with `VITE_USE_MOCK_ADAPTER=true`
-- **Playwright service**: Waits for app to be ready, then runs tests against `https://localhost:5173`
+Compose files are split by purpose:
+- `docker-compose.yml` is for the user's manual app-server workflow only and must not be treated as the default agent test stack.
+- `docker-compose.test.yml` is the dedicated agent/Playwright test workflow.
 
-**Important**: When running tests, use Docker Compose, not direct `npm run test:short`:
+For required Playwright validation, use the dedicated test compose file:
 ```bash
-# Run tests using Docker Compose (correct way)
-docker-compose up --build playwright
+# Run tests using dedicated test compose
+docker-compose -f docker-compose.test.yml up --build playwright
 
-# Or to run specific test suite:
-docker-compose run --rm playwright npx playwright test --config=playwright.config.ts --grep "@short" --project=desktop-chrome
+# Or run a specific suite/project
+docker-compose -f docker-compose.test.yml run --rm playwright npx playwright test --config=playwright.config.ts --grep "@short" --project=desktop-chrome
 ```
+
+Manual app serving for the user may use:
+```bash
+docker-compose up app
+```
+
+That manual compose path must keep real auth available and must not force mock mode.
 
 **Never run `npm run test:short` directly in Docker** - it will try to launch both dev server and browser in same container, which conflicts with the proper separation.
 

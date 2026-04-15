@@ -26,16 +26,18 @@ Define the executable validation policy for Telegram Gallery. This document cove
 ## Execution Model
 
 ### Docker Compose Workflow For Playwright
-Use Docker Compose so the app server and browser runner stay separated:
+Use the dedicated test compose file so the app server and browser runner stay separated without affecting the user's manual compose workflow:
 
 ```bash
-docker-compose up --build playwright
+docker-compose -f docker-compose.test.yml up --build playwright
 
 # Specific suite/project example
-docker-compose run --rm playwright npx playwright test --config=playwright.config.ts --grep "@short" --project=desktop-chrome
+docker-compose -f docker-compose.test.yml run --rm playwright npx playwright test --config=playwright.config.ts --grep "@short" --project=desktop-chrome
 ```
 
 Do not rely on direct `npm run test:short` execution inside a single Docker container for required Playwright validation.
+
+`docker-compose.yml` is reserved for manual app-server usage and must not be used as the default agent test entry point.
 
 ### Docker Workflow For Type Check
 ```bash
