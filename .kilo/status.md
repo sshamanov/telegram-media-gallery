@@ -4,7 +4,7 @@
 **Current Phase:** Process truth recovery and gallery baseline rebuild
 **Active Plan:** `.kilo/plans/1776176222439-sunny-river.md`
 **Branch:** `main`
-**Ahead Of `origin/main`:** 34 commits
+**Ahead Of `origin/main`:** 36 commits
 
 ---
 
@@ -86,6 +86,8 @@
 ## Recent Commit Log
 | Commit | Date | Description |
 |--------|------|-------------|
+| `48d3955` | 2026-04-15 | Prune long Playwright specs to executable-only coverage |
+| `077fcab` | 2026-04-15 | Replace direct console.* calls with debug utility |
 | `2c37df7` | 2026-04-15 | Add explicit agent-level permissions for .kilo/status.md edits |
 | `037315f` | 2026-04-14 | Make UI Playwright-friendly with stable test hooks |
 | `1a9f1f4` | 2026-04-14 | Fix mock toggle state and env configuration |
