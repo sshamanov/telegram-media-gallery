@@ -16,7 +16,8 @@ Browser-based photo/video gallery using Telegram as a storage backend. Client-on
 - Gallery baseline and viewer baseline are implemented with Phase 1 media types (photos, videos, PDF, audio, documents).
 - Phase 2 actions (multi-select, bulk download, forward, share, copy, upload queue) are implemented and available in the UI.
 - Production builds now register a real service worker that precaches the app shell (`/`, `/index.html`, hashed JS/CSS assets) and clears stale shell caches on activate.
-- Offline dialog/bootstrap/media behavior beyond the cached app shell remains planned for later Phase 3 blocks.
+- Dialog bootstrap now persists a sanitized last-known dialog snapshot and can render that cached state while offline after a prior online sync.
+- Offline media/cache behavior beyond the cached app shell plus dialog snapshot remains planned for later Phase 3 blocks.
 
 ## Core Architecture
 
@@ -86,6 +87,7 @@ All Telegram API calls go through `src/lib/telegram/adapter.ts`. Feature code mu
 | Viewer state | `src/stores/gallery.ts` | No |
 | Scroll positions | `src/stores/gallery.ts` | localStorage |
 | Gallery bookmarks | `src/stores/dialogs.ts` | localStorage |
+| Last-known dialog snapshot | `src/stores/dialogs.ts` via `src/stores/persisted.ts` | localStorage |
 | Dialog search | `src/stores/dialogs.ts` | No |
 | User settings | `src/stores/settings.ts` | localStorage |
 | Toasts / offline UI | `src/stores/ui.ts` | No |
@@ -154,6 +156,7 @@ All Telegram API calls go through `src/lib/telegram/adapter.ts`. Feature code mu
 
 ### Dialog Screen
 - `src/components/dialogs/DialogList.svelte` exposes semantic tabs for Galleries / Groups / Chats
+- When the app is offline, the dialogs screen explicitly labels cached dialog state and does not claim live freshness.
 - Stable hooks include:
   - `galleries-tab`
   - `groups-tab`
@@ -161,6 +164,7 @@ All Telegram API calls go through `src/lib/telegram/adapter.ts`. Feature code mu
   - `galleries-list`
   - `groups-list`
   - `chats-list`
+  - `dialogs-data-status` when offline cached-state messaging is active
   - `dialog-search` when the current tab count exceeds 20
   - `empty-galleries`
 - `src/components/dialogs/DialogItem.svelte` exposes:
@@ -201,6 +205,7 @@ Do not claim end-to-end support for these until they are rebuilt and revalidated
 ## Caching Strategy
 - **Thumbnails**: IndexedDB
 - **Full media**: OPFS where available in later phases
+- **Dialogs**: sanitized last-known dialog snapshot in localStorage for offline bootstrap and reconnect recovery only
 - **Service worker cache**: production app shell precache for `/`, `/index.html`, and hashed JS/CSS assets; broader offline behavior remains phase-scoped
 - **Storage breakdown**: shown in settings with clear actions for each cache area
 
@@ -267,6 +272,7 @@ Short tests are intended to validate only currently supported baseline behavior:
 - If an advanced flow is not restored end-to-end, it must not remain as a required assertion.
 - Unsupported advanced behavior must be tracked as a gap instead of being hidden behind weakened tests.
 - Service-worker acceptance uses a dedicated production preview path; dev-server-only checks do not satisfy offline shell validation.
+- Offline dialog acceptance requires proving the dialog list renders from the persisted snapshot after a prior online load.
 
 ## Development Workflow
 
@@ -322,7 +328,7 @@ Short tests are intended to validate only currently supported baseline behavior:
 
 ### Phase 3+ (Advanced) - Planned
 - OPFS full-media cache
-- Service worker for offline shell
+- Broader service-worker/offline media behavior beyond app-shell precache and dialog snapshot bootstrap
 - Masonry layout toggle
 - Desktop layout variants
 - Light theme support

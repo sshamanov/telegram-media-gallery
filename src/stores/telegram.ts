@@ -5,6 +5,7 @@ import { getTelegramAdapter, setTelegramAdapter, setTelegramApiCredentials, setU
 import { mtcuteAdapter } from '../lib/telegram/mtcute'
 import { mockAdapter } from '../lib/telegram/mock'
 import { pushToast } from './ui'
+import { clearDialogSnapshot, resetDialogsState } from './dialogs'
 
 // For testing: default to mock adapter if no API credentials are set or if env var is set
 const hasApiCredentials = localStorage.getItem('telegram.apiId') || import.meta.env.VITE_TELEGRAM_API_ID
@@ -62,6 +63,8 @@ export function switchToMockAdapter(enabled: boolean): void {
   
   localStorage.removeItem('session')
   localStorage.removeItem('phone')
+  clearDialogSnapshot()
+  resetDialogsState()
   authState.set('idle')
   session.set({ session: null })
   pushToast({ 
@@ -134,8 +137,12 @@ export function retryReconnect(): void {
 /** Called when session is found to be expired */
 export function handleSessionExpired(): void {
   localStorage.removeItem('session')
+  localStorage.removeItem('phone')
+  clearDialogSnapshot()
+  resetDialogsState()
   reconnectState.set('idle')
   authState.set('idle')
+  session.set({ session: null })
   pushToast({ kind: 'error', text: 'Session expired — please log in again', dismissible: true })
 }
 

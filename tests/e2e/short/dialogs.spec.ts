@@ -7,6 +7,7 @@ test.describe('Dialog Navigation @short', () => {
     
     // Check for main heading
     await expect(galleryPage.getByRole('heading', { name: 'Telegram Gallery' })).toBeVisible();
+    await expect(galleryPage.getByTestId('dialog-list')).toHaveAttribute('data-dialog-source', 'live');
   });
 
   test('tabs are visible: Galleries, Groups, Chats', async ({ galleryPage }) => {

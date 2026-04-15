@@ -1,9 +1,20 @@
 <script lang="ts">
   import DialogItem from './DialogItem.svelte'
-  import { allDialogs, dialogSearch, galleries, galleryIds, setDialogs, toggleGallery } from '../../stores/dialogs'
-  import { authState, getCurrentAdapter } from '../../stores/telegram'
+  import {
+    allDialogs,
+    dialogDataSource,
+    dialogSearch,
+    dialogSnapshotUpdatedAt,
+    galleries,
+    galleryIds,
+    resetDialogsState,
+    setDialogs,
+    clearDialogSnapshot,
+    toggleGallery,
+  } from '../../stores/dialogs'
+  import { authState, getCurrentAdapter, session } from '../../stores/telegram'
   import { setActiveDialog } from '../../stores/gallery'
-  import { pushToast } from '../../stores/ui'
+  import { isOffline, pushToast } from '../../stores/ui'
   import { tooltip } from '../../lib/dom/tooltips'
   import { navigateToSettings, navigateToGallery } from '../../lib/routing'
   import type { Dialog } from '../../types/telegram'
@@ -11,6 +22,20 @@
   let tab: 'galleries' | 'groups' | 'chats' = 'galleries'
   let currentTabCount = 0
   let filteredDialogs: Dialog[] = []
+  const snapshotTimeFormatter = new Intl.DateTimeFormat(undefined, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  })
+
+  $: snapshotLabel = $dialogSnapshotUpdatedAt
+    ? snapshotTimeFormatter.format(new Date($dialogSnapshotUpdatedAt))
+    : null
+
+  $: offlineStatusText = $isOffline
+    ? snapshotLabel
+      ? `Offline - showing last synced dialogs from ${snapshotLabel}.`
+      : 'Offline - no cached dialog snapshot is available yet.'
+    : null
 
   $: {
     const query = $dialogSearch.trim().toLowerCase()
@@ -32,8 +57,12 @@
   }
 
   async function refreshDialogs(): Promise<void> {
+    if ($isOffline) {
+      return
+    }
+
     try {
-       const dialogs = await getCurrentAdapter().getDialogs()
+      const dialogs = await getCurrentAdapter().getDialogs()
       setDialogs(dialogs)
     } catch {
       pushToast({ kind: 'error', text: 'Failed to refresh dialogs', dismissible: true })
@@ -50,18 +79,25 @@
   }
 
   async function logout(): Promise<void> {
-     await getCurrentAdapter().logout()
+    await getCurrentAdapter().logout()
     localStorage.removeItem('session')
+    localStorage.removeItem('phone')
+    clearDialogSnapshot()
+    resetDialogsState()
     authState.set('idle')
+    session.set({ session: null })
     pushToast({ kind: 'info', text: 'Session cleared', dismissible: true })
   }
 </script>
 
-<section class="panel dialogs-shell" data-testid="dialog-list">
+<section class="panel dialogs-shell" data-testid="dialog-list" data-dialog-source={$dialogDataSource}>
   <header class="header">
     <div>
       <h1>Telegram Gallery</h1>
       <p class="muted">Browse your galleries, groups, and chats.</p>
+      {#if offlineStatusText}
+        <p class="status-note" data-testid="dialogs-data-status">{offlineStatusText}</p>
+      {/if}
     </div>
     <div class="header-actions">
       <button class="button secondary" type="button" on:click={openSettings} aria-label="Settings" use:tooltip={{ text: 'Settings' }}>⚙</button>
@@ -162,6 +198,12 @@
     gap: 8px;
     margin-bottom: 16px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .status-note {
+    margin: 10px 0 0;
+    color: var(--color-warning);
+    font-size: 0.95rem;
   }
 
   .tab {

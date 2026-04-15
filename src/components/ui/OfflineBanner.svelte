@@ -1,9 +1,18 @@
 <script lang="ts">
   import { isOffline } from '../../stores/ui'
+  import { hasDialogSnapshot } from '../../stores/dialogs'
+
+  $: bannerMode = $hasDialogSnapshot ? 'cached' : 'empty'
 </script>
 
 {#if $isOffline}
-  <div class="offline-banner">⚠ Offline - showing cached content</div>
+  <div class="offline-banner" data-testid="offline-banner" data-offline-mode={bannerMode}>
+    {#if bannerMode === 'cached'}
+      ⚠ Offline - showing last synced data
+    {:else}
+      ⚠ Offline - reconnect to load Telegram data
+    {/if}
+  </div>
 {/if}
 
 <style>
