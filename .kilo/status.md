@@ -1,7 +1,7 @@
 # Telegram Gallery - Execution Ledger
 
 **Last Updated:** 2026-04-15 12:09 +02:00
-**Current Phase:** Process truth recovery and gallery baseline rebuild
+**Current Phase:** Phase 1 complete, ready for Phase 2 actions implementation
 **Active Plan:** `.kilo/plans/1776176222439-sunny-river.md`
 **Branch:** `main`
 **Ahead Of `origin/main`:** 37 commits
@@ -40,6 +40,12 @@
 - `completed` Add list view mode with 48px thumb/icon + filename + date + size
 - `completed` Update APPLICATION_SPEC.md with Phase 1 supported behavior
 - `completed` Run validation (npm run check, short tests) and update status
+- `pending` Implement multi-select with long-press on mobile
+- `pending` Add bulk download (chained individual downloads)
+- `pending` Implement forward to Telegram chat functionality
+- `pending` Add Android Share API integration
+- `pending` Implement copy to clipboard (images only)
+- `pending` Enhance upload with progress panel and queue UX
 
 ## Plan And Todo History
 - 2026-04-14 19:41 +02:00 - Activated `.kilo/plans/1776176222439-sunny-river.md`.
@@ -102,6 +108,7 @@
 ## Recent Commit Log
 | Commit | Date | Description |
 |--------|------|-------------|
+| `7b33ceb` | 2026-04-15 | Document Phase 1 gallery features and update status ledger |
 | `48d3955` | 2026-04-15 | Prune long Playwright specs to executable-only coverage |
 | `077fcab` | 2026-04-15 | Replace direct console.* calls with debug utility |
 | `2c37df7` | 2026-04-15 | Add explicit agent-level permissions for .kilo/status.md edits |
