@@ -37,6 +37,8 @@
     copyQueueState,
     enqueueCopies,
     cancelCopies,
+    uploadQueueState,
+    cancelUploadQueue,
   } from '../../stores/gallery'
   import { galleryIds, toggleGallery } from '../../stores/dialogs'
   import { settings, updateSettings } from '../../stores/settings'
@@ -422,7 +424,38 @@
                 </div>
               </div>
             </div>
-          {/if}
+           {/if}
+
+           {#if $uploadQueueState.active}
+             <div class="panel download-panel" data-testid="gallery-upload-panel">
+               <div class="download-progress">
+                 <div class="download-status">
+                   Uploading {$uploadQueueState.currentIndex + 1} of {$uploadQueueState.items.length} items
+                   {#if $uploadQueueState.currentIndex >= 0 && $uploadQueueState.items[$uploadQueueState.currentIndex]}
+                     - {$uploadQueueState.items[$uploadQueueState.currentIndex].fileName}
+                   {/if}
+                 </div>
+                 <div class="progress-bar">
+                   <div
+                     class="progress-fill"
+                     style="width: {$uploadQueueState.currentIndex >= 0 && $uploadQueueState.items[$uploadQueueState.currentIndex]
+                       ? $uploadQueueState.items[$uploadQueueState.currentIndex].progress + '%'
+                       : '0%'}"
+                   ></div>
+                 </div>
+                 <div class="download-actions">
+                   <button
+                     class="button ghost small"
+                     type="button"
+                     on:click={cancelUploadQueue}
+                     data-testid="gallery-upload-cancel"
+                   >
+                     Cancel
+                   </button>
+                 </div>
+               </div>
+             </div>
+           {/if}
       {:else}
       <header class="panel gallery-header">
         <button class="button ghost" type="button" on:click={back} data-testid="gallery-back-button">← Back</button>
