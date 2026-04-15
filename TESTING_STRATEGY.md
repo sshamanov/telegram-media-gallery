@@ -43,7 +43,7 @@ Do not rely on direct `npm run test:short` execution inside a single Docker cont
 ```bash
 docker run --rm --network host \
   -v "$(pwd)":/app -w /app \
-  node:20-alpine npm run check
+  node:24-alpine npm run check
 ```
 
 ## Validation Gates

@@ -1,6 +1,6 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-15 22:49 +02:00
+**Last Updated:** 2026-04-15 22:57 +02:00
 **Current Phase:** Phase 1 complete, ready for Phase 2 actions implementation
 **Active Plan:** `.kilo/plans/1776176222439-sunny-river.md`
 **Branch:** `main`
@@ -20,9 +20,14 @@
 - This ledger must stay stricter than historical claims and must not overstate completion.
 
 ## Active Plan
+- **Plan file:** `.kilo/plans/1776281608527-nimble-canyon.md`
+- **Goal:** migrate runtime baseline from node:20-alpine to node:24-alpine across compose files and documentation; validate compatibility.
+- **Execution strategy:** update compose files, documentation, optional package.json engines field, run validation on Node 24.
+- **Status:** completed with validation
+
 - **Plan file:** (completed) `.kilo/plans/1776256839612-quiet-orchid.md`
 - **Goal:** restore actual mock media thumbnails and viewer previews in galleries, groups, and chats; make grid-columns button functional; revalidate repaired mock-mode UX.
-- **Execution strategy:** fix mock data mismatch, harden file resolution, implement grid controls, add test coverage.
+- **Execution strategy:** fix mock data mismatch, hardened file resolution, implement grid controls, add test coverage.
 - **Status:** completed with commit `b28eb0b`
 
 ## Current Todo States
@@ -47,6 +52,7 @@
 - `completed` Fix mock media and grid controls (plan: `.kilo/plans/1776256839612-quiet-orchid.md`)
 - `in_progress` Investigate real Telegram auth failure for phone code and QR 2FA flows
 - `completed` Separate manual compose workflow from agent Playwright/mock compose workflow
+- `completed` Migrate runtime baseline to Node 24 (plan: `.kilo/plans/1776281608527-nimble-canyon.md`)
 - `pending` Add Android Share API integration
 - `pending` Implement copy to clipboard (images only)
 - `pending` Enhance upload with progress panel and queue UX
@@ -71,6 +77,7 @@
 - 2026-04-15 18:15 +02:00 - Completed Phase 2 forward functionality: added forward queue state, forward button to selection header, dialog picker component, progress tracking UI, and test coverage.
 - 2026-04-15 21:33 +02:00 - Activated `.kilo/plans/1776256839612-quiet-orchid.md` to fix mock media mismatch and grid-columns button.
 - 2026-04-15 21:45 +02:00 - Completed mock media and grid controls fix: updated samples/dialogs.json to match dialog-media files, hardened mock file resolution, implemented grid-columns cycling button, added test coverage for both features.
+- 2026-04-15 22:56 +02:00 - Activated `.kilo/plans/1776281608527-nimble-canyon.md` to migrate runtime baseline from Node 20 to Node 24.
 - 2026-04-15 22:31 +02:00 - Investigated real Telegram auth failure reports for phone code delivery and QR 2FA completion; added targeted debug logging to mtcute adapter and auth forms before behavior changes.
 - 2026-04-15 22:49 +02:00 - Confirmed auth failure was caused by manual compose forcing mock mode in prior workflow assumptions; split compose usage so `docker-compose.yml` is manual app-only and `docker-compose.test.yml` is dedicated to agent/Playwright mock validation.
 
@@ -97,6 +104,15 @@
 - Product-level drift may still exist in code paths not rewritten in this documentation-only block; those are tracked as blockers rather than accepted support.
 
 ## Last Validation
+- 2026-04-15 22:57 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
+  - Result: passed with 0 errors, 6 warnings (pre-existing accessibility warnings in DialogPicker and GalleryGrid)
+  - Main note: type checking passes cleanly on Node 24; runtime migration does not introduce new type errors.
+- 2026-04-15 22:57 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run build`
+  - Result: passed with accessibility warnings (same as check) and chunk size warnings
+  - Main note: build succeeds on Node 24; no compatibility issues with Vite/Svelte toolchain.
+- 2026-04-15 22:57 +02:00 - `docker-compose -f docker-compose.test.yml run --rm playwright npx playwright test --config=playwright.config.ts --grep "@short" --project=desktop-chrome --reporter=line`
+  - Result: passed (`32 passed`)
+  - Main note: All short tests pass on Node 24 runtime; mock mode and Playwright integration remain functional.
 - 2026-04-15 22:50 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:20-alpine npm run check`
   - Result: passed with 0 errors, 6 warnings (pre-existing accessibility warnings in DialogPicker and GalleryGrid)
   - Main note: compose split and documentation updates type-check cleanly; manual compose no longer forces mock mode.
@@ -166,7 +182,8 @@
 4. Consider addressing the accessibility warning (non-interactive element with tabindex in GalleryGrid).
 
 ## Cross References
-- Active implementation plan: `.kilo/plans/1776256839612-quiet-orchid.md`
+- Active implementation plan: `.kilo/plans/1776281608527-nimble-canyon.md`
+- Previous implementation plan: `.kilo/plans/1776256839612-quiet-orchid.md`
 - Previous recovery plan: `.kilo/plans/1776176222439-sunny-river.md`
 - Previous implementation plan: `.kilo/plans/1776281434000-forward-messages.md`
 - Previous implementation plan: `.kilo/plans/1776274073000-bulk-download.md`

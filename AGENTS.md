@@ -36,16 +36,16 @@ These rules override everything else. No exceptions. No creative interpretations
    Docker networking is permanently disabled on this system.
    Every `docker run` must include `--network host`.
    Standard build pattern:
-   ```
-   docker run --rm --network host \
-     -v "$(pwd)":/app -w /app \
-     node:20-alpine <command>
-   ```
+    ```
+    docker run --rm --network host \
+      -v "$(pwd)":/app -w /app \
+      node:24-alpine <command>
+    ```
     Dev server pattern (exposes port to host directly via host networking):
     ```
     docker run --rm --network host \
       -v "$(pwd)":/app -w /app \
-      node:20-alpine npm run dev -- --host --port 5173
+      node:24-alpine npm run dev -- --host --port 5173
     ```
 
  6. **Temporary files use `./tmp/`, never system `/tmp/`.**

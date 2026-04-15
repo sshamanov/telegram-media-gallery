@@ -40,12 +40,12 @@ Browser-based photo/video gallery using Telegram as a storage backend. Client-on
 # Type check / build pattern
 docker run --rm --network host \
   -v "$(pwd)":/app -w /app \
-  node:20-alpine <command>
+  node:24-alpine <command>
 
 # Dev server pattern
 docker run --rm --network host \
   -v "$(pwd)":/app -w /app \
-  node:20-alpine npm run dev -- --host --port 5173
+  node:24-alpine npm run dev -- --host --port 5173
 ```
 
 ## Adapter Pattern
