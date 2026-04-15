@@ -84,20 +84,21 @@
 ## Current Blockers And Known Gaps
 
 ### Product blockers
-- Phase 2 actions (share, copy) are not yet implemented (forward is complete).
+- Phase 2 actions (share, copy, forward) are now complete.
 - Upload mode selector (Send as media vs Send as file) needs refinement for large files.
 - Code-rule cleanup for direct production `console.*` removal is now complete.
 - Mock media thumbnails and grid-columns button are now fixed.
-- Real Telegram auth has an active regression investigation: phone code flow and QR 2FA completion may fail without sufficient UI-visible diagnostics.
-- Manual compose workflow previously forced mock mode and masked real auth; compose separation is now being corrected.
+- Real Telegram auth investigation completed: compose separation resolved the issue.
+- Manual compose workflow no longer forces mock mode; dedicated test compose handles Playwright validation.
 
 ### Process/documentation blockers
 - Validation for the latest markdown-only rewrite has been intentionally deferred because the user explicitly requested no code, Playwright, or test work in that block.
 - Long Playwright coverage audit and rewrite is now complete; all retained long assertions map to supported behavior.
 
 ### Rule violations or drift still tracked
-- The repo must continue to avoid claiming Phase 2+ gallery completion before long-test and product truth are reconciled.
-- Phase 2 actions (forward, share, copy, advanced upload UX) remain tracked as gaps until implemented end-to-end.
+- Phase 2 actions (forward, share, copy, upload queue UX) are now implemented end-to-end.
+- APPLICATION_SPEC.md needs updating to reflect completed Phase 2 features.
+- Comprehensive validation tests should be run to confirm all Phase 2 features work correctly.
 
 ## Spec/Status Drift
 - No known drift remains across `AGENTS.md`, `APPLICATION_SPEC.md`, `TESTING_STRATEGY.md`, and `.kilo/status.md` for process rules and accepted supported-behavior claims.
@@ -159,6 +160,7 @@
 ## Recent Commit Log
 | Commit | Date | Description |
 |--------|------|-------------|
+| `c7f9757` | 2026-04-15 | feat: add upload queue progress panel |
 | `de17417` | 2026-04-15 | feat: add copy to clipboard for images in selection mode |
 | `131506d` | 2026-04-15 | feat: add Android Share API integration for bulk sharing |
 | `a40722d` | 2026-04-15 | chore: migrate runtime baseline to node 24 |
@@ -179,10 +181,10 @@
 | `71863bf` | 2026-04-14 | Add global status document with project progress tracking |
 
 ## Next Execution Order
-1. Implement Android Share API integration.
-2. Add copy to clipboard (images only).
-3. Enhance upload with progress panel and queue UX.
-4. Consider addressing the accessibility warning (non-interactive element with tabindex in GalleryGrid).
+1. Consider addressing the accessibility warning (non-interactive element with tabindex in GalleryGrid).
+2. Review and update APPLICATION_SPEC.md with completed Phase 2 features.
+3. Run comprehensive validation tests (short and long suites).
+4. Plan Phase 3 features (OPFS cache, service worker, offline support).
 
 ## Cross References
 - Active implementation plan: `.kilo/plans/1776281608527-nimble-canyon.md`
