@@ -34,6 +34,9 @@
     shareQueueState,
     enqueueShares,
     cancelShares,
+    copyQueueState,
+    enqueueCopies,
+    cancelCopies,
   } from '../../stores/gallery'
   import { galleryIds, toggleGallery } from '../../stores/dialogs'
   import { settings, updateSettings } from '../../stores/settings'
@@ -214,6 +217,15 @@
     await enqueueShares(selectedItems)
   }
 
+  async function handleCopy(): Promise<void> {
+    if (selectedCount === 0) {
+      return
+    }
+
+    const selectedItems = visibleItems.filter((item) => $selectedMediaIds.has(item.id))
+    await enqueueCopies(selectedItems)
+  }
+
   onMount(() => {
     scroller?.focus()
   })
@@ -267,7 +279,7 @@
           >
             Forward
           </button>
-          <button
+           <button
             class="button secondary"
             type="button"
             on:click={() => handleShare()}
@@ -275,6 +287,15 @@
             data-testid="gallery-selection-share"
           >
             Share
+          </button>
+          <button
+            class="button secondary"
+            type="button"
+            on:click={() => handleCopy()}
+            disabled={selectedCount === 0 || typeof navigator.clipboard?.write !== 'function' || typeof ClipboardItem === 'undefined'}
+            data-testid="gallery-selection-copy"
+          >
+            Copy
           </button>
          </div>
        </header>
@@ -370,8 +391,39 @@
                </div>
              </div>
            </div>
-         {/if}
-     {:else}
+          {/if}
+
+          {#if $copyQueueState.active}
+            <div class="panel download-panel" data-testid="gallery-copy-panel">
+              <div class="download-progress">
+                <div class="download-status">
+                  Copying {$copyQueueState.currentIndex + 1} of {$copyQueueState.totalItems} items
+                  {#if $copyQueueState.currentIndex >= 0 && $copyQueueState.items[$copyQueueState.currentIndex]}
+                    - {$copyQueueState.items[$copyQueueState.currentIndex].fileName}
+                  {/if}
+                </div>
+                <div class="progress-bar">
+                  <div
+                    class="progress-fill"
+                    style="width: {$copyQueueState.currentIndex >= 0 && $copyQueueState.items[$copyQueueState.currentIndex]
+                      ? $copyQueueState.items[$copyQueueState.currentIndex].progress + '%'
+                      : '0%'}"
+                  ></div>
+                </div>
+                <div class="download-actions">
+                  <button
+                    class="button ghost small"
+                    type="button"
+                    on:click={cancelCopies}
+                    data-testid="gallery-copy-cancel"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          {/if}
+      {:else}
       <header class="panel gallery-header">
         <button class="button ghost" type="button" on:click={back} data-testid="gallery-back-button">← Back</button>
 

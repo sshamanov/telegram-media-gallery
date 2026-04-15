@@ -54,8 +54,8 @@
 - `completed` Separate manual compose workflow from agent Playwright/mock compose workflow
 - `completed` Migrate runtime baseline to Node 24 (plan: `.kilo/plans/1776281608527-nimble-canyon.md`)
 - `completed` Add Android Share API integration
-- `in_progress` Implement copy to clipboard (images only)
-- `pending` Enhance upload with progress panel and queue UX
+- `completed` Implement copy to clipboard (images only)
+- `in_progress` Enhance upload with progress panel and queue UX
 
 ## Plan And Todo History
 - 2026-04-14 19:41 +02:00 - Activated `.kilo/plans/1776176222439-sunny-river.md`.
@@ -159,6 +159,7 @@
 ## Recent Commit Log
 | Commit | Date | Description |
 |--------|------|-------------|
+| `131506d` | 2026-04-15 | feat: add Android Share API integration for bulk sharing |
 | `a40722d` | 2026-04-15 | chore: migrate runtime baseline to node 24 |
 | `b28eb0b` | 2026-04-15 | fix: restore mock media thumbnails and implement grid-columns cycling |
 | `792dd0b` | 2026-04-15 | feat: add forward to Telegram chat functionality |

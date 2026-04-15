@@ -177,3 +177,22 @@ export interface ShareQueueState {
   totalItems: number
   completedItems: number
 }
+
+export type CopyQueueItemStatus = 'queued' | 'copying' | 'complete' | 'error' | 'cancelled'
+
+export interface CopyQueueItem {
+  id: string
+  mediaItemId: string
+  fileName: string
+  progress: number
+  status: CopyQueueItemStatus
+  error: string | null
+}
+
+export interface CopyQueueState {
+  active: boolean
+  currentIndex: number
+  items: CopyQueueItem[]
+  totalItems: number
+  completedItems: number
+}

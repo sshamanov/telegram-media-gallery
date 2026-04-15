@@ -1,9 +1,9 @@
 import { get, writable } from 'svelte/store'
 import { debugLog } from '../lib/debug'
-import { classifyMediaType } from '../lib/media'
+import { classifyMediaType, isImageItem } from '../lib/media'
 import { getTelegramAdapter, type MessagePage } from '../lib/telegram/adapter'
 import { blobToFile, getCachedOrDownloadBlob } from '../lib/files'
-import type { Dialog, GalleryViewMode, MediaItem, Message, UploadMode, UploadQueueItem, UploadQueueState, UploadState, DownloadQueueState, DownloadQueueItem, ForwardQueueState, ForwardQueueItem, ShareQueueState, ShareQueueItem } from '../types/telegram'
+import type { Dialog, GalleryViewMode, MediaItem, Message, UploadMode, UploadQueueItem, UploadQueueState, UploadState, DownloadQueueState, DownloadQueueItem, ForwardQueueState, ForwardQueueItem, ShareQueueState, ShareQueueItem, CopyQueueState, CopyQueueItem } from '../types/telegram'
 import { persisted } from './persisted'
 
 const PAGE_SIZE = 100
@@ -52,6 +52,14 @@ export const forwardQueueState = writable<ForwardQueueState>({
 })
 
 export const shareQueueState = writable<ShareQueueState>({
+  active: false,
+  currentIndex: -1,
+  items: [],
+  totalItems: 0,
+  completedItems: 0,
+})
+
+export const copyQueueState = writable<CopyQueueState>({
   active: false,
   currentIndex: -1,
   items: [],
@@ -805,6 +813,118 @@ export function cancelShares(): void {
             ...item,
             status: index >= current.currentIndex ? 'cancelled' : item.status,
             error: index >= current.currentIndex ? 'Share cancelled' : item.error,
+          }),
+  }))
+}
+
+function updateCopyQueueItem(itemId: string, updater: (item: CopyQueueItem) => CopyQueueItem): void {
+  copyQueueState.update((current) => ({
+    ...current,
+    items: current.items.map((item) => item.id === itemId ? updater(item) : item),
+  }))
+}
+
+async function processCopyQueue(mediaItems: MediaItem[]): Promise<void> {
+  for (let index = 0; index < get(copyQueueState).items.length; index += 1) {
+    const snapshot = get(copyQueueState)
+    const item = snapshot.items[index]
+
+    if (!item || item.status === 'cancelled' || item.status === 'complete') {
+      continue
+    }
+
+    copyQueueState.update((current) => ({ ...current, active: true, currentIndex: index }))
+    updateCopyQueueItem(item.id, (current) => ({ ...current, status: 'copying', progress: 0, error: null }))
+
+    const controller = new AbortController()
+    const mediaItem = mediaItems.find(mi => mi.id === item.mediaItemId)
+
+    if (!mediaItem) {
+      updateCopyQueueItem(item.id, (current) => ({
+        ...current,
+        status: 'error',
+        error: 'Media item not found',
+      }))
+      continue
+    }
+
+    try {
+      if (!isImageItem(mediaItem)) {
+        throw new Error('Only images can be copied to clipboard')
+      }
+
+      if (typeof navigator.clipboard?.write !== 'function' || typeof ClipboardItem === 'undefined') {
+        throw new Error('Clipboard API not supported')
+      }
+
+      const blob = await getCachedOrDownloadBlob(mediaItem, 'full', {
+        onProgress: (progress) => {
+          updateCopyQueueItem(item.id, (current) => ({ ...current, progress }))
+        },
+        abortSignal: controller.signal,
+      })
+
+      if (!blob) {
+        throw new Error('Failed to download media')
+      }
+
+      await navigator.clipboard.write([
+        new ClipboardItem({ [blob.type || 'image/png']: blob }),
+      ])
+
+      updateCopyQueueItem(item.id, (current) => ({ ...current, progress: 100, status: 'complete', error: null }))
+      copyQueueState.update((current) => ({ ...current, completedItems: current.completedItems + 1 }))
+    } catch (error) {
+      const isCancelled = controller.signal.aborted
+      updateCopyQueueItem(item.id, (current) => ({
+        ...current,
+        progress: isCancelled ? current.progress : 0,
+        status: isCancelled ? 'cancelled' : 'error',
+        error: isCancelled ? 'Copy cancelled' : error instanceof Error ? error.message : 'Copy failed',
+      }))
+    }
+  }
+
+  copyQueueState.update((current) => ({ ...current, active: false, currentIndex: -1 }))
+}
+
+export async function enqueueCopies(mediaItems: MediaItem[]): Promise<void> {
+  if (mediaItems.length === 0) {
+    return
+  }
+
+  const items: CopyQueueItem[] = mediaItems.map((item) => ({
+    id: crypto.randomUUID(),
+    mediaItemId: item.id,
+    fileName: item.filename,
+    progress: 0,
+    status: 'queued',
+    error: null,
+  }))
+
+  copyQueueState.set({
+    active: true,
+    currentIndex: 0,
+    items,
+    totalItems: items.length,
+    completedItems: 0,
+  })
+
+  await processCopyQueue(mediaItems)
+}
+
+export function cancelCopies(): void {
+  copyQueueState.update((current) => ({
+    ...current,
+    active: false,
+    currentIndex: -1,
+    items: current.items.map((item, index) =>
+      item.status === 'complete'
+        ? item
+        : {
+            ...item,
+            status: index >= current.currentIndex ? 'cancelled' : item.status,
+            error: index >= current.currentIndex ? 'Copy cancelled' : item.error,
           }),
   }))
 }
