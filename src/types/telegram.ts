@@ -136,3 +136,25 @@ export interface DownloadQueueState {
   totalItems: number
   completedItems: number
 }
+
+export type ForwardQueueItemStatus = 'queued' | 'forwarding' | 'complete' | 'error' | 'cancelled'
+
+export interface ForwardQueueItem {
+  id: string
+  mediaItemId: string
+  fileName: string
+  sourceDialogId: string
+  sourceMessageId: number
+  targetDialogId: string
+  progress: number
+  status: ForwardQueueItemStatus
+  error: string | null
+}
+
+export interface ForwardQueueState {
+  active: boolean
+  currentIndex: number
+  items: ForwardQueueItem[]
+  totalItems: number
+  completedItems: number
+}

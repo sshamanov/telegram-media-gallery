@@ -197,4 +197,68 @@ test.describe('Gallery View @short', () => {
     // Should show download status
     await expect(galleryPage.locator('.download-status')).toBeVisible();
   });
+
+  test('selection mode: forward button appears when items selected', async ({ galleryPage }) => {
+    const firstDialog = galleryPage.locator('[data-testid="dialog-item"]').first();
+    await firstDialog.click();
+
+    const firstMediaItem = galleryPage.locator('[data-testid="media-item"]').first();
+    await expect(firstMediaItem).toBeVisible({ timeout: 5000 });
+
+    // Enter selection mode with ctrl click
+    await galleryPage.keyboard.down('Control');
+    await firstMediaItem.click();
+    await galleryPage.keyboard.up('Control');
+
+    await expect(galleryPage.getByTestId('gallery-selection-header')).toBeVisible();
+    
+    // Forward button should be visible and enabled
+    const forwardButton = galleryPage.getByTestId('gallery-selection-forward');
+    await expect(forwardButton).toBeVisible();
+    await expect(forwardButton).toBeEnabled();
+  });
+
+  test('selection mode: forward button disabled when no items selected', async ({ galleryPage }) => {
+    const firstDialog = galleryPage.locator('[data-testid="dialog-item"]').first();
+    await firstDialog.click();
+
+    const firstMediaItem = galleryPage.locator('[data-testid="media-item"]').first();
+    await expect(firstMediaItem).toBeVisible({ timeout: 5000 });
+
+    // Enter selection mode with ctrl click
+    await galleryPage.keyboard.down('Control');
+    await firstMediaItem.click();
+    await galleryPage.keyboard.up('Control');
+
+    await expect(galleryPage.getByTestId('gallery-selection-header')).toBeVisible();
+    
+    // Click to deselect
+    await firstMediaItem.click();
+    
+    // Forward button should be disabled
+    const forwardButton = galleryPage.getByTestId('gallery-selection-forward');
+    await expect(forwardButton).toBeVisible();
+    await expect(forwardButton).toBeDisabled();
+  });
+
+  test('selection mode: forward opens dialog picker', async ({ galleryPage }) => {
+    const firstDialog = galleryPage.locator('[data-testid="dialog-item"]').first();
+    await firstDialog.click();
+
+    const firstMediaItem = galleryPage.locator('[data-testid="media-item"]').first();
+    await expect(firstMediaItem).toBeVisible({ timeout: 5000 });
+
+    // Enter selection mode with ctrl click
+    await galleryPage.keyboard.down('Control');
+    await firstMediaItem.click();
+    await galleryPage.keyboard.up('Control');
+
+    await expect(galleryPage.getByTestId('gallery-selection-header')).toBeVisible();
+    
+    // Click forward button
+    await galleryPage.getByTestId('gallery-selection-forward').click();
+    
+    // Dialog picker should appear
+    await expect(galleryPage.getByTestId('dialog-picker-search')).toBeVisible({ timeout: 5000 });
+  });
 });

@@ -42,7 +42,7 @@
 - `completed` Run validation (npm run check, short tests) and update status
 - `completed` Implement multi-select with long-press on mobile
 - `completed` Add bulk download (chained individual downloads)
-- `pending` Implement forward to Telegram chat functionality
+- `completed` Implement forward to Telegram chat functionality
 - `pending` Add Android Share API integration
 - `pending` Implement copy to clipboard (images only)
 - `pending` Enhance upload with progress panel and queue UX
@@ -64,6 +64,7 @@
 - 2026-04-15 12:12 +02:00 - Ran validation (type check and short tests) confirming Phase 1 features work correctly.
 - 2026-04-15 14:41 +02:00 - Completed Phase 2 selection mode implementation: added gallery store state, selection header, long-press mobile entry, ctrl/meta toggle, shift-range selection, and test coverage.
 - 2026-04-15 15:27 +02:00 - Completed Phase 2 bulk download implementation: added download queue state, download button to selection header, progress tracking UI, and test coverage.
+- 2026-04-15 18:15 +02:00 - Completed Phase 2 forward functionality: added forward queue state, forward button to selection header, dialog picker component, progress tracking UI, and test coverage.
 
 ## Current Blockers And Known Gaps
 
@@ -125,6 +126,7 @@
 ## Recent Commit Log
 | Commit | Date | Description |
 |--------|------|-------------|
+| `96de4d5` | 2026-04-15 | feat: add bulk download for selected media items |
 | `4afef34` | 2026-04-15 | feat: add gallery selection mode |
 | `7b33ceb` | 2026-04-15 | Document Phase 1 gallery features and update status ledger |
 | `48d3955` | 2026-04-15 | Prune long Playwright specs to executable-only coverage |
@@ -148,7 +150,8 @@
 
 ## Cross References
 - Active recovery plan: `.kilo/plans/1776176222439-sunny-river.md`
-- Active implementation plan: `.kilo/plans/1776274073000-bulk-download.md`
+- Active implementation plan: `.kilo/plans/1776281434000-forward-messages.md`
+- Previous implementation plan: `.kilo/plans/1776274073000-bulk-download.md`
 - Rewrite plan: `.kilo/plans/1775737553407-cosmic-engine.md`
 - Testing strategy: `TESTING_STRATEGY.md`
 - Architecture spec: `APPLICATION_SPEC.md`

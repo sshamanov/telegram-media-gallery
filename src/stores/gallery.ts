@@ -2,7 +2,7 @@ import { get, writable } from 'svelte/store'
 import { debugLog } from '../lib/debug'
 import { classifyMediaType } from '../lib/media'
 import { getTelegramAdapter, type MessagePage } from '../lib/telegram/adapter'
-import type { Dialog, GalleryViewMode, MediaItem, Message, UploadMode, UploadQueueItem, UploadQueueState, UploadState, DownloadQueueState, DownloadQueueItem } from '../types/telegram'
+import type { Dialog, GalleryViewMode, MediaItem, Message, UploadMode, UploadQueueItem, UploadQueueState, UploadState, DownloadQueueState, DownloadQueueItem, ForwardQueueState, ForwardQueueItem } from '../types/telegram'
 import { persisted } from './persisted'
 
 const PAGE_SIZE = 100
@@ -35,6 +35,14 @@ export const uploadQueueState = writable<UploadQueueState>({
 })
 
 export const downloadQueueState = writable<DownloadQueueState>({
+  active: false,
+  currentIndex: -1,
+  items: [],
+  totalItems: 0,
+  completedItems: 0,
+})
+
+export const forwardQueueState = writable<ForwardQueueState>({
   active: false,
   currentIndex: -1,
   items: [],
@@ -586,6 +594,90 @@ export function cancelDownloads(): void {
             ...item,
             status: index >= current.currentIndex ? 'cancelled' : item.status,
             error: index >= current.currentIndex ? 'Download cancelled' : item.error,
+          }),
+  }))
+}
+
+function updateForwardQueueItem(itemId: string, updater: (item: ForwardQueueItem) => ForwardQueueItem): void {
+  forwardQueueState.update((current) => ({
+    ...current,
+    items: current.items.map((item) => item.id === itemId ? updater(item) : item),
+  }))
+}
+
+async function processForwardQueue(): Promise<void> {
+  for (let index = 0; index < get(forwardQueueState).items.length; index += 1) {
+    const snapshot = get(forwardQueueState)
+    const item = snapshot.items[index]
+
+    if (!item || item.status === 'cancelled' || item.status === 'complete') {
+      continue
+    }
+
+    forwardQueueState.update((current) => ({ ...current, active: true, currentIndex: index }))
+    updateForwardQueueItem(item.id, (current) => ({ ...current, status: 'forwarding', progress: 0, error: null }))
+
+    const controller = new AbortController()
+
+    try {
+      await getTelegramAdapter().forwardMessages(item.targetDialogId, item.sourceDialogId, [item.sourceMessageId])
+
+      updateForwardQueueItem(item.id, (current) => ({ ...current, progress: 100, status: 'complete', error: null }))
+      forwardQueueState.update((current) => ({ ...current, completedItems: current.completedItems + 1 }))
+    } catch (error) {
+      const isCancelled = controller.signal.aborted
+      updateForwardQueueItem(item.id, (current) => ({
+        ...current,
+        progress: isCancelled ? current.progress : 0,
+        status: isCancelled ? 'cancelled' : 'error',
+        error: isCancelled ? 'Forward cancelled' : error instanceof Error ? error.message : 'Forward failed',
+      }))
+    }
+  }
+
+  forwardQueueState.update((current) => ({ ...current, active: false, currentIndex: -1 }))
+}
+
+export async function enqueueForwards(mediaItems: MediaItem[], targetDialogId: string): Promise<void> {
+  if (mediaItems.length === 0) {
+    return
+  }
+
+  const items: ForwardQueueItem[] = mediaItems.map((item) => ({
+    id: crypto.randomUUID(),
+    mediaItemId: item.id,
+    fileName: item.filename,
+    sourceDialogId: item.dialogId,
+    sourceMessageId: item.messageId,
+    targetDialogId,
+    progress: 0,
+    status: 'queued',
+    error: null,
+  }))
+
+  forwardQueueState.set({
+    active: true,
+    currentIndex: 0,
+    items,
+    totalItems: items.length,
+    completedItems: 0,
+  })
+
+  await processForwardQueue()
+}
+
+export function cancelForwards(): void {
+  forwardQueueState.update((current) => ({
+    ...current,
+    active: false,
+    currentIndex: -1,
+    items: current.items.map((item, index) =>
+      item.status === 'complete'
+        ? item
+        : {
+            ...item,
+            status: index >= current.currentIndex ? 'cancelled' : item.status,
+            error: index >= current.currentIndex ? 'Forward cancelled' : item.error,
           }),
   }))
 }

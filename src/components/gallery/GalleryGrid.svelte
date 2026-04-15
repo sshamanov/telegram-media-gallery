@@ -3,6 +3,7 @@
   import { galleryFilters, matchesFilter, mediaTypeToFilter } from '../../lib/media'
   import MediaItemCard from './MediaItem.svelte'
   import MediaListRow from './MediaListRow.svelte'
+  import DialogPicker from './DialogPicker.svelte'
   import { tooltip } from '../../lib/dom/tooltips'
   import { navigateToDialogList } from '../../lib/routing'
   import {
@@ -27,6 +28,9 @@
     downloadQueueState,
     enqueueDownloads,
     cancelDownloads,
+    forwardQueueState,
+    enqueueForwards,
+    cancelForwards,
   } from '../../stores/gallery'
   import { galleryIds, toggleGallery } from '../../stores/dialogs'
   import { settings } from '../../stores/settings'
@@ -38,6 +42,7 @@
   let fileInput: HTMLInputElement | null = null
   let pendingUploadMode: UploadModeType = 'media'
   let scroller: HTMLElement | null = null
+  let showDialogPicker = false
 
   $: hiddenFilters = $settings.defaultHiddenFilters ?? []
   $: counts = countFilters($mediaItems)
@@ -174,6 +179,23 @@
     await enqueueDownloads(selectedItems)
   }
 
+  function handleForward(): void {
+    if (selectedCount === 0) {
+      return
+    }
+
+    showDialogPicker = true
+  }
+
+  async function handleForwardToDialog(dialogId: string, _dialogTitle: string): Promise<void> {
+    if (selectedCount === 0) {
+      return
+    }
+
+    const selectedItems = visibleItems.filter((item) => $selectedMediaIds.has(item.id))
+    await enqueueForwards(selectedItems, dialogId)
+  }
+
   onMount(() => {
     scroller?.focus()
   })
@@ -218,39 +240,79 @@
           >
             Download
           </button>
+          <button
+            class="button secondary"
+            type="button"
+            on:click={() => handleForward()}
+            disabled={selectedCount === 0}
+            data-testid="gallery-selection-forward"
+          >
+            Forward
+          </button>
          </div>
        </header>
 
-       {#if $downloadQueueState.active}
-         <div class="panel download-panel" data-testid="gallery-download-panel">
-           <div class="download-progress">
-             <div class="download-status">
-               Downloading {$downloadQueueState.currentIndex + 1} of {$downloadQueueState.totalItems} items
-               {#if $downloadQueueState.currentIndex >= 0 && $downloadQueueState.items[$downloadQueueState.currentIndex]}
-                 - {$downloadQueueState.items[$downloadQueueState.currentIndex].fileName}
-               {/if}
-             </div>
-             <div class="progress-bar">
-               <div
-                 class="progress-fill"
-                 style="width: {$downloadQueueState.currentIndex >= 0 && $downloadQueueState.items[$downloadQueueState.currentIndex]
-                   ? $downloadQueueState.items[$downloadQueueState.currentIndex].progress + '%'
-                   : '0%'}"
-               ></div>
-             </div>
-             <div class="download-actions">
-               <button
-                 class="button ghost small"
-                 type="button"
-                 on:click={cancelDownloads}
-                 data-testid="gallery-download-cancel"
-               >
-                 Cancel
-               </button>
-             </div>
-           </div>
-         </div>
-       {/if}
+        {#if $downloadQueueState.active}
+          <div class="panel download-panel" data-testid="gallery-download-panel">
+            <div class="download-progress">
+              <div class="download-status">
+                Downloading {$downloadQueueState.currentIndex + 1} of {$downloadQueueState.totalItems} items
+                {#if $downloadQueueState.currentIndex >= 0 && $downloadQueueState.items[$downloadQueueState.currentIndex]}
+                  - {$downloadQueueState.items[$downloadQueueState.currentIndex].fileName}
+                {/if}
+              </div>
+              <div class="progress-bar">
+                <div
+                  class="progress-fill"
+                  style="width: {$downloadQueueState.currentIndex >= 0 && $downloadQueueState.items[$downloadQueueState.currentIndex]
+                    ? $downloadQueueState.items[$downloadQueueState.currentIndex].progress + '%'
+                    : '0%'}"
+                ></div>
+              </div>
+              <div class="download-actions">
+                <button
+                  class="button ghost small"
+                  type="button"
+                  on:click={cancelDownloads}
+                  data-testid="gallery-download-cancel"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        {/if}
+
+        {#if $forwardQueueState.active}
+          <div class="panel download-panel" data-testid="gallery-forward-panel">
+            <div class="download-progress">
+              <div class="download-status">
+                Forwarding {$forwardQueueState.currentIndex + 1} of {$forwardQueueState.totalItems} items
+                {#if $forwardQueueState.currentIndex >= 0 && $forwardQueueState.items[$forwardQueueState.currentIndex]}
+                  - {$forwardQueueState.items[$forwardQueueState.currentIndex].fileName}
+                {/if}
+              </div>
+              <div class="progress-bar">
+                <div
+                  class="progress-fill"
+                  style="width: {$forwardQueueState.currentIndex >= 0 && $forwardQueueState.items[$forwardQueueState.currentIndex]
+                    ? $forwardQueueState.items[$forwardQueueState.currentIndex].progress + '%'
+                    : '0%'}"
+                ></div>
+              </div>
+              <div class="download-actions">
+                <button
+                  class="button ghost small"
+                  type="button"
+                  on:click={cancelForwards}
+                  data-testid="gallery-forward-cancel"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        {/if}
      {:else}
       <header class="panel gallery-header">
         <button class="button ghost" type="button" on:click={back} data-testid="gallery-back-button">← Back</button>
@@ -377,6 +439,12 @@
     {/if}
 
     <div class="pull-refresh-note muted">Pull-to-refresh is temporarily disabled during gallery recovery.</div>
+
+    <DialogPicker
+      open={showDialogPicker}
+      onClose={() => showDialogPicker = false}
+      onForward={handleForwardToDialog}
+    />
   </section>
 {/if}
 
