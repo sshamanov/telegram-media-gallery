@@ -2,7 +2,8 @@ import { get, writable } from 'svelte/store'
 import { debugLog } from '../lib/debug'
 import { classifyMediaType } from '../lib/media'
 import { getTelegramAdapter, type MessagePage } from '../lib/telegram/adapter'
-import type { Dialog, GalleryViewMode, MediaItem, Message, UploadMode, UploadQueueItem, UploadQueueState, UploadState, DownloadQueueState, DownloadQueueItem, ForwardQueueState, ForwardQueueItem } from '../types/telegram'
+import { blobToFile, getCachedOrDownloadBlob } from '../lib/files'
+import type { Dialog, GalleryViewMode, MediaItem, Message, UploadMode, UploadQueueItem, UploadQueueState, UploadState, DownloadQueueState, DownloadQueueItem, ForwardQueueState, ForwardQueueItem, ShareQueueState, ShareQueueItem } from '../types/telegram'
 import { persisted } from './persisted'
 
 const PAGE_SIZE = 100
@@ -43,6 +44,14 @@ export const downloadQueueState = writable<DownloadQueueState>({
 })
 
 export const forwardQueueState = writable<ForwardQueueState>({
+  active: false,
+  currentIndex: -1,
+  items: [],
+  totalItems: 0,
+  completedItems: 0,
+})
+
+export const shareQueueState = writable<ShareQueueState>({
   active: false,
   currentIndex: -1,
   items: [],
@@ -678,6 +687,124 @@ export function cancelForwards(): void {
             ...item,
             status: index >= current.currentIndex ? 'cancelled' : item.status,
             error: index >= current.currentIndex ? 'Forward cancelled' : item.error,
+          }),
+  }))
+}
+
+function updateShareQueueItem(itemId: string, updater: (item: ShareQueueItem) => ShareQueueItem): void {
+  shareQueueState.update((current) => ({
+    ...current,
+    items: current.items.map((item) => item.id === itemId ? updater(item) : item),
+  }))
+}
+
+async function processShareQueue(mediaItems: MediaItem[]): Promise<void> {
+  const shareLimitBytes = 200 * 1024 * 1024
+
+  for (let index = 0; index < get(shareQueueState).items.length; index += 1) {
+    const snapshot = get(shareQueueState)
+    const item = snapshot.items[index]
+
+    if (!item || item.status === 'cancelled' || item.status === 'complete') {
+      continue
+    }
+
+    shareQueueState.update((current) => ({ ...current, active: true, currentIndex: index }))
+    updateShareQueueItem(item.id, (current) => ({ ...current, status: 'sharing', progress: 0, error: null }))
+
+    const controller = new AbortController()
+    const mediaItem = mediaItems.find(mi => mi.id === item.mediaItemId)
+
+    if (!mediaItem) {
+      updateShareQueueItem(item.id, (current) => ({
+        ...current,
+        status: 'error',
+        error: 'Media item not found',
+      }))
+      continue
+    }
+
+    try {
+      if (mediaItem.size > shareLimitBytes) {
+        throw new Error(`File too large for sharing (${Math.round(mediaItem.size / 1024 / 1024)}MB > 200MB limit)`)
+      }
+
+      if (typeof navigator.share !== 'function' || typeof navigator.canShare !== 'function') {
+        throw new Error('Web Share API not supported')
+      }
+
+      const blob = await getCachedOrDownloadBlob(mediaItem, 'full', {
+        onProgress: (progress) => {
+          updateShareQueueItem(item.id, (current) => ({ ...current, progress }))
+        },
+        abortSignal: controller.signal,
+      })
+
+      if (!blob) {
+        throw new Error('Failed to download media')
+      }
+
+      const file = blobToFile(blob, mediaItem.filename)
+
+      if (!navigator.canShare({ files: [file] })) {
+        throw new Error('Cannot share this file type')
+      }
+
+      await navigator.share({ files: [file], title: mediaItem.filename })
+
+      updateShareQueueItem(item.id, (current) => ({ ...current, progress: 100, status: 'complete', error: null }))
+      shareQueueState.update((current) => ({ ...current, completedItems: current.completedItems + 1 }))
+    } catch (error) {
+      const isCancelled = controller.signal.aborted
+      updateShareQueueItem(item.id, (current) => ({
+        ...current,
+        progress: isCancelled ? current.progress : 0,
+        status: isCancelled ? 'cancelled' : 'error',
+        error: isCancelled ? 'Share cancelled' : error instanceof Error ? error.message : 'Share failed',
+      }))
+    }
+  }
+
+  shareQueueState.update((current) => ({ ...current, active: false, currentIndex: -1 }))
+}
+
+export async function enqueueShares(mediaItems: MediaItem[]): Promise<void> {
+  if (mediaItems.length === 0) {
+    return
+  }
+
+  const items: ShareQueueItem[] = mediaItems.map((item) => ({
+    id: crypto.randomUUID(),
+    mediaItemId: item.id,
+    fileName: item.filename,
+    progress: 0,
+    status: 'queued',
+    error: null,
+  }))
+
+  shareQueueState.set({
+    active: true,
+    currentIndex: 0,
+    items,
+    totalItems: items.length,
+    completedItems: 0,
+  })
+
+  await processShareQueue(mediaItems)
+}
+
+export function cancelShares(): void {
+  shareQueueState.update((current) => ({
+    ...current,
+    active: false,
+    currentIndex: -1,
+    items: current.items.map((item, index) =>
+      item.status === 'complete'
+        ? item
+        : {
+            ...item,
+            status: index >= current.currentIndex ? 'cancelled' : item.status,
+            error: index >= current.currentIndex ? 'Share cancelled' : item.error,
           }),
   }))
 }

@@ -1,5 +1,5 @@
 import { TelegramClient, type Chat, type Message as MtcuteMessage, type Photo, type Video, type Document, type Audio, type Voice } from '@mtcute/web'
-import { debugLog } from '../debug'
+import { debugLog, debugWarn } from '../debug'
 import type { Dialog, Message, TgMedia, UploadMode } from '../../types/telegram'
 import type { MessagePage, TelegramAdapter } from './adapter'
 import { getTelegramApiCredentials } from './adapter'
@@ -113,6 +113,12 @@ class MtcuteTelegramAdapter implements TelegramAdapter {
   private createClient(): TelegramClient {
     const { apiId, apiHash } = getTelegramApiCredentials()
 
+    debugLog('mtcute:createClient', {
+      hasApiId: Boolean(apiId),
+      hasApiHash: Boolean(apiHash),
+      hasExistingClient: Boolean(this.client),
+    })
+
     if (!apiId || !apiHash) {
       throw new Error('API ID and API Hash are required')
     }
@@ -193,8 +199,18 @@ class MtcuteTelegramAdapter implements TelegramAdapter {
     const client = this.getClient()
     localStorage.setItem('phone', _phone)
 
+    debugLog('mtcute:sendCode:start', {
+      phone: _phone,
+      hasClient: Boolean(client),
+    })
+
     const result = await client.sendCode({ phone: _phone })
+    debugLog('mtcute:sendCode:result', {
+      keys: Object.keys(result),
+      hasPhoneCodeHash: 'phoneCodeHash' in result,
+    })
     if (!('phoneCodeHash' in result)) {
+      debugWarn('mtcute:sendCode missing phoneCodeHash, exporting session instead')
       await this.exportSession()
       return { phoneCodeHash: '' }
     }
@@ -205,6 +221,12 @@ class MtcuteTelegramAdapter implements TelegramAdapter {
   async signIn(phone: string, code: string, hash: string): Promise<'ok' | '2fa_required'> {
     const client = this.getClient()
 
+    debugLog('mtcute:signIn:start', {
+      phone,
+      codeLength: code.length,
+      hasHash: Boolean(hash),
+    })
+
     try {
       await client.signIn({
         phone,
@@ -212,9 +234,15 @@ class MtcuteTelegramAdapter implements TelegramAdapter {
         phoneCodeHash: hash,
       })
       await this.exportSession()
+      debugLog('mtcute:signIn:success', { phone })
       return 'ok'
     } catch (error) {
+      debugWarn('mtcute:signIn:error', {
+        phone,
+        message: errorMessage(error),
+      })
       if (isPasswordRequired(error)) {
+        debugLog('mtcute:signIn:passwordRequired', { phone })
         return '2fa_required'
       }
 
@@ -224,8 +252,12 @@ class MtcuteTelegramAdapter implements TelegramAdapter {
 
   async signIn2FA(password: string): Promise<void> {
     const client = this.getClient()
+    debugLog('mtcute:signIn2FA:start', {
+      passwordLength: password.length,
+    })
     await client.checkPassword(password)
     await this.exportSession()
+    debugLog('mtcute:signIn2FA:success')
   }
 
   async *startQRLogin(onPasswordRequired: () => Promise<string>): AsyncIterable<{ token: string; expires: number }> {
@@ -238,21 +270,32 @@ class MtcuteTelegramAdapter implements TelegramAdapter {
     this.qrAbortController?.abort()
     this.qrAbortController = new AbortController()
 
+    debugLog('mtcute:qr:start')
+
     void client.signInQr({
       abortSignal: this.qrAbortController.signal,
       onUrlUpdated: (url, expires) => {
+        debugLog('mtcute:qr:urlUpdated', {
+          expiresAt: expires.getTime(),
+          tokenPreview: url.slice(0, 32),
+        })
         events.push({ token: url, expires: expires.getTime() })
         notify?.()
       },
       password: onPasswordRequired,
     }).then(async () => {
       await this.exportSession()
+      debugLog('mtcute:qr:success')
       finished = true
       notify?.()
     }).catch((error) => {
       if (this.qrAbortController?.signal.aborted) {
+        debugLog('mtcute:qr:aborted')
         finished = true
       } else {
+        debugWarn('mtcute:qr:error', {
+          message: errorMessage(error),
+        })
         thrown = error
       }
       notify?.()

@@ -50,11 +50,11 @@
 - `completed` Add bulk download (chained individual downloads)
 - `completed` Implement forward to Telegram chat functionality
 - `completed` Fix mock media and grid controls (plan: `.kilo/plans/1776256839612-quiet-orchid.md`)
-- `in_progress` Investigate real Telegram auth failure for phone code and QR 2FA flows
+- `completed` Investigate real Telegram auth failure for phone code and QR 2FA flows
 - `completed` Separate manual compose workflow from agent Playwright/mock compose workflow
 - `completed` Migrate runtime baseline to Node 24 (plan: `.kilo/plans/1776281608527-nimble-canyon.md`)
-- `pending` Add Android Share API integration
-- `pending` Implement copy to clipboard (images only)
+- `completed` Add Android Share API integration
+- `in_progress` Implement copy to clipboard (images only)
 - `pending` Enhance upload with progress panel and queue UX
 
 ## Plan And Todo History

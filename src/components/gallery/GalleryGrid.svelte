@@ -31,6 +31,9 @@
     forwardQueueState,
     enqueueForwards,
     cancelForwards,
+    shareQueueState,
+    enqueueShares,
+    cancelShares,
   } from '../../stores/gallery'
   import { galleryIds, toggleGallery } from '../../stores/dialogs'
   import { settings, updateSettings } from '../../stores/settings'
@@ -202,6 +205,15 @@
     await enqueueForwards(selectedItems, dialogId)
   }
 
+  async function handleShare(): Promise<void> {
+    if (selectedCount === 0) {
+      return
+    }
+
+    const selectedItems = visibleItems.filter((item) => $selectedMediaIds.has(item.id))
+    await enqueueShares(selectedItems)
+  }
+
   onMount(() => {
     scroller?.focus()
   })
@@ -254,6 +266,15 @@
             data-testid="gallery-selection-forward"
           >
             Forward
+          </button>
+          <button
+            class="button secondary"
+            type="button"
+            on:click={() => handleShare()}
+            disabled={selectedCount === 0 || typeof navigator.share !== 'function' || typeof navigator.canShare !== 'function'}
+            data-testid="gallery-selection-share"
+          >
+            Share
           </button>
          </div>
        </header>
@@ -318,7 +339,38 @@
               </div>
             </div>
           </div>
-        {/if}
+         {/if}
+
+         {#if $shareQueueState.active}
+           <div class="panel download-panel" data-testid="gallery-share-panel">
+             <div class="download-progress">
+               <div class="download-status">
+                 Sharing {$shareQueueState.currentIndex + 1} of {$shareQueueState.totalItems} items
+                 {#if $shareQueueState.currentIndex >= 0 && $shareQueueState.items[$shareQueueState.currentIndex]}
+                   - {$shareQueueState.items[$shareQueueState.currentIndex].fileName}
+                 {/if}
+               </div>
+               <div class="progress-bar">
+                 <div
+                   class="progress-fill"
+                   style="width: {$shareQueueState.currentIndex >= 0 && $shareQueueState.items[$shareQueueState.currentIndex]
+                     ? $shareQueueState.items[$shareQueueState.currentIndex].progress + '%'
+                     : '0%'}"
+                 ></div>
+               </div>
+               <div class="download-actions">
+                 <button
+                   class="button ghost small"
+                   type="button"
+                   on:click={cancelShares}
+                   data-testid="gallery-share-cancel"
+                 >
+                   Cancel
+                 </button>
+               </div>
+             </div>
+           </div>
+         {/if}
      {:else}
       <header class="panel gallery-header">
         <button class="button ghost" type="button" on:click={back} data-testid="gallery-back-button">← Back</button>

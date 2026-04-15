@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onDestroy, onMount } from 'svelte'
   import QRCode from 'qrcode'
+  import { debugLog, debugWarn } from '../../lib/debug'
   import { setTelegramApiCredentials } from '../../lib/telegram/adapter'
   import { authState, authStatus, session, getCurrentAdapter } from '../../stores/telegram'
 
@@ -28,6 +29,7 @@
   /** Called by mtcute when 2FA is required after the QR scan is confirmed. */
   function requestPassword(): Promise<string> {
     needs2FA = true
+    debugLog('auth:qr:passwordRequested')
     authStatus.set('2FA password required. Enter it below and click Submit.')
     return new Promise<string>((resolve) => {
       passwordResolver = resolve
@@ -36,6 +38,9 @@
 
   function submit2FA(): void {
     if (passwordResolver && password2FA.trim()) {
+      debugLog('auth:qr:submit2FA', {
+        passwordLength: password2FA.trim().length,
+      })
       const resolver = passwordResolver
       passwordResolver = null
       needs2FA = false
@@ -53,6 +58,10 @@
     }
 
     setTelegramApiCredentials(apiId, apiHash)
+    debugLog('auth:qr:start', {
+      hasApiId: Boolean(apiId.trim()),
+      hasApiHash: Boolean(apiHash.trim()),
+    })
     needs2FA = false
     password2FA = ''
     passwordResolver = null
@@ -86,6 +95,7 @@
         authStatus.set('QR login did not complete. Press Refresh.')
       }
     } catch (error) {
+      debugWarn('auth:qr:error', error)
       authStatus.set(error instanceof Error ? error.message : 'QR login is unavailable')
     } finally {
       running = false

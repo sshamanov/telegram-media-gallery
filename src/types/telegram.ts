@@ -158,3 +158,22 @@ export interface ForwardQueueState {
   totalItems: number
   completedItems: number
 }
+
+export type ShareQueueItemStatus = 'queued' | 'sharing' | 'complete' | 'error' | 'cancelled'
+
+export interface ShareQueueItem {
+  id: string
+  mediaItemId: string
+  fileName: string
+  progress: number
+  status: ShareQueueItemStatus
+  error: string | null
+}
+
+export interface ShareQueueState {
+  active: boolean
+  currentIndex: number
+  items: ShareQueueItem[]
+  totalItems: number
+  completedItems: number
+}

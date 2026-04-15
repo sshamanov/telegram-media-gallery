@@ -1,5 +1,6 @@
 <script lang="ts">
   import { setTelegramApiCredentials } from '../../lib/telegram/adapter'
+  import { debugLog, debugWarn } from '../../lib/debug'
   import { authState, authStatus, phone, phoneCodeHash, session, getCurrentAdapter } from '../../stores/telegram'
   import { pushToast } from '../../stores/ui'
 
@@ -26,6 +27,11 @@
 
     try {
       setTelegramApiCredentials(apiId, apiHash)
+      debugLog('auth:phone:sendCode', {
+        phone: value,
+        hasApiId: Boolean(apiId.trim()),
+        hasApiHash: Boolean(apiHash.trim()),
+      })
       const result = await getCurrentAdapter().sendCode(value)
       phoneCodeHash.set(result.phoneCodeHash)
       localStorage.setItem('phone', value)
@@ -34,6 +40,7 @@
       authStatus.set('Code sent. Check Telegram.')
       authState.set('idle')
     } catch (error) {
+      debugWarn('auth:phone:sendCode:error', error)
       authStatus.set(error instanceof Error ? error.message : 'Failed to send code')
       authState.set('error')
     }
@@ -50,6 +57,11 @@
     authStatus.set('Verifying code...')
 
     try {
+      debugLog('auth:phone:submitCode', {
+        phone: $phone,
+        codeLength: code.length,
+        hasHash: Boolean(hash),
+      })
       const result = await getCurrentAdapter().signIn($phone, code, hash)
       if (result === '2fa_required') {
         step = 'password'
@@ -65,6 +77,7 @@
       authStatus.set('Connected')
       authState.set('connected')
     } catch (error) {
+      debugWarn('auth:phone:submitCode:error', error)
       authStatus.set(error instanceof Error ? error.message : 'Failed to verify code')
       authState.set('error')
     }
@@ -75,6 +88,9 @@
     authStatus.set('Checking password...')
 
     try {
+      debugLog('auth:phone:submitPassword', {
+        passwordLength: password.length,
+      })
       await getCurrentAdapter().signIn2FA(password)
       const nextSession = getCurrentAdapter().getSession()
       localStorage.setItem('session', nextSession ?? '')
@@ -82,6 +98,7 @@
       authStatus.set('Connected')
       authState.set('connected')
     } catch (error) {
+      debugWarn('auth:phone:submitPassword:error', error)
       authStatus.set(error instanceof Error ? error.message : 'Failed to verify password')
       authState.set('error')
     }
