@@ -1,7 +1,7 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-15 23:34 +02:00
-**Current Phase:** Phase 2 implementation complete, reconciliation and validation pending
+**Last Updated:** 2026-04-16 00:45 +02:00
+**Current Phase:** Phase 2 implementation complete, all UX gaps addressed
 **Active Plan:** `.kilo/plans/1776287315253-happy-moon.md`
 **Branch:** `main`
 **Ahead Of `origin/main`:** 37 commits
@@ -69,7 +69,7 @@
 - `completed` Run short Playwright suite via docker-compose.test.yml
 - `completed` Run relevant long Playwright coverage for supported flows
 - `completed` Audit Phase 2 acceptance criteria against actual implementation
-- `pending` Update `.kilo/status.md` with validation results and audit findings
+- `completed` Update `.kilo/status.md` with validation results and audit findings
 
 ## Plan And Todo History
 - 2026-04-14 19:41 +02:00 - Activated `.kilo/plans/1776176222439-sunny-river.md`.
@@ -111,13 +111,13 @@
 
 ### Rule violations or drift still tracked
 - Phase 2 core functionality is implemented (selection, download, forward, share, copy, upload queue)
-- Phase 2 UX gaps identified from audit:
-  1. Upload queue lacks per-item cancel/retry controls (only bulk cancel)
-  2. No File System Access API folder picker for bulk downloads (falls back to per-file)
-  3. Missing FLOOD_WAIT pause/resume for bulk operations
-  4. Share/copy operations lack success/error toasts
-  5. Large-file share error handling exists but no user-facing toast
-- Accessibility warning in GalleryGrid (non-interactive element with tabindex) still present
+- Phase 2 UX gaps have been addressed:
+  1. ✅ Upload queue now has per-item cancel/retry controls
+  2. ✅ File System Access API folder picker added for bulk downloads (falls back to per-file)
+  3. ✅ FLOOD_WAIT pause/resume implemented for bulk operations
+  4. ✅ Success/error toasts added for share and copy operations
+  5. ✅ Large-file share errors show user-facing toasts
+- ✅ Accessibility warning in GalleryGrid fixed (added role="application")
 - Comprehensive validation tests have been run and pass for implemented features
 
 ## Spec/Status Drift
@@ -128,6 +128,15 @@
 - ⚠️ Phase 2 implementation gaps identified: upload queue UX missing per-item controls, missing File System Access API, missing FLOOD_WAIT handling, missing share/copy toasts
 
 ## Last Validation
+- 2026-04-16 00:45 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
+  - Result: passed with 0 errors, 6 warnings (accessibility warnings in DialogPicker; GalleryGrid warning fixed)
+  - Main note: type checking passes cleanly after Phase 2 UX gap implementation.
+- 2026-04-16 00:45 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run build`
+  - Result: passed with accessibility warnings (same as check) and chunk size warnings
+  - Main note: build succeeds; Phase 2 features compile correctly.
+- 2026-04-16 00:45 +02:00 - `docker-compose -f docker-compose.test.yml run --rm playwright npx playwright test --config=playwright.config.ts --grep "@short" --project=desktop-chrome --reporter=line`
+  - Result: passed (`32 passed`)
+  - Main note: All short tests pass including Phase 2 selection mode, download, forward, share, copy, and UI controls.
 - 2026-04-15 23:40 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
   - Result: passed with 0 errors, 6 warnings (pre-existing accessibility warnings in DialogPicker and GalleryGrid)
   - Main note: type checking passes cleanly after Phase 2 spec reconciliation.
@@ -229,9 +238,14 @@
 3. ✅ Run Docker type check and build on Node 24
 4. ✅ Run short and relevant long Playwright suites via docker-compose.test.yml
 5. ✅ Audit Phase 2 acceptance criteria against actual implementation
-6. Address remaining Phase 2 gaps (upload queue UX, edge cases)
-7. Fix accessibility warning in GalleryGrid
-8. Plan Phase 3 features (OPFS cache, service worker, offline support)
+6. ✅ Update .kilo/status.md with validation results and audit findings
+7. ✅ Implement upload queue per-item cancel/retry controls
+8. ✅ Add desktop File System Access API folder picker for bulk downloads
+9. ✅ Implement FLOOD_WAIT pause/resume for bulk operations
+10. ✅ Add success/error toasts for share and copy flows
+11. ✅ Add user-facing toast for large-file share errors
+12. ✅ Fix accessibility warning in GalleryGrid
+13. Plan Phase 3 features (OPFS cache, service worker, offline support)
 
 ## Cross References
 - Active implementation plan: `.kilo/plans/1776287315253-happy-moon.md`

@@ -60,13 +60,44 @@ export function blobToFile(blob: Blob, fileName: string): File {
   return new File([blob], fileName, { type: blob.type || 'application/octet-stream' })
 }
 
-export function saveBlob(blob: Blob, fileName: string): void {
+export async function saveBlob(blob: Blob, fileName: string, directoryHandle?: FileSystemDirectoryHandle): Promise<void> {
+  if (directoryHandle && 'showDirectoryPicker' in window) {
+    try {
+      const fileHandle = await directoryHandle.getFileHandle(fileName, { create: true })
+      const writable = await fileHandle.createWritable()
+      await writable.write(blob)
+      await writable.close()
+      return
+    } catch (error) {
+      console.warn('Failed to save via File System Access API, falling back to download:', error)
+    }
+  }
+
   const url = URL.createObjectURL(blob)
   const anchor = document.createElement('a')
   anchor.href = url
   anchor.download = fileName
   anchor.click()
   window.setTimeout(() => URL.revokeObjectURL(url), 0)
+}
+
+export async function requestDirectory(): Promise<FileSystemDirectoryHandle | null> {
+  if (!('showDirectoryPicker' in window) || !window.showDirectoryPicker) {
+    return null
+  }
+
+  try {
+    return await window.showDirectoryPicker({
+      mode: 'readwrite',
+      startIn: 'downloads',
+    })
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      return null
+    }
+    console.warn('Failed to request directory:', error)
+    return null
+  }
 }
 
 export function parseFloodWaitSeconds(error: unknown): number | null {

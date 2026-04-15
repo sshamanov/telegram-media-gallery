@@ -99,7 +99,7 @@ export interface UploadState {
   mode: UploadMode
 }
 
-export type UploadQueueItemStatus = 'queued' | 'uploading' | 'complete' | 'error' | 'cancelled'
+export type UploadQueueItemStatus = 'queued' | 'uploading' | 'complete' | 'error' | 'cancelled' | 'paused'
 
 export interface UploadQueueItem {
   id: string
@@ -135,6 +135,7 @@ export interface DownloadQueueState {
   items: DownloadQueueItem[]
   totalItems: number
   completedItems: number
+  directoryHandle: FileSystemDirectoryHandle | null
 }
 
 export type ForwardQueueItemStatus = 'queued' | 'forwarding' | 'complete' | 'error' | 'cancelled'

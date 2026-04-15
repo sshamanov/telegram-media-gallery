@@ -2,7 +2,8 @@ import { get, writable } from 'svelte/store'
 import { debugLog } from '../lib/debug'
 import { classifyMediaType, isImageItem } from '../lib/media'
 import { getTelegramAdapter, type MessagePage } from '../lib/telegram/adapter'
-import { blobToFile, getCachedOrDownloadBlob } from '../lib/files'
+import { blobToFile, getCachedOrDownloadBlob, parseFloodWaitSeconds, sleep } from '../lib/files'
+import { pushToast } from './ui'
 import type { Dialog, GalleryViewMode, MediaItem, Message, UploadMode, UploadQueueItem, UploadQueueState, UploadState, DownloadQueueState, DownloadQueueItem, ForwardQueueState, ForwardQueueItem, ShareQueueState, ShareQueueItem, CopyQueueState, CopyQueueItem } from '../types/telegram'
 import { persisted } from './persisted'
 
@@ -41,6 +42,7 @@ export const downloadQueueState = writable<DownloadQueueState>({
   items: [],
   totalItems: 0,
   completedItems: 0,
+  directoryHandle: null,
 })
 
 export const forwardQueueState = writable<ForwardQueueState>({
@@ -347,18 +349,44 @@ async function uploadQueueItems(dialogId: string, mode: UploadMode, itemIds?: st
       setLegacyUploadState({ ...item, status: 'complete', progress: 100, error: null }, mode, false)
     } catch (error) {
       const isCancelled = controller.signal.aborted
-      updateQueueItem(item.id, (current) => ({
-        ...current,
-        progress: isCancelled ? current.progress : 0,
-        status: isCancelled ? 'cancelled' : 'error',
-        error: isCancelled ? 'Upload cancelled' : error instanceof Error ? error.message : 'Upload failed',
-      }))
-      setLegacyUploadState({
-        ...item,
-        progress: 0,
-        status: isCancelled ? 'cancelled' : 'error',
-        error: isCancelled ? 'Upload cancelled' : error instanceof Error ? error.message : 'Upload failed',
-      }, mode, false)
+      const floodWaitSeconds = parseFloodWaitSeconds(error)
+      
+      if (floodWaitSeconds && !isCancelled) {
+        // Pause the queue for FLOOD_WAIT
+        updateQueueItem(item.id, (current) => ({
+          ...current,
+          status: 'paused',
+          error: `Rate limited: wait ${floodWaitSeconds} seconds`,
+        }))
+        setLegacyUploadState({
+          ...item,
+          status: 'paused',
+          error: `Rate limited: wait ${floodWaitSeconds} seconds`,
+        }, mode, false)
+        
+        // Pause the entire queue
+        uploadQueueState.update((current) => ({ ...current, active: false, currentIndex: -1 }))
+        
+        // Wait for the flood wait period
+        await sleep(floodWaitSeconds * 1000)
+        
+        // Resume the queue
+        await uploadQueueItems(dialogId, mode, itemIds)
+        return
+      } else {
+        updateQueueItem(item.id, (current) => ({
+          ...current,
+          progress: isCancelled ? current.progress : 0,
+          status: isCancelled ? 'cancelled' : 'error',
+          error: isCancelled ? 'Upload cancelled' : error instanceof Error ? error.message : 'Upload failed',
+        }))
+        setLegacyUploadState({
+          ...item,
+          progress: 0,
+          status: isCancelled ? 'cancelled' : 'error',
+          error: isCancelled ? 'Upload cancelled' : error instanceof Error ? error.message : 'Upload failed',
+        }, mode, false)
+      }
     } finally {
       if (activeUploadAbortController === controller) {
         activeUploadAbortController = null
@@ -520,7 +548,10 @@ function updateDownloadQueueItem(itemId: string, updater: (item: DownloadQueueIt
 }
 
 async function processDownloadQueue(mediaItems: MediaItem[]): Promise<void> {
-  for (let index = 0; index < get(downloadQueueState).items.length; index += 1) {
+  const state = get(downloadQueueState)
+  const directoryHandle = state.directoryHandle
+
+  for (let index = 0; index < state.items.length; index += 1) {
     const snapshot = get(downloadQueueState)
     const item = snapshot.items[index]
 
@@ -557,7 +588,7 @@ async function processDownloadQueue(mediaItems: MediaItem[]): Promise<void> {
         throw new Error('Download failed: no blob returned')
       }
 
-      saveBlob(blob, item.fileName)
+      await saveBlob(blob, item.fileName, directoryHandle ?? undefined)
       updateDownloadQueueItem(item.id, (current) => ({ ...current, progress: 100, status: 'complete', error: null }))
       downloadQueueState.update((current) => ({ ...current, completedItems: current.completedItems + 1 }))
     } catch (error) {
@@ -574,7 +605,7 @@ async function processDownloadQueue(mediaItems: MediaItem[]): Promise<void> {
   downloadQueueState.update((current) => ({ ...current, active: false, currentIndex: -1 }))
 }
 
-export async function enqueueDownloads(mediaItems: MediaItem[]): Promise<void> {
+export async function enqueueDownloads(mediaItems: MediaItem[], directoryHandle?: FileSystemDirectoryHandle | null): Promise<void> {
   if (mediaItems.length === 0) {
     return
   }
@@ -594,6 +625,7 @@ export async function enqueueDownloads(mediaItems: MediaItem[]): Promise<void> {
     items,
     totalItems: items.length,
     completedItems: 0,
+    directoryHandle: directoryHandle ?? null,
   })
 
   await processDownloadQueue(mediaItems)
@@ -758,18 +790,36 @@ async function processShareQueue(mediaItems: MediaItem[]): Promise<void> {
         throw new Error('Cannot share this file type')
       }
 
-      await navigator.share({ files: [file], title: mediaItem.filename })
+       await navigator.share({ files: [file], title: mediaItem.filename })
 
       updateShareQueueItem(item.id, (current) => ({ ...current, progress: 100, status: 'complete', error: null }))
       shareQueueState.update((current) => ({ ...current, completedItems: current.completedItems + 1 }))
-    } catch (error) {
+      
+      // Show success toast for individual share
+      pushToast({
+        kind: 'success',
+        text: `Shared "${mediaItem.filename}"`,
+        dismissible: true,
+      })
+     } catch (error) {
       const isCancelled = controller.signal.aborted
+      const errorMessage = isCancelled ? 'Share cancelled' : error instanceof Error ? error.message : 'Share failed'
+      
       updateShareQueueItem(item.id, (current) => ({
         ...current,
         progress: isCancelled ? current.progress : 0,
         status: isCancelled ? 'cancelled' : 'error',
-        error: isCancelled ? 'Share cancelled' : error instanceof Error ? error.message : 'Share failed',
+        error: errorMessage,
       }))
+      
+      // Show error toast for failed share (unless cancelled by user)
+      if (!isCancelled) {
+        pushToast({
+          kind: 'error',
+          text: `Failed to share "${mediaItem.filename}": ${errorMessage}`,
+          dismissible: true,
+        })
+      }
     }
   }
 
@@ -868,20 +918,38 @@ async function processCopyQueue(mediaItems: MediaItem[]): Promise<void> {
         throw new Error('Failed to download media')
       }
 
-      await navigator.clipboard.write([
+       await navigator.clipboard.write([
         new ClipboardItem({ [blob.type || 'image/png']: blob }),
       ])
 
       updateCopyQueueItem(item.id, (current) => ({ ...current, progress: 100, status: 'complete', error: null }))
       copyQueueState.update((current) => ({ ...current, completedItems: current.completedItems + 1 }))
-    } catch (error) {
+      
+      // Show success toast for individual copy
+      pushToast({
+        kind: 'success',
+        text: `Copied "${mediaItem.filename}" to clipboard`,
+        dismissible: true,
+      })
+     } catch (error) {
       const isCancelled = controller.signal.aborted
+      const errorMessage = isCancelled ? 'Copy cancelled' : error instanceof Error ? error.message : 'Copy failed'
+      
       updateCopyQueueItem(item.id, (current) => ({
         ...current,
         progress: isCancelled ? current.progress : 0,
         status: isCancelled ? 'cancelled' : 'error',
-        error: isCancelled ? 'Copy cancelled' : error instanceof Error ? error.message : 'Copy failed',
+        error: errorMessage,
       }))
+      
+      // Show error toast for failed copy (unless cancelled by user)
+      if (!isCancelled) {
+        pushToast({
+          kind: 'error',
+          text: `Failed to copy "${mediaItem.filename}": ${errorMessage}`,
+          dismissible: true,
+        })
+      }
     }
   }
 

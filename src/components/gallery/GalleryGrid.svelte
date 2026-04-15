@@ -39,6 +39,8 @@
     cancelCopies,
     uploadQueueState,
     cancelUploadQueue,
+    cancelUploadQueueItem,
+    retryUploadQueueItem,
   } from '../../stores/gallery'
   import { galleryIds, toggleGallery } from '../../stores/dialogs'
   import { settings, updateSettings } from '../../stores/settings'
@@ -190,7 +192,23 @@
     }
 
     const selectedItems = visibleItems.filter((item) => $selectedMediaIds.has(item.id))
-    await enqueueDownloads(selectedItems)
+    let directoryHandle: FileSystemDirectoryHandle | null = null
+
+    // Try to use File System Access API on desktop
+    if ('showDirectoryPicker' in window && window.showDirectoryPicker) {
+      try {
+        directoryHandle = await window.showDirectoryPicker({
+          mode: 'readwrite',
+          startIn: 'downloads',
+        })
+      } catch (error) {
+        if (!(error instanceof DOMException && error.name === 'AbortError')) {
+          console.warn('Failed to request directory, falling back to per-file downloads:', error)
+        }
+      }
+    }
+
+    await enqueueDownloads(selectedItems, directoryHandle)
   }
 
   function handleForward(): void {
@@ -238,6 +256,7 @@
       bind:this={scroller}
       class="gallery-shell"
       aria-label="Gallery"
+      role="application"
       tabindex="0"
       on:scroll={() => void handleScroll()}
       on:keydown={handleKeyDown}
@@ -426,36 +445,83 @@
             </div>
            {/if}
 
-           {#if $uploadQueueState.active}
-             <div class="panel download-panel" data-testid="gallery-upload-panel">
-               <div class="download-progress">
-                 <div class="download-status">
-                   Uploading {$uploadQueueState.currentIndex + 1} of {$uploadQueueState.items.length} items
-                   {#if $uploadQueueState.currentIndex >= 0 && $uploadQueueState.items[$uploadQueueState.currentIndex]}
-                     - {$uploadQueueState.items[$uploadQueueState.currentIndex].fileName}
-                   {/if}
-                 </div>
-                 <div class="progress-bar">
-                   <div
-                     class="progress-fill"
-                     style="width: {$uploadQueueState.currentIndex >= 0 && $uploadQueueState.items[$uploadQueueState.currentIndex]
-                       ? $uploadQueueState.items[$uploadQueueState.currentIndex].progress + '%'
-                       : '0%'}"
-                   ></div>
-                 </div>
-                 <div class="download-actions">
-                   <button
-                     class="button ghost small"
-                     type="button"
-                     on:click={cancelUploadQueue}
-                     data-testid="gallery-upload-cancel"
-                   >
-                     Cancel
-                   </button>
-                 </div>
-               </div>
-             </div>
-           {/if}
+            {#if $uploadQueueState.active}
+              <div class="panel download-panel" data-testid="gallery-upload-panel">
+                <div class="download-progress">
+                  <div class="download-status">
+                    Uploading {$uploadQueueState.currentIndex + 1} of {$uploadQueueState.items.length} items
+                    {#if $uploadQueueState.currentIndex >= 0 && $uploadQueueState.items[$uploadQueueState.currentIndex]}
+                      - {$uploadQueueState.items[$uploadQueueState.currentIndex].fileName}
+                    {/if}
+                  </div>
+                  <div class="progress-bar">
+                    <div
+                      class="progress-fill"
+                      style="width: {$uploadQueueState.currentIndex >= 0 && $uploadQueueState.items[$uploadQueueState.currentIndex]
+                        ? $uploadQueueState.items[$uploadQueueState.currentIndex].progress + '%'
+                        : '0%'}"
+                    ></div>
+                  </div>
+                  <div class="download-actions">
+                    <button
+                      class="button ghost small"
+                      type="button"
+                      on:click={cancelUploadQueue}
+                      data-testid="gallery-upload-cancel"
+                    >
+                      Cancel All
+                    </button>
+                  </div>
+                </div>
+                
+                {#if $uploadQueueState.items.length > 0}
+                  <div class="queue-items">
+                    {#each $uploadQueueState.items as item (item.id)}
+                      <div class="queue-item {item.status}">
+                        <div class="queue-item-info">
+                          <div class="queue-item-name">{item.fileName}</div>
+                          <div class="queue-item-status">
+                            {#if item.status === 'queued'}
+                              Queued
+                            {:else if item.status === 'uploading'}
+                              Uploading ({item.progress}%)
+                            {:else if item.status === 'complete'}
+                              Complete
+                            {:else if item.status === 'error'}
+                              Error: {item.error}
+                            {:else if item.status === 'cancelled'}
+                              Cancelled
+                            {/if}
+                          </div>
+                        </div>
+                        <div class="queue-item-actions">
+                          {#if item.status === 'error'}
+                            <button
+                              class="button ghost xsmall"
+                              type="button"
+                              on:click={() => retryUploadQueueItem(item.id)}
+                              data-testid="upload-item-retry"
+                            >
+                              Retry
+                            </button>
+                          {/if}
+                          {#if item.status === 'queued' || item.status === 'uploading'}
+                            <button
+                              class="button ghost xsmall"
+                              type="button"
+                              on:click={() => cancelUploadQueueItem(item.id)}
+                              data-testid="upload-item-cancel"
+                            >
+                              Cancel
+                            </button>
+                          {/if}
+                        </div>
+                      </div>
+                    {/each}
+                  </div>
+                {/if}
+              </div>
+            {/if}
       {:else}
       <header class="panel gallery-header">
         <button class="button ghost" type="button" on:click={back} data-testid="gallery-back-button">← Back</button>
@@ -678,6 +744,78 @@
   .button.small {
     padding: 6px 12px;
     font-size: 0.85rem;
+  }
+
+  .button.xsmall {
+    padding: 4px 8px;
+    font-size: 0.8rem;
+  }
+
+  .queue-items {
+    margin-top: 12px;
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+  }
+
+  .queue-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    margin-bottom: 6px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 6px;
+    border: 1px solid var(--border);
+  }
+
+  .queue-item.queued {
+    opacity: 0.8;
+  }
+
+  .queue-item.uploading {
+    border-color: rgba(0, 136, 204, 0.3);
+    background: rgba(0, 136, 204, 0.08);
+  }
+
+  .queue-item.complete {
+    border-color: rgba(0, 204, 68, 0.3);
+    background: rgba(0, 204, 68, 0.08);
+  }
+
+  .queue-item.error {
+    border-color: rgba(204, 68, 0, 0.3);
+    background: rgba(204, 68, 0, 0.08);
+  }
+
+  .queue-item.cancelled {
+    opacity: 0.6;
+    border-color: rgba(136, 136, 136, 0.3);
+    background: rgba(136, 136, 136, 0.08);
+  }
+
+  .queue-item-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .queue-item-name {
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 2px;
+  }
+
+  .queue-item-status {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+  }
+
+  .queue-item-actions {
+    display: flex;
+    gap: 8px;
+    margin-left: 12px;
   }
 
   .filter-bar {
