@@ -20,9 +20,10 @@
 - This ledger must stay stricter than historical claims and must not overstate completion.
 
 ## Active Plan
-- **Plan file:** `.kilo/plans/1776256839612-quiet-orchid.md`
+- **Plan file:** (completed) `.kilo/plans/1776256839612-quiet-orchid.md`
 - **Goal:** restore actual mock media thumbnails and viewer previews in galleries, groups, and chats; make grid-columns button functional; revalidate repaired mock-mode UX.
 - **Execution strategy:** fix mock data mismatch, harden file resolution, implement grid controls, add test coverage.
+- **Status:** completed with commit `b28eb0b`
 
 ## Current Todo States
 - `completed` Rewrite `.kilo/status.md` into structured execution ledger with active plan, todo states, blockers, validations, and commit log.
@@ -43,7 +44,7 @@
 - `completed` Implement multi-select with long-press on mobile
 - `completed` Add bulk download (chained individual downloads)
 - `completed` Implement forward to Telegram chat functionality
-- `in_progress` Fix mock media and grid controls (plan: `.kilo/plans/1776256839612-quiet-orchid.md`)
+- `completed` Fix mock media and grid controls (plan: `.kilo/plans/1776256839612-quiet-orchid.md`)
 - `pending` Add Android Share API integration
 - `pending` Implement copy to clipboard (images only)
 - `pending` Enhance upload with progress panel and queue UX
@@ -72,9 +73,10 @@
 ## Current Blockers And Known Gaps
 
 ### Product blockers
-- Phase 2 actions (forward, share, copy) are not yet implemented.
+- Phase 2 actions (share, copy) are not yet implemented (forward is complete).
 - Upload mode selector (Send as media vs Send as file) needs refinement for large files.
 - Code-rule cleanup for direct production `console.*` removal is now complete.
+- Mock media thumbnails and grid-columns button are now fixed.
 
 ### Process/documentation blockers
 - Validation for the latest markdown-only rewrite has been intentionally deferred because the user explicitly requested no code, Playwright, or test work in that block.
@@ -129,6 +131,7 @@
 ## Recent Commit Log
 | Commit | Date | Description |
 |--------|------|-------------|
+| `b28eb0b` | 2026-04-15 | fix: restore mock media thumbnails and implement grid-columns cycling |
 | `792dd0b` | 2026-04-15 | feat: add forward to Telegram chat functionality |
 | `96de4d5` | 2026-04-15 | feat: add bulk download for selected media items |
 | `4afef34` | 2026-04-15 | feat: add gallery selection mode |
