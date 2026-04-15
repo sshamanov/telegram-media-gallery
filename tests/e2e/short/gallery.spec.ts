@@ -261,4 +261,63 @@ test.describe('Gallery View @short', () => {
     // Dialog picker should appear
     await expect(galleryPage.getByTestId('dialog-picker-search')).toBeVisible({ timeout: 5000 });
   });
+
+  test('grid columns button cycles through values', async ({ galleryPage }) => {
+    const firstDialog = galleryPage.locator('[data-testid="dialog-item"]').first();
+    await firstDialog.click();
+
+    await expect(galleryPage.getByTestId('gallery-screen')).toBeVisible({ timeout: 10000 });
+    
+    const columnsButton = galleryPage.getByTestId('gallery-grid-columns-button');
+    await expect(columnsButton).toBeVisible();
+    
+    // Get initial value
+    const initialText = await columnsButton.textContent();
+    expect(initialText).toMatch(/^\d+x$/);
+    
+    // Click to cycle
+    await columnsButton.click();
+    
+    // Should have changed
+    const afterClickText = await columnsButton.textContent();
+    expect(afterClickText).toMatch(/^\d+x$/);
+    expect(afterClickText).not.toBe(initialText);
+    
+    // Grid should have updated columns
+    const grid = galleryPage.getByTestId('gallery-grid');
+    await expect(grid).toBeVisible();
+    
+    // Click a few more times to cycle through values
+    for (let i = 0; i < 3; i++) {
+      await columnsButton.click();
+    }
+    
+    // Should still be a valid columns value
+    const finalText = await columnsButton.textContent();
+    expect(finalText).toMatch(/^\d+x$/);
+  });
+
+  test('mock media thumbnails render actual images', async ({ galleryPage }) => {
+    const firstDialog = galleryPage.locator('[data-testid="dialog-item"]').first();
+    await firstDialog.click();
+
+    await expect(galleryPage.getByTestId('gallery-screen')).toBeVisible({ timeout: 10000 });
+    
+    // Wait for media items to load
+    const mediaItems = galleryPage.locator('[data-testid="media-item"]');
+    await expect(mediaItems.first()).toBeVisible({ timeout: 5000 });
+    
+    // Check that at least one media item has an actual image (not just icon placeholder)
+    // We look for img elements inside media items
+    const firstMediaItem = mediaItems.first();
+    const imgElement = firstMediaItem.locator('img');
+    
+    // The img should be visible and have a src
+    await expect(imgElement).toBeVisible({ timeout: 3000 });
+    const src = await imgElement.getAttribute('src');
+    expect(src).toBeTruthy();
+    
+    // The src should be a data URL or blob URL (not empty)
+    expect(src?.length).toBeGreaterThan(0);
+  });
 });

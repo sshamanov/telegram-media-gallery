@@ -1,7 +1,6 @@
 <script lang="ts">
   import { allDialogs } from '../../stores/dialogs'
   import { pushToast } from '../../stores/ui'
-  import { getTelegramAdapter } from '../../lib/telegram/adapter'
   import type { Dialog } from '../../types/telegram'
 
   export let open = false

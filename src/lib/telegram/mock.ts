@@ -121,7 +121,11 @@ async function loadFileFromSamples(fileName: string): Promise<Uint8Array> {
       throw new Error(`HTTP ${response.status} for ${fileName}`)
     }
     const buffer = await response.arrayBuffer()
-    return new Uint8Array(buffer)
+    const data = new Uint8Array(buffer)
+    if (data.length === 0) {
+      debugWarn(`Loaded empty file ${fileName}`)
+    }
+    return data
   } catch (error) {
     debugWarn(`Failed to load file ${fileName}:`, error)
     // Return empty data as fallback

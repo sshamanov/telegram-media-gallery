@@ -20,9 +20,9 @@
 - This ledger must stay stricter than historical claims and must not overstate completion.
 
 ## Active Plan
-- **Plan file:** `.kilo/plans/1776176222439-sunny-river.md`
-- **Goal:** restore process compliance first, then rebuild gallery/viewer baseline and restore executable test coverage.
-- **Execution strategy:** baseline then rebuild.
+- **Plan file:** `.kilo/plans/1776256839612-quiet-orchid.md`
+- **Goal:** restore actual mock media thumbnails and viewer previews in galleries, groups, and chats; make grid-columns button functional; revalidate repaired mock-mode UX.
+- **Execution strategy:** fix mock data mismatch, harden file resolution, implement grid controls, add test coverage.
 
 ## Current Todo States
 - `completed` Rewrite `.kilo/status.md` into structured execution ledger with active plan, todo states, blockers, validations, and commit log.
@@ -43,6 +43,7 @@
 - `completed` Implement multi-select with long-press on mobile
 - `completed` Add bulk download (chained individual downloads)
 - `completed` Implement forward to Telegram chat functionality
+- `in_progress` Fix mock media and grid controls (plan: `.kilo/plans/1776256839612-quiet-orchid.md`)
 - `pending` Add Android Share API integration
 - `pending` Implement copy to clipboard (images only)
 - `pending` Enhance upload with progress panel and queue UX
@@ -65,6 +66,8 @@
 - 2026-04-15 14:41 +02:00 - Completed Phase 2 selection mode implementation: added gallery store state, selection header, long-press mobile entry, ctrl/meta toggle, shift-range selection, and test coverage.
 - 2026-04-15 15:27 +02:00 - Completed Phase 2 bulk download implementation: added download queue state, download button to selection header, progress tracking UI, and test coverage.
 - 2026-04-15 18:15 +02:00 - Completed Phase 2 forward functionality: added forward queue state, forward button to selection header, dialog picker component, progress tracking UI, and test coverage.
+- 2026-04-15 21:33 +02:00 - Activated `.kilo/plans/1776256839612-quiet-orchid.md` to fix mock media mismatch and grid-columns button.
+- 2026-04-15 21:45 +02:00 - Completed mock media and grid controls fix: updated samples/dialogs.json to match dialog-media files, hardened mock file resolution, implemented grid-columns cycling button, added test coverage for both features.
 
 ## Current Blockers And Known Gaps
 
@@ -86,12 +89,12 @@
 - Product-level drift may still exist in code paths not rewritten in this documentation-only block; those are tracked as blockers rather than accepted support.
 
 ## Last Validation
-- 2026-04-15 21:15 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:20-alpine npm run check`
-  - Result: passed with 2 Svelte accessibility warnings (non-interactive element with tabindex, non-interactive element with mouse/keyboard listeners)
-  - Main note: type checking passes cleanly after forward implementation and test fixes.
-- 2026-04-15 21:15 +02:00 - `docker-compose run --rm playwright npx playwright test --config=playwright.config.ts --reporter=line`
-  - Result: passed (`86 passed`)
-  - Main note: All tests pass including short suite (30 tests), long suite (11 tests), smoke tests (2 tests), and mobile tests (43 tests). Forward functionality fully validated.
+- 2026-04-15 21:45 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:20-alpine npm run check`
+  - Result: passed with 0 errors, 6 warnings (accessibility warnings in DialogPicker and GalleryGrid)
+  - Main note: type checking passes cleanly after mock media fix and grid-columns implementation.
+- 2026-04-15 21:45 +02:00 - `docker-compose run --rm playwright npx playwright test --config=playwright.config.ts --grep "@short" --project=desktop-chrome --reporter=line`
+  - Result: passed (`32 passed`)
+  - Main note: All short tests pass including new tests for grid-columns button cycling and mock media thumbnails rendering actual images.
 - 2026-04-15 14:41 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:20-alpine npm run check`
   - Result: passed with 2 Svelte accessibility warnings (non-interactive element with tabindex, non-interactive element with mouse/keyboard listeners)
   - Main note: type checking passes cleanly after selection mode implementation.
@@ -148,8 +151,9 @@
 4. Consider addressing the accessibility warning (non-interactive element with tabindex in GalleryGrid).
 
 ## Cross References
-- Active recovery plan: `.kilo/plans/1776176222439-sunny-river.md`
-- Active implementation plan: `.kilo/plans/1776281434000-forward-messages.md`
+- Active implementation plan: `.kilo/plans/1776256839612-quiet-orchid.md`
+- Previous recovery plan: `.kilo/plans/1776176222439-sunny-river.md`
+- Previous implementation plan: `.kilo/plans/1776281434000-forward-messages.md`
 - Previous implementation plan: `.kilo/plans/1776274073000-bulk-download.md`
 - Rewrite plan: `.kilo/plans/1775737553407-cosmic-engine.md`
 - Testing strategy: `TESTING_STRATEGY.md`

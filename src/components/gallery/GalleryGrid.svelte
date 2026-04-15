@@ -33,7 +33,7 @@
     cancelForwards,
   } from '../../stores/gallery'
   import { galleryIds, toggleGallery } from '../../stores/dialogs'
-  import { settings } from '../../stores/settings'
+  import { settings, updateSettings } from '../../stores/settings'
   import { pushToast } from '../../stores/ui'
   import type { GalleryFilterId, MediaItem, UploadMode as UploadModeType } from '../../types/telegram'
 
@@ -127,6 +127,12 @@
 
   function toggleViewMode(): void {
     setGalleryViewMode($galleryViewMode === 'grid' ? 'list' : 'grid')
+  }
+
+  function cycleGridColumns(): void {
+    const current = $settings.gridColumns
+    const next = current >= 5 ? 2 : current + 1
+    updateSettings({ gridColumns: next })
   }
 
   function toggleUploadSheet(): void {
@@ -341,8 +347,10 @@
           <button
             class="button secondary"
             type="button"
+            on:click={cycleGridColumns}
             aria-label="Grid columns"
-            use:tooltip={{ text: 'Grid columns' }}
+            use:tooltip={{ text: 'Cycle grid columns (2–5)' }}
+            data-testid="gallery-grid-columns-button"
           >
             {$settings.gridColumns}x
           </button>
