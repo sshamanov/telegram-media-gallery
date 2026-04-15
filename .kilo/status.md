@@ -1,6 +1,6 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-15 11:11 +02:00
+**Last Updated:** 2026-04-15 12:09 +02:00
 **Current Phase:** Process truth recovery and gallery baseline rebuild
 **Active Plan:** `.kilo/plans/1776176222439-sunny-river.md`
 **Branch:** `main`
@@ -35,6 +35,11 @@
 - `completed` Prune or rewrite long Playwright specs to executable-only coverage.
 - `completed` Run required validation (`npm run check`, short tests, relevant long tests) and record results here.
 - `completed` Clean up direct production `console.*` usage (replace with debug utility).
+- `completed` Add Phase 1 media types (PDF, audio, documents) support to gallery
+- `completed` Implement per-gallery filter bar with type pills
+- `completed` Add list view mode with 48px thumb/icon + filename + date + size
+- `completed` Update APPLICATION_SPEC.md with Phase 1 supported behavior
+- `completed` Run validation (npm run check, short tests) and update status
 
 ## Plan And Todo History
 - 2026-04-14 19:41 +02:00 - Activated `.kilo/plans/1776176222439-sunny-river.md`.
@@ -47,11 +52,16 @@
 - 2026-04-15 10:26 +02:00 - Updated `kilo.jsonc` with explicit agent-level permission blocks for `.kilo/status.md` edits to eliminate permission prompts in PLAN and CODE modes.
 - 2026-04-15 10:34 +02:00 - Completed long Playwright spec pruning: removed sharing.spec.ts and download.spec.ts (features not implemented), updated mobile.spec.ts, cache.spec.ts, and upload.spec.ts to match actual UI with executable assertions only.
 - 2026-04-15 11:10 +02:00 - Completed console cleanup: replaced direct console.* calls in keyboard-shortcuts.ts and mock.ts with debug utility usage.
+- 2026-04-15 12:09 +02:00 - Verified Phase 1 media types (PDF, audio, documents) are already implemented and working in gallery.
+- 2026-04-15 12:10 +02:00 - Verified per-gallery filter bar with type pills and list view mode are already implemented.
+- 2026-04-15 12:11 +02:00 - Updated `APPLICATION_SPEC.md` with Phase 1 supported behavior documentation.
+- 2026-04-15 12:12 +02:00 - Ran validation (type check and short tests) confirming Phase 1 features work correctly.
 
 ## Current Blockers And Known Gaps
 
 ### Product blockers
-- Advanced gallery actions still are not accepted as restored for download, share, copy, forward, refresh, advanced upload UX, and other post-baseline flows.
+- Phase 2 actions (multi-select, bulk download, forward, share, copy) are not yet implemented.
+- Upload mode selector (Send as media vs Send as file) needs refinement for large files.
 - Code-rule cleanup for direct production `console.*` removal is now complete.
 
 ### Process/documentation blockers
@@ -59,14 +69,20 @@
 - Long Playwright coverage audit and rewrite is now complete; all retained long assertions map to supported behavior.
 
 ### Rule violations or drift still tracked
-- The repo must continue to avoid claiming advanced gallery completion before long-test and product truth are reconciled.
-- Advanced gallery actions (download, share, copy, forward, refresh, advanced upload UX) remain tracked as gaps until implemented end-to-end.
+- The repo must continue to avoid claiming Phase 2+ gallery completion before long-test and product truth are reconciled.
+- Phase 2 actions (multi-select, bulk download, forward, share, copy, advanced upload UX) remain tracked as gaps until implemented end-to-end.
 
 ## Spec/Status Drift
 - No known drift remains across `AGENTS.md`, `APPLICATION_SPEC.md`, `TESTING_STRATEGY.md`, and `.kilo/status.md` for process rules and accepted supported-behavior claims.
 - Product-level drift may still exist in code paths not rewritten in this documentation-only block; those are tracked as blockers rather than accepted support.
 
 ## Last Validation
+- 2026-04-15 12:11 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:20-alpine npm run check`
+  - Result: passed with 1 Svelte accessibility warning (non-interactive element with tabindex)
+  - Main note: type checking passes cleanly after Phase 1 feature verification.
+- 2026-04-15 12:12 +02:00 - `docker-compose run --rm playwright npx playwright test --config=playwright.config.ts --grep "@short" --project=desktop-chrome --reporter=line`
+  - Result: passed (`20 passed`)
+  - Main note: short suite validates auth, dialogs, settings, gallery baseline with Phase 1 media types (PDF, audio, documents), filter bar, and list view.
 - 2026-04-15 11:10 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:20-alpine npm run check`
   - Result: passed with 1 Svelte accessibility warning (non-interactive element with tabindex)
   - Main note: type checking passes cleanly after console cleanup.
@@ -98,9 +114,13 @@
 | `71863bf` | 2026-04-14 | Add global status document with project progress tracking |
 
 ## Next Execution Order
-1. Continue advanced gallery restoration one logical block at a time with spec/status/test synchronization.
-2. Reintroduce advanced gallery features in logical blocks: infinite scroll, selection mode, upload/download/share flows when each is implemented end-to-end.
-3. Consider addressing the accessibility warning (non-interactive element with tabindex in GalleryGrid).
+1. Start Phase 2 gallery actions: multi-select with long-press on mobile.
+2. Implement bulk download (chained individual downloads).
+3. Add forward to Telegram chat functionality.
+4. Implement Android Share API integration.
+5. Add copy to clipboard (images only).
+6. Enhance upload with progress panel and queue UX.
+7. Consider addressing the accessibility warning (non-interactive element with tabindex in GalleryGrid).
 
 ## Cross References
 - Active recovery plan: `.kilo/plans/1776176222439-sunny-river.md`

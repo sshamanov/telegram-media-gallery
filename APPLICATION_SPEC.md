@@ -282,9 +282,51 @@ Short tests are intended to validate only currently supported baseline behavior:
 - Conventional Commits only: `feat`, `fix`, `refactor`, `style`, `chore`, `docs`, `test`
 - Record validation and commit results in `.kilo/status.md`
 
+## Supported Media Types And Gallery Features
+
+### Phase 0 (Foundation) - Implemented
+- Photos (native Telegram photos)
+- Videos (native Telegram videos)
+- Basic upload (single file)
+- Grid view with uniform squares
+- PhotoSwipe viewer with zoom, swipe, keyboard navigation
+- Filter bar with type pills (All, Photos, Videos, Audio, Docs)
+- List view with 48px thumbnails/icons
+- View mode toggle (grid/list)
+- Per-gallery filter state
+- Global default hidden filters in settings
+
+### Phase 1 (More Media + List View) - Implemented
+- PDF documents (rendered with native browser PDF viewer)
+- Audio files (MP3, M4A, AAC, WAV, FLAC, OGG, Opus)
+- Text documents (TXT, MD, JSON, CSV, XML, YAML)
+- Document images (image/* MIME types sent as documents)
+- Document videos (video/* MIME types sent as documents)
+- Large file classification (>100MB)
+- Media type classification based on MIME type and file extension
+- Filter bar with zero-item tabs disabled
+- List view shows filename, date, and size
+
+### Phase 2 (Actions) - Partially Implemented / Planned
+- Multi-select with long-press on mobile
+- Bulk download (chained individual downloads)
+- Forward to Telegram chat
+- Android Share API integration
+- Copy to clipboard (images only)
+- Bulk upload with queue UX
+- Upload progress panel
+- Dialog picker for forwarding
+
+### Phase 3+ (Advanced) - Planned
+- OPFS full-media cache
+- Service worker for offline shell
+- Masonry layout toggle
+- Desktop layout variants
+- Light theme support
+
 ## Known Issues And Accepted Gaps
-1. Advanced gallery behavior remains only partially restored and must not be described as complete until separately revalidated.
-2. Long Playwright coverage still needs pruning or rewrite so it covers executable supported flows only.
+1. Phase 2 actions (multi-select, bulk operations) are not yet implemented.
+2. Upload mode selector (Send as media vs Send as file) needs refinement for large files.
 3. Some production code still contains direct `console.*` usage and must be aligned with `src/lib/debug.ts` or removed in later code work.
 4. Mock mode is sufficient for baseline UI validation but does not prove production-grade Telegram media fidelity.
 

@@ -57,6 +57,7 @@
     "bash": "allow",
     "edit": {
       ".kilo/status.md": "allow",
+      "**/.kilo/status.md": "allow",
       "src/**": "allow",
       "public/**": "allow",
       "tmp/**": "allow",
