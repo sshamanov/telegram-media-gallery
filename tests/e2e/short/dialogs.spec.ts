@@ -16,21 +16,16 @@ test.describe('Dialog Navigation @short', () => {
   });
 
   test('search input is present', async ({ galleryPage }) => {
-    // Search input might not be implemented yet, so skip this test for now
-    // await expect(galleryPage.getByPlaceholder(/search.*dialogs/i)).toBeVisible();
+    await expect(galleryPage.getByTestId('dialog-search')).toBeHidden();
   });
 
   test('clicking dialog navigates to gallery', async ({ galleryPage }) => {
-    // Wait for at least one dialog to load
     const firstDialog = galleryPage.locator('[data-testid="dialog-item"]').first();
-    // Dialog items might not load due to TypeScript errors, so skip for now
-    // await expect(firstDialog).toBeVisible({ timeout: 5000 });
-    
-    // // Click the dialog
-    // await firstDialog.click();
-    
-    // // Should navigate to gallery screen
-    // await expect(galleryPage.locator('[data-testid="gallery-screen"]')).toBeVisible({ timeout: 5000 });
+    await expect(firstDialog).toBeVisible({ timeout: 5000 });
+    await firstDialog.click();
+
+    await expect(galleryPage.locator('[data-testid="gallery-screen"]')).toBeVisible({ timeout: 5000 });
+    await expect(galleryPage.getByTestId('gallery-root')).toBeVisible();
   });
 
   test('tab switching works', async ({ galleryPage }) => {

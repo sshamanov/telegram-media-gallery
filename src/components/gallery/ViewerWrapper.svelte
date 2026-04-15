@@ -447,6 +447,7 @@
   }
 
   function closeOverlay(): void {
+    closeViewer()
     pswp?.close()
   }
 

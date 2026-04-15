@@ -107,6 +107,7 @@
   class:selection-mode={selectionMode}
   class="list-row panel"
   type="button"
+  data-testid="media-item"
   data-media-id={item.id}
   on:click={handleClick}
   on:pointercancel={clearLongPress}

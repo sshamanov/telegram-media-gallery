@@ -19,38 +19,57 @@ test.describe('Mobile Responsiveness @long', () => {
     // Tabs should be touch-friendly
     const phoneTab = page.getByRole('tab', { name: /phone/i });
     const tabSize = await phoneTab.boundingBox();
-    expect(tabSize?.width).toBeGreaterThan(44); // Minimum touch target
-    expect(tabSize?.height).toBeGreaterThan(44);
+    expect(tabSize?.width).toBeGreaterThanOrEqual(44); // Minimum touch target
+    expect(tabSize?.height).toBeGreaterThanOrEqual(44);
   });
 
   test('mobile navigation works', async ({ page }) => {
     // Login
     await page.goto('/');
     await page.getByRole('tab', { name: /phone/i }).click();
-    await page.getByPlaceholder('Phone number').fill('1234567890');
-    await page.getByRole('button', { name: /next|continue|sign in/i }).click();
+    await page.getByTestId('phone-input').fill('1234567890');
+    await page.getByTestId('send-code-button').click();
+    
+    // Wait for code step
+    await page.waitForSelector('[data-auth-step="code"]', { timeout: 5000 });
+    
+    // Enter mock code
+    await page.getByTestId('verification-code-input').fill('000000');
+    await page.getByTestId('submit-code-button').click();
     
     // Wait for dialogs
-    await expect(page.getByRole('heading', { name: /dialogs|conversations/i })).toBeVisible({ timeout: 10000 });
+    await expect(page.getByTestId('dialogs-screen')).toBeVisible({ timeout: 10000 });
     
-    // Check mobile navigation elements
-    await expect(page.getByRole('button', { name: /menu|hamburger/i })).toBeVisible();
+    // Check mobile navigation elements - back button should be visible when in gallery
+    const firstDialog = page.locator('[data-testid="dialog-item"]').first();
+    await firstDialog.click();
+    
+    await expect(page.getByTestId('gallery-root')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByTestId('gallery-back-button')).toBeVisible();
   });
 
   test('touch interactions work', async ({ page }) => {
     // Login and navigate to gallery
     await page.goto('/');
     await page.getByRole('tab', { name: /phone/i }).click();
-    await page.getByPlaceholder('Phone number').fill('1234567890');
-    await page.getByRole('button', { name: /next|continue|sign in/i }).click();
+    await page.getByTestId('phone-input').fill('1234567890');
+    await page.getByTestId('send-code-button').click();
     
-    await expect(page.getByRole('heading', { name: /dialogs|conversations/i })).toBeVisible({ timeout: 10000 });
+    // Wait for code step
+    await page.waitForSelector('[data-auth-step="code"]', { timeout: 5000 });
+    
+    // Enter mock code
+    await page.getByTestId('verification-code-input').fill('000000');
+    await page.getByTestId('submit-code-button').click();
+    
+    // Wait for dialogs
+    await expect(page.getByTestId('dialogs-screen')).toBeVisible({ timeout: 10000 });
     
     // Tap on dialog
     const firstDialog = page.locator('[data-testid="dialog-item"]').first();
     await firstDialog.click();
     
-    await expect(page.getByRole('heading', { name: /gallery|media/i })).toBeVisible({ timeout: 10000 });
+    await expect(page.getByTestId('gallery-root')).toBeVisible({ timeout: 10000 });
     
     // Tap on media item
     const firstMediaItem = page.locator('[data-testid="media-item"]').first();

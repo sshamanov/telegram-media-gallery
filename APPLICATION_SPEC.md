@@ -3,258 +3,303 @@
 ## Overview
 Browser-based photo/video gallery using Telegram as a storage backend. Client-only Svelte 5 PWA with no server component.
 
+## Document Authority
+- `APPLICATION_SPEC.md` is the architecture and supported-behavior source of truth.
+- `.kilo/status.md` is the execution ledger for active plans, todo states, validations, blockers, and commits.
+- `AGENTS.md` defines the required execution workflow and document-maintenance rules.
+- If code, spec, and status disagree, reconcile the documents before claiming a feature or flow is complete.
+
+## Current Supported State
+- Auth baseline is supported through the real app shell and the mock adapter.
+- Dialog browsing baseline is supported, including Galleries / Groups / Chats tabs and conditional search.
+- Settings baseline is supported as a dedicated screen with inline cache/storage actions.
+- Gallery baseline and viewer baseline have recently been rebuilt and are the accepted baseline target, but advanced gallery capabilities are still not accepted as restored until they are revalidated and recorded in `.kilo/status.md`.
+- This document does not claim that all historical gallery, upload, download, share, cache, or mobile flows are currently restored.
+
 ## Core Architecture
 
 ### Tech Stack
-- **Frontend**: Svelte 5 + TypeScript (strict mode)
+- **Frontend**: Svelte 5 + TypeScript strict
 - **Build Tool**: Vite
-- **Telegram Client**: @mtcute/web (MTProto client)
+- **Telegram Client**: `@mtcute/web`
 - **Media Viewer**: PhotoSwipe v5
-- **Caching**: IndexedDB (thumbnails), OPFS (full media)
-- **PWA**: Service Worker for offline capability
+- **Caching**: IndexedDB for thumbnails, OPFS for full-media cache in later phases
+- **PWA**: Manifest is part of the app; broader offline/service-worker behavior remains phase-scoped
 
-### System Boundaries (Hard Rules)
-1. **Working directory is project root only** - Never `cd` outside or read/write external paths
-2. **No system-level tool installation** - No `apt`, `brew`, `pip install` (outside venv), `npm install -g`
-3. **No system configuration modification** - No `/etc/`, `~/.bashrc`, `~/.gitconfig` changes
-4. **No external network access** - All builds run inside Docker with `--network host` disabled
-5. **Docker networking permanently disabled** - Every `docker run` must include `--network host`
-6. **Temporary files use `./tmp/`** - Never system `/tmp/` (gitignored)
+### System Boundaries
+1. **Working directory is project root only** - never read or write outside the repo.
+2. **No system-level tool installation** - do not modify the host OS.
+3. **No system configuration modification** - do not touch shell, git, or service config outside the repo.
+4. **No external access** - do not access remote services or external network resources.
+5. **All builds run inside Docker with `--network host`** - every project `docker run` must include `--network host`.
+6. **Temporary files use `./tmp/`** - never use system `/tmp/`.
+7. **Dev server must use port `5173`** - keep that port fixed for local validation.
 
-### Build Patterns
+### Standard Build Patterns
 ```bash
-# Standard build
+# Type check / build pattern
 docker run --rm --network host \
   -v "$(pwd)":/app -w /app \
   node:20-alpine <command>
 
-# Dev server
+# Dev server pattern
 docker run --rm --network host \
   -v "$(pwd)":/app -w /app \
-  node:20-alpine npm run dev -- --host
+  node:20-alpine npm run dev -- --host --port 5173
 ```
-
-## State Management
-
-### Stores Architecture
-| State | Store | Persistence |
-|-------|-------|-------------|
-| TelegramClient | `stores/telegram` | In-memory only |
-| Auth state | `stores/telegram` | Session → localStorage |
-| Current dialog | `stores/gallery` | Not persisted |
-| Loaded media items | `stores/gallery` | Not persisted |
-| Scroll positions | `stores/gallery` | localStorage (Map) |
-| Gallery bookmarks | `stores/dialogs` | localStorage |
-| User settings | `stores/settings` | localStorage |
-
-### Key Stores
-- **`src/stores/telegram.ts`**: Telegram adapter management, auth state, session handling
-- **`src/stores/gallery.ts`**: Media loading, viewer state, current dialog
-- **`src/stores/dialogs.ts`**: Dialog lists, gallery pins, search
-- **`src/stores/settings.ts`**: User preferences, cache limits, theme
-- **`src/stores/ui.ts`**: Toast notifications, offline state
 
 ## Adapter Pattern
 
-### TelegramAdapter Interface
-All Telegram API calls go through `src/lib/telegram/adapter.ts` interface. Never import `@mtcute/web` directly in feature code.
+### TelegramAdapter Contract
+All Telegram API calls go through `src/lib/telegram/adapter.ts`. Feature code must not import `@mtcute/web` directly.
 
-**Implementations**:
-- `src/lib/telegram/mtcute.ts`: Real Telegram API via @mtcute/web
-- `src/lib/telegram/mock.ts`: Mock data for testing
+### Implementations
+- `src/lib/telegram/mtcute.ts` - real Telegram implementation
+- `src/lib/telegram/mock.ts` - mock adapter for local validation and Playwright
 
-**Adapter Switching**:
-- Environment: `VITE_USE_MOCK_ADAPTER=true|1|True|TRUE|false|0|False|FALSE` (supports multiple boolean values)
-- No UI Toggle: Removed from AuthScreen and SettingsPanel
-- No localStorage persistence: `telegram.useMock` storage removed
-- Function: `switchToMockAdapter(enabled: boolean)` in `stores/telegram.ts` (available for programmatic use)
-- Default: If no env var and no API credentials, defaults to mock (true)
+### Adapter Selection
+- `VITE_USE_MOCK_ADAPTER=true|1|True|TRUE|false|0|False|FALSE`
+- There is no UI toggle for switching mock mode.
+- Programmatic switching remains available via `switchToMockAdapter(enabled)` in `src/stores/telegram.ts`.
+- If no environment override is present and Telegram API credentials are absent, the app defaults to mock mode.
 
 ### Mock Mode Behavior
-- **Phone**: Any phone number accepted
-- **Code**: Any code except `123456` signs in directly
-- **2FA**: Code `123456` triggers 2FA flow, password is `"password"`
-- **Data**: Uses `samples/dialogs.json`, falls back to synthetic messages
-- **Media**: Returns empty buffers (placeholder implementation)
+- **Phone**: any phone number is accepted
+- **Code**: any code except `123456` signs in directly
+- **2FA**: code `123456` triggers 2FA, password is `password`
+- **Data**: dialogs load from `samples/dialogs.json`, messages load from `samples/dialog-media/*.json`, with synthetic fallbacks where needed
+- **Media fidelity**: mock mode is suitable for baseline UI validation, not for claiming full production-grade media parity
 
-## Authentication Flows
+## State Management
 
-### Phone Login (`PhoneForm.svelte`)
-1. **Phone Entry**: Enter phone → Send Code (Enter key supported)
-2. **Code Entry**: Enter verification code → Submit Code (Enter key supported)
-3. **2FA Conditional**: Only shown if `signIn()` returns `'2fa_required'`
-4. **Password Entry**: Enter 2FA password → Submit Password (Enter key supported)
+### Store Ownership
+| State | Store | Persistence |
+|-------|-------|-------------|
+| Telegram client / adapter session | `src/stores/telegram.ts` | Session snapshot in localStorage |
+| Current dialog | `src/stores/gallery.ts` | No |
+| Loaded media items | `src/stores/gallery.ts` | No |
+| Viewer state | `src/stores/gallery.ts` | No |
+| Scroll positions | `src/stores/gallery.ts` | localStorage |
+| Gallery bookmarks | `src/stores/dialogs.ts` | localStorage |
+| Dialog search | `src/stores/dialogs.ts` | No |
+| User settings | `src/stores/settings.ts` | localStorage |
+| Toasts / offline UI | `src/stores/ui.ts` | No |
 
-### QR Login (`QRForm.svelte`)
-1. **QR Display**: Shows QR code with expiration countdown
-2. **2FA Handling**: Conditional password prompt via `requestPassword()` callback
-3. **Auto-refresh**: QR codes expire and refresh automatically
+### Key Stores
+- `src/stores/telegram.ts` - adapter initialization, auth state, reconnect flow
+- `src/stores/gallery.ts` - current dialog, media paging, viewer state, upload state
+- `src/stores/dialogs.ts` - dialog lists, galleries subset, search, bookmarks
+- `src/stores/settings.ts` - theme and gallery-related settings
+- `src/stores/ui.ts` - toast notifications and offline state
+
+## Supported Authentication Flows
+
+### Phone Login
+1. Enter phone number
+2. Click `Send Code`
+3. Wait for `data-auth-step="code"`
+4. Enter verification code
+5. Click `Submit Code`
+6. If required, enter 2FA password and submit
+
+### QR Login
+1. QR token is rendered to canvas
+2. Expiration countdown is shown
+3. Refresh is available
+4. If Telegram requests 2FA, a password field is shown inline
 
 ### Session Management
-- **Storage**: `localStorage.getItem('session')`
-- **Reconnection**: Automatic on app start if session exists
-- **Expiry**: Handles `AUTH_KEY_UNREGISTERED` and `SESSION_REVOKED` errors
-- **Logout**: Clears session, returns to auth screen
+- Session is stored in `localStorage`
+- Reconnect is attempted on app initialization
+- Logout clears session and returns to auth screen
+- Session-expiry and reconnect UI are handled through store-driven banner/toast state
 
-## Navigation & Routing
+## Navigation And Routing
 
-### Hash-based Routing (`src/lib/routing.ts`)
-- **`#/`**: Dialog list (default)
-- **`#/gallery/:dialogId`**: Gallery view for specific dialog
-- **`#/settings`**: Settings screen
+### Hash Routes
+- `#/` - dialog list
+- `#/gallery/:dialogId` - gallery screen for selected dialog
+- `#/settings` - settings screen
 
-### Route Transitions
-- Uses `src/lib/dom/transitions.ts` for animated transitions
-- Respects `prefers-reduced-motion` user preference
-- Clean listener removal (bound handler instance stored)
+### Screen Markers Used By Tests
+- `data-testid="auth-screen"`
+- `data-testid="dialogs-screen"`
+- `data-testid="gallery-screen"`
+- `data-testid="settings-screen"`
 
-## Gallery System
+## UI Contract Currently Accepted
 
-### Media Loading
-1. **Dialog Selection**: `setActiveDialog(dialogId)` triggers load
-2. **Initial Load**: `loadInitialMedia()` fetches first page
-3. **Infinite Scroll**: `loadMoreMedia()` on scroll threshold
-4. **Filtering**: Client-side filtering by media type (photos, videos, audio, docs)
+### Auth Screen
+- `src/components/auth/AuthScreen.svelte` exposes Phone and QR as semantic tabs
+- `src/components/auth/PhoneForm.svelte` exposes:
+  - `phone-input`
+  - `send-code-button`
+  - `verification-code-input`
+  - `submit-code-button`
+  - `2fa-password-input`
+  - `submit-password-button`
+  - `auth-status`
+- `src/components/auth/QRForm.svelte` exposes:
+  - `qr-form`
+  - `qr-canvas`
+  - `qr-refresh-button`
+  - `qr-2fa-section`
+  - `qr-2fa-password-input`
+  - `qr-2fa-submit-button`
 
-### Viewer Integration
-1. **Item Click**: Opens `ViewerWrapper.svelte` via `openViewer(items, index)`
-2. **PhotoSwipe**: Fullscreen viewer with zoom, swipe, info panel
-3. **Keyboard Navigation**: Arrow keys, Escape, Space bar support
+### Dialog Screen
+- `src/components/dialogs/DialogList.svelte` exposes semantic tabs for Galleries / Groups / Chats
+- Stable hooks include:
+  - `galleries-tab`
+  - `groups-tab`
+  - `chats-tab`
+  - `galleries-list`
+  - `groups-list`
+  - `chats-list`
+  - `dialog-search` when the current tab count exceeds 20
+  - `empty-galleries`
+- `src/components/dialogs/DialogItem.svelte` exposes:
+  - `data-testid="dialog-item"`
+  - `data-dialog-id="..."`
+  - `data-testid="dialog-toggle-button"`
 
-### Caching Strategy
-- **Thumbnails**: IndexedDB with LRU eviction (`thumbCacheLimit` setting)
-- **Full Media**: OPFS with size-based eviction (`maxCacheSizeMb` setting)
-- **Service Worker**: App cache for offline PWA capability
-- **Storage Breakdown**: Visible in Settings with per-section clear buttons
+### Settings Screen
+- Settings is a dedicated route-backed screen at `#/settings`
+- Settings opens from the dialogs header and closes via a back button
+- Storage information is shown inline with clear buttons and no confirmation dialog
 
-## UI/UX Patterns
+## Gallery And Viewer Support
 
-### Design System
-- **CSS Variables**: Theme-aware (`--accent`, `--bg-surface`, `--text-primary`, etc.)
-- **Responsive**: Mobile-first, touch targets ≥44×44px
-- **Accessibility**: ARIA labels, keyboard navigation, focus management
-- **Themes**: Dark/Light/System with `applyTheme()` function
+### Accepted Gallery Baseline
+The accepted gallery baseline is limited to the currently restored behavior:
+1. route entry after dialog selection
+2. render loaded media items in grid or list mode
+3. filter by media type
+4. toggle grid/list view
+5. open viewer on item activation
 
-### Component Structure
-```
+### Accepted Viewer Baseline
+- Viewer opens from gallery item activation
+- Viewer close path is part of the accepted baseline
+- Viewer baseline is treated as supported only to the extent validated by the current short suite and status ledger
+
+### Advanced Gallery Features Not Yet Accepted As Restored
+Do not claim end-to-end support for these until they are rebuilt and revalidated:
+- UI-layer infinite scroll restoration
+- bulk selection and bulk actions
+- download / share / copy / forward flows
+- gallery onboarding hints
+- masonry layout
+- keyboard gallery navigation beyond validated viewer baseline behavior
+- pull-to-refresh
+- advanced upload UX beyond what is explicitly revalidated later
+
+These paths may exist partially in code or stores, but they are not currently accepted as supported behavior.
+
+## Caching Strategy
+- **Thumbnails**: IndexedDB
+- **Full media**: OPFS where available in later phases
+- **Service worker cache**: app/offline shell resources when phase-scoped work restores that behavior
+- **Storage breakdown**: shown in settings with clear actions for each cache area
+
+## Component Layout
+```text
 src/components/
-├── auth/                    # Authentication screens
-│   ├── AuthScreen.svelte   # Login shell with phone/QR tabs
-│   ├── PhoneForm.svelte    # Phone+code+2FA login
-│   └── QRForm.svelte       # QR code login
-├── dialogs/                # Dialog management
-│   ├── DialogList.svelte   # Main dialog list with tabs
-│   └── DialogItem.svelte   # Individual dialog row
-├── gallery/                # Media gallery
-│   ├── GalleryGrid.svelte  # Main gallery grid/list view
-│   ├── ViewerWrapper.svelte # PhotoSwipe fullscreen viewer
-│   └── MediaItem.svelte    # Individual media item card
-├── settings/               # Settings UI
-│   ├── SettingsScreen.svelte # Settings page shell
-│   └── SettingsPanel.svelte  # Settings form controls
-└── ui/                     # Shared UI components
-    ├── Toast.svelte        # Notification toasts
-    ├── ReconnectBanner.svelte # Connection status
-    └── CacheIndicator.svelte # Storage usage indicator
+|- auth/
+|  |- AuthScreen.svelte
+|  |- PhoneForm.svelte
+|  `- QRForm.svelte
+|- dialogs/
+|  |- DialogList.svelte
+|  `- DialogItem.svelte
+|- gallery/
+|  |- GalleryGrid.svelte
+|  |- ViewerWrapper.svelte
+|  |- MediaItem.svelte
+|  `- MediaListRow.svelte
+|- settings/
+|  |- SettingsScreen.svelte
+|  `- SettingsPanel.svelte
+`- ui/
+   |- Toast.svelte
+   |- OfflineBanner.svelte
+   |- ReconnectBanner.svelte
+   `- CacheIndicator.svelte
 ```
 
-### Keyboard & Gestures
-- **Gallery Navigation**: Arrow keys, Enter, Space, Escape
-- **Mobile**: Pull-to-refresh, swipe gestures in viewer
-- **Global Shortcuts**: `?` for help overlay (if implemented)
-- **Selection Mode**: Ctrl/Cmd+Click, Shift+Click ranges
+## Testing Workflow
 
-## Testing Strategy
+### Required Validation Policy
+- `npm run check` must pass before a logical block is complete unless the block is intentionally documentation-only and the deferral is recorded in `.kilo/status.md`.
+- Required Playwright suites must contain executable assertions only.
+- Commented-out, placeholder, or speculative tests do not satisfy process gates.
 
-### Mock Testing Flow
-1. **Environment**: Set `VITE_USE_MOCK_ADAPTER=1` or use UI toggle
-2. **Authentication**: Any phone + any code (except 123456 for 2FA)
-3. **Data**: Synthetic dialogs and media from `samples/` directory
-4. **Verification**: Test all user flows without Telegram API
+### Test Commands
+Current repo scripts include:
+- `npm run check`
+- `npm run test:short`
+- `npm run test:long`
+- `npm run test:all`
+- `npm run test:ui`
+- `npm run test:visual`
 
-### Test Scripts (Placeholder)
-- `npm run test:ui`: Playwright UI tests (not yet implemented)
-- `npm run test:visual`: Visual regression tests (not yet implemented)
+### Docker Compose Test Flow
+Use Docker Compose for Playwright validation:
+```bash
+docker-compose up --build playwright
+
+# Specific suite/project example
+docker-compose run --rm playwright npx playwright test --config=playwright.config.ts --grep "@short" --project=desktop-chrome
+```
+
+### Current Required Short-Test Contract
+Short tests are intended to validate only currently supported baseline behavior:
+- auth screen rendering and auth flows
+- dialogs screen rendering and tab semantics
+- settings open/close baseline
+- gallery baseline when accepted in current status
+- viewer baseline when accepted in current status
+
+### Current Long-Test Policy
+- Long tests must cover only executable, supported flows.
+- If an advanced flow is not restored end-to-end, it must not remain as a required assertion.
+- Unsupported advanced behavior must be tracked as a gap instead of being hidden behind weakened tests.
 
 ## Development Workflow
 
+### Required Order
+1. Read `APPLICATION_SPEC.md`
+2. Read `.kilo/status.md`
+3. Read the active plan file
+4. Update `.kilo/status.md` before starting non-trivial work
+5. Implement or rewrite one logical block
+6. Run required validation or record a truthful deferral for documentation-only work
+7. Update spec/status to match reality
+8. Commit one logical block
+
 ### Commit Discipline
-1. **Check**: Run `npm run check` (type check) in Docker
-2. **Review**: `git add -A && git diff --cached --stat`
-3. **Commit**: Conventional Commits (`type: subject` max 72 chars)
-4. **Verify**: `git status` to confirm clean working tree
+- Commit after every logical block of work
+- Conventional Commits only: `feat`, `fix`, `refactor`, `style`, `chore`, `docs`, `test`
+- Record validation and commit results in `.kilo/status.md`
 
-**Commit Types**: `feat` | `fix` | `refactor` | `style` | `chore` | `docs` | `test`
+## Known Issues And Accepted Gaps
+1. Advanced gallery behavior remains only partially restored and must not be described as complete until separately revalidated.
+2. Long Playwright coverage still needs pruning or rewrite so it covers executable supported flows only.
+3. Some production code still contains direct `console.*` usage and must be aligned with `src/lib/debug.ts` or removed in later code work.
+4. Mock mode is sufficient for baseline UI validation but does not prove production-grade Telegram media fidelity.
 
-### Agent/Kilo Reference Flow
-```
-Get Task → Read SPEC → Make Plan → Implement → Update SPEC/Status
-```
+## Browser Compatibility
+- Primary targets: Chrome desktop and Android Chrome (PWA)
+- Security-sensitive features require a secure context such as `https://localhost:5173`
+- OPFS is optional and may not be available in all environments
 
-**When questions arise not in plan**:
-1. Read this SPEC document first
-2. Check `AGENTS.md` for project-specific rules
-3. Review `src/lib/telegram/adapter.ts` for API interface
-4. Examine existing components for patterns
-
-### File Locations
-- **This SPEC**: `APPLICATION_SPEC.md` (project root)
-- **Agent Instructions**: `AGENTS.md` (project rules, architecture)
-- **Status Tracking**: `.kilo/status.md` (project status, progress)
-- **Plans**: `.kilo/plans/*.md` (implementation plans)
-- **Samples**: `samples/` (mock data, documentation)
-
-## Environment Configuration
-
-### Required Files
-- **`.env.example`**: Template with all possible variables
-- **`.env`**: User's actual environment (DO NOT MODIFY without asking)
-- **`.env.local`**: Local overrides (gitignored)
-
-### Key Environment Variables
-```env
-# Telegram API (from https://my.telegram.org)
-VITE_TELEGRAM_API_ID=
-VITE_TELEGRAM_API_HASH=
-
-# Mock adapter (development/testing)
-# Valid values: true, 1, True, TRUE or false, 0, False, FALSE
-VITE_USE_MOCK_ADAPTER=0
-```
-
-### Docker vs Compose Usage
-- **User Session**: Uses `docker-compose` with `.env` file
-- **Agent/Dev Session**: Uses `docker run` directly with env vars
-- **Mock Testing**: Agents should use `VITE_USE_MOCK_ADAPTER=1` in docker command, not modify `.env`
-
-## Known Issues & Limitations
-
-### Current Technical Debt
-1. **GalleryGrid Component**: Template/script mismatch, many stub functions
-2. **TypeScript Errors**: ~45 errors in GalleryGrid (build succeeds)
-3. **Mock Media**: Returns empty buffers, not actual sample media
-4. **Test Coverage**: Playwright tests not yet implemented
-
-### Browser Compatibility
-- **Primary**: Chrome desktop + Android Chrome (PWA)
-- **Requirements**: WebCrypto API, IndexedDB, OPFS (optional)
-- **Security**: Must run on `https://` or `http://localhost` for WebCrypto
-
-## Cross-References
-
-### Related Documentation
-- `AGENTS.md` - Project rules, commit discipline, architecture
-- `.kilo/status.md` - Current project status, completed work
-- `samples/INDEX.md` - Mock data specification
-- `TECHNICAL_MIGRATION_PLAN.md` - Original migration plan
-
-### Key Implementation Files
-- `src/App.svelte` - Root component, startup flow, screen switching
-- `src/lib/telegram/adapter.ts` - Adapter interface definition
-- `src/stores/telegram.ts` - Adapter switching, auth state
-- `src/components/auth/AuthScreen.svelte` - Login with mock toggle
-- `src/components/settings/SettingsPanel.svelte` - Settings with mock toggle
+## Cross References
+- Agent rules: `AGENTS.md`
+- Execution ledger: `.kilo/status.md`
+- Active recovery plan: `.kilo/plans/1776176222439-sunny-river.md`
+- Testing guide: `TESTING_STRATEGY.md`
+- Mock data reference: `samples/INDEX.md`
 
 ---
 
-*This document is maintained as the single source of truth for Telegram Gallery architecture and implementation details. Update when making significant changes to patterns, flows, or architecture.*
+This document must describe only validated architecture, supported behavior, required workflow rules, and explicitly accepted gaps. Do not use it to preserve stale claims or aspirational completion statements.

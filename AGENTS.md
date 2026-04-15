@@ -56,7 +56,7 @@ These rules override everything else. No exceptions. No creative interpretations
     to fall back to another port. Before starting dev server, ensure port 5173 is free.
     Example: `lsof -ti:5173 | xargs kill -9 2>/dev/null || true`
 
- ## Commit discipline
+## Commit discipline
 
 **Commit after every logical block of work. Do not batch multiple features into one commit.**
 
@@ -68,11 +68,14 @@ A "logical block" is any of:
 - Updating config, docs, or tooling
 
 Commit flow (mandatory before moving to the next block):
-1. Run `npm run check` (type check) inside Docker — fix any errors first.
-2. Run `git add -A && git diff --cached --stat` to review what will be committed.
-3. Commit with a Conventional Commits message: `type: subject` (max 72 chars).
+1. Run `npm run check` (type check) inside Docker unless the active task is explicitly limited to documentation-only work and code/test behavior is intentionally untouched.
+2. Run the required short or long test gates when the touched logical block changes executable product behavior, test selectors/contracts, or test files.
+3. Update `.kilo/status.md` with the logical block being completed, the current todo states, blockers/gaps affected by the work, and the latest validation result or explicit validation deferral.
+4. Run `git add -A && git diff --cached --stat` to review what will be committed.
+5. Commit with a Conventional Commits message: `type: subject` (max 72 chars).
    Types: `feat` | `fix` | `refactor` | `style` | `chore` | `docs` | `test`
-4. Run `git status` to confirm clean working tree.
+6. Record the commit hash and completed block in `.kilo/status.md`.
+7. Run `git status` to confirm clean working tree.
 
 Never skip a commit to "do one more thing first."
 Never use `--no-verify`.
@@ -87,6 +90,33 @@ Never use `--no-verify`.
 10. **TypeScript strict**: no `any`, no type assertions outside adapter files.
 11. **Progressive jpeg**: every commit is a working, usable app. No stubs.
 12. **Reference code is archived in legacy-archive branch**: original MVP code preserved in git history.
+
+## Required workflow documents
+
+### Document authority
+- `APPLICATION_SPEC.md` is the architecture and supported-behavior source of truth.
+- `.kilo/status.md` is the execution ledger for plans, todo states, blockers, validations, and commits.
+- If code changes architecture, supported behavior, workflow gates, or accepted limitations, update `APPLICATION_SPEC.md`.
+- If work changes plan state, todo state, validation state, blocker state, or commit state, update `.kilo/status.md`.
+
+### Status ledger rules (mandatory)
+- Read `.kilo/status.md` before starting non-trivial work.
+- Register every new implementation plan in `.kilo/status.md` before starting execution.
+- Record every todo state in `.kilo/status.md` using explicit states: `pending`, `in_progress`, `failed`, `completed`.
+- Update `.kilo/status.md` immediately when a todo changes state.
+- Record every validation run in `.kilo/status.md`, including command, pass/fail, and why it matters.
+- If a validation is intentionally deferred because the task is documentation-only or blocked by scope, record the deferral and reason in `.kilo/status.md` immediately.
+- Record every blocker, failed attempt, and spec/status drift worth tracking in `.kilo/status.md`.
+- Record every completed logical block and every commit hash in `.kilo/status.md`.
+- Do not claim a feature/flow is complete in `.kilo/status.md` unless the required validation has passed.
+
+### Planning and execution rules
+- Before non-trivial implementation, read `APPLICATION_SPEC.md`, `.kilo/status.md`, and the active plan file.
+- If no active plan exists for non-trivial work, create one under `.kilo/plans/` and register it in `.kilo/status.md`.
+- If `APPLICATION_SPEC.md`, `.kilo/status.md`, and the code disagree, reconcile the documents before claiming completion.
+- Required test suites must contain executable assertions only. Do not satisfy process gates with commented-out, placeholder, or speculative tests.
+- Unsupported behavior must be removed from required test claims and documented as a gap; do not hide it behind weakened completion claims.
+- Documentation-only tasks must update the governing markdown files truthfully without silently claiming unrun validations or restored product behavior.
 
 ## Architecture
 src/lib/telegram/adapter.ts  <- TelegramAdapter interface (the only import contract)
@@ -110,29 +140,21 @@ src/main.ts                  <- entry point
 ## UI Testing Rules
 
 ### Test Suites
-1. **Short Test** (`npm run test:short`): Basic flows only
+1. **Short Test** (`npm run test:short`): Required baseline coverage for currently supported flows
    - Authentication (phone/QR)
-   - Dialog navigation
-   - Gallery view transitions
-   - Basic UI interactions
-   - No uploads/downloads/sharing
-   - Timeout: 60 seconds max
+   - Dialog navigation and settings baseline
+   - Gallery/viewer baseline only when those paths are currently supported and asserted for real
+   - No placeholder assertions, no commented-out shells, no speculative checks
 
-2. **Long Test** (`npm run test:long`): Full coverage
-   - All short test features PLUS:
-   - Upload/download flows
-   - Sharing functionality
-   - Cache management
-   - Error states
-   - Mobile responsiveness
-   - Performance testing
-   - Timeout: 5 minutes max
+2. **Long Test** (`npm run test:long`): Extended coverage for advanced flows that are both implemented and currently claimed as supported
+   - Include only executable assertions for real UI behavior
+   - Remove or rewrite unsupported upload/download/share/cache/mobile expectations until those flows are actually restored
 
 ### When to Run Tests
 
 #### Short Test (MANDATORY):
 - ✅ After every logical block of work
-- ✅ Before updating APPLICATION_SPEC.md
+- ✅ Before updating `APPLICATION_SPEC.md` when the edit changes supported behavior claims tied to executable validation
 - ✅ Before completing a plan/phase
 - ✅ On every commit
 - ✅ Before moving to next task
@@ -144,6 +166,7 @@ src/main.ts                  <- entry point
 - 🔄 When changing data fetching logic
 - 🔄 Before major releases
 - 🔄 Manual trigger when needed
+- 🔄 Only when the touched advanced flow is implemented end-to-end and claimed as supported in `APPLICATION_SPEC.md`
 
 ### Test Environment
 - Real Playwright test files with assertions (not placeholder scripts)
@@ -158,6 +181,8 @@ src/main.ts                  <- entry point
 - Update tests if behavior changes intentionally
 - Document test changes in commit messages
 - Never skip tests to "save time"
+- Record failing validations and their current disposition in `.kilo/status.md` immediately
+- Do not replace failing required coverage with placeholders or weakened no-op assertions
 
 ### Kilo Commands
 ```bash
@@ -192,3 +217,14 @@ docker-compose run --rm playwright npx playwright test --config=playwright.confi
 - TECHNICAL_MIGRATION_PLAN.md  - full plan with phases, flows, design spec
 - legacy-archive branch        - original MVP code preserved in git history
 - .kilo/status.md              - project status, progress tracking, plan cross‑references
+
+## Status minimum sections
+`.kilo/status.md` must keep these sections current:
+- Active Plan
+- Current Todo States
+- Plan And Todo History
+- Current Blockers And Known Gaps
+- Spec/Status Drift
+- Last Validation
+- Recent Commit Log
+- Next Execution Order

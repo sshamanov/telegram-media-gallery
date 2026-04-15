@@ -5,28 +5,25 @@ test.describe('Upload Flow @long', () => {
     // Navigate to gallery view
     const firstDialog = galleryPage.locator('[data-testid="dialog-item"]').first();
     await firstDialog.click();
-    await expect(galleryPage.getByRole('heading', { name: /gallery|media/i })).toBeVisible({ timeout: 10000 });
+    await expect(galleryPage.getByTestId('gallery-root')).toBeVisible({ timeout: 10000 });
   });
 
   test('upload button is visible', async ({ galleryPage }) => {
-    await expect(galleryPage.getByRole('button', { name: /upload|add|plus/i })).toBeVisible();
+    await expect(galleryPage.getByTestId('gallery-upload-toggle')).toBeVisible();
   });
 
-  test('upload dialog opens', async ({ galleryPage }) => {
-    const uploadButton = galleryPage.getByRole('button', { name: /upload|add|plus/i });
+  test('upload sheet opens', async ({ galleryPage }) => {
+    const uploadButton = galleryPage.getByTestId('gallery-upload-toggle');
     await uploadButton.click();
     
-    await expect(galleryPage.getByRole('dialog').or(galleryPage.getByText(/upload.*media/i))).toBeVisible({ timeout: 5000 });
+    await expect(galleryPage.getByTestId('gallery-upload-sheet')).toBeVisible({ timeout: 5000 });
   });
 
-  // Note: File upload tests would require actual file selection
-  // This is a placeholder for the upload flow structure
-  test('upload progress indication appears', async ({ galleryPage }) => {
-    // This test would simulate file upload and check for progress indicators
-    // For now, just verify the UI structure
-    const uploadButton = galleryPage.getByRole('button', { name: /upload|add|plus/i });
+  test('upload sheet shows media and file options', async ({ galleryPage }) => {
+    const uploadButton = galleryPage.getByTestId('gallery-upload-toggle');
     await uploadButton.click();
     
-    await expect(galleryPage.getByText(/choose.*file/i).or(galleryPage.getByText(/browse/i))).toBeVisible();
+    await expect(galleryPage.getByText(/upload as media/i)).toBeVisible();
+    await expect(galleryPage.getByText(/upload as file/i)).toBeVisible();
   });
 });

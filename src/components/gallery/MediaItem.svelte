@@ -123,6 +123,7 @@
   class:selection-mode={selectionMode}
   class="media-card"
   type="button"
+  data-testid="media-item"
   data-media-id={item.id}
   on:click={handleClick}
   on:pointercancel={clearLongPress}

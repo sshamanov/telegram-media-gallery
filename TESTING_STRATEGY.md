@@ -1,251 +1,161 @@
-# Telegram Gallery - UI Testing Strategy
+# Telegram Gallery - Testing Strategy
 
-## Overview
-Comprehensive UI testing system with two test suites:
-1. **Short Test**: Basic flows (auth, navigation, views) - runs frequently
-2. **Long Test**: Full coverage (all features) - runs on major changes
+## Purpose
+Define the executable validation policy for Telegram Gallery. This document covers only real commands, real suites, real selectors, real assertions, and truthful accepted gaps.
 
-## Test Architecture
+## Document Role
+- `TESTING_STRATEGY.md` defines how validation must be run and what counts as valid coverage.
+- `APPLICATION_SPEC.md` defines which product behavior is currently supported.
+- `.kilo/status.md` records the latest validation results, deferrals, blockers, and scope changes.
+- If these documents disagree, reconcile them before claiming a suite or flow is complete.
 
-### Test Framework
-- **Playwright**: Cross-browser testing with mobile emulation
-- **Mock Data**: Uses `VITE_USE_MOCK_ADAPTER=true` environment
-- **Sample Data**: Pre-generated mock data in `samples/` directory
+## Core Rules
+- Required suites must contain executable assertions only.
+- Commented-out, placeholder, speculative, weakened, or aspirational tests do not satisfy process gates.
+- If behavior is not currently supported, remove it from required test claims and document it as a gap in `APPLICATION_SPEC.md` and `.kilo/status.md`.
+- `npm run check` is a required gate for every non-documentation logical block.
+- Documentation-only work may defer code/test validation only when the deferral is explicitly recorded in `.kilo/status.md`.
 
-### Test Suites
+## Test Stack
+- **Framework**: Playwright
+- **Runtime target**: local app served at `https://localhost:5173`
+- **Mock mode**: `VITE_USE_MOCK_ADAPTER=true`
+- **Projects**: `desktop-chrome`, `mobile-chrome`
+- **Config**: `playwright.config.ts`
 
-#### 1. Short Test (`npm run test:short`)
-**Purpose**: Quick validation of core functionality
-**When to run**:
-- After every logical block of work
-- Before updating specs
-- Before the end of a plan/phase
-- On every commit
+## Execution Model
 
-**Coverage**:
-- Authentication flows (phone, QR)
-- Dialog list navigation
-- Gallery view transitions
-- Basic UI interactions
-- No uploads/downloads/sharing
+### Docker Compose Workflow For Playwright
+Use Docker Compose so the app server and browser runner stay separated:
 
-**Timeout**: 60 seconds max
-
-#### 2. Long Test (`npm run test:long`)
-**Purpose**: Comprehensive validation of all features
-**When to run**:
-- On major changes (architecture, core logic)
-- Before releases
-- When changes affect features covered by long test but not short test
-- Manual trigger when needed
-
-**Coverage**:
-- All short test features PLUS:
-- Upload/download flows
-- Sharing functionality
-- Cache management
-- Error states
-- Mobile responsiveness
-- Performance with large datasets
-
-**Timeout**: 5 minutes max
-
-## Test Flows
-
-### Short Test Flow
-```
-1. App Launch
-   - Load app with mock adapter
-   - Verify auth screen appears
-
-2. Authentication
-   - Phone login flow
-   - QR login flow
-   - Verify successful login
-
-3. Dialog Navigation
-   - Load dialog list
-   - Switch tabs (Galleries/Groups/Chats)
-   - Search functionality
-   - Select a dialog
-
-4. Gallery View
-   - Load media grid
-   - Switch to list view
-   - Filter media types
-   - Basic selection
-
-5. Fullscreen Viewer
-   - Open media in viewer
-   - Navigate between items
-   - Close viewer
-
-6. Settings
-   - Open settings panel
-   - Verify settings load
-   - Close settings
-```
-
-### Long Test Flow (Additional)
-```
-7. Upload Flow
-   - Upload media/file
-   - Verify progress
-   - Verify completion
-
-8. Download Flow
-   - Select and download items
-   - Verify download progress
-   - Verify completion
-
-9. Sharing & Forwarding
-   - Share functionality
-   - Forward to dialogs
-   - Copy to clipboard
-
-10. Cache Management
-    - Clear thumbnails cache
-    - Clear full media cache
-    - Verify storage updates
-
-11. Error States
-    - Network errors
-    - Offline mode
-    - Rate limiting
-
-12. Mobile Testing
-    - Touch interactions
-    - Pull-to-refresh
-    - Mobile gestures
-
-13. Performance
-    - Large dataset loading
-    - Memory usage
-    - Scroll performance
-```
-
-## Mock Data Requirements
-
-### Sample Files Structure
-```
-samples/
-├── dialogs.json              # Dialog list data
-├── dialog-media/            # Media for each dialog
-│   ├── gallery_photos.json
-│   ├── work_chat.json
-│   └── family_chat.json
-└── media-files/             # Binary files (thumbnails)
-    └── thumbnails/
-        ├── photo1_thumb.jpg
-        ├── photo2_thumb.jpg
-        └── video1_thumb.jpg
-```
-
-### Mock Adapter Behavior
-- Returns pre-defined dialog list
-- Provides sample media items
-- Simulates network delays (100-500ms)
-- Simulates download progress
-- Handles authentication with mock data
-
-## Agent/Kilo Rules
-
-### Testing Rules for Agents
-1. **Short Test Mandatory**:
-   - Run `npm run test:short` after every logical block of work
-   - Fix any failures before proceeding
-   - Run before updating APPLICATION_SPEC.md
-   - Run before completing a plan/phase
-
-2. **Long Test Triggers**:
-   - Run `npm run test:long` when:
-     - Changing authentication logic
-     - Modifying navigation flows
-     - Updating core UI components
-     - Changing data fetching logic
-     - Before major releases
-   - Can be run manually when needed
-
-3. **Test Environment**:
-   - Always use mock adapter (`VITE_USE_MOCK_ADAPTER=true`)
-   - Run in headless mode for CI
-   - Use mobile viewport for responsive testing
-
-4. **Failure Handling**:
-   - Test failures must be addressed immediately
-   - Update tests if behavior changes intentionally
-   - Document test changes in commit messages
-
-### Kilo Command Integration
 ```bash
-# Development workflow
-kilo test:short    # Run short test suite
-kilo test:long     # Run long test suite
-kilo test:all      # Run both suites
+docker-compose up --build playwright
 
-# CI/CD integration
-kilo ci:test       # Run appropriate tests based on changes
+# Specific suite/project example
+docker-compose run --rm playwright npx playwright test --config=playwright.config.ts --grep "@short" --project=desktop-chrome
 ```
 
-## Implementation Plan
+Do not rely on direct `npm run test:short` execution inside a single Docker container for required Playwright validation.
 
-### Phase 1: Foundation
-1. Install Playwright and dependencies
-2. Create sample mock data files
-3. Set up test configuration
+### Docker Workflow For Type Check
+```bash
+docker run --rm --network host \
+  -v "$(pwd)":/app -w /app \
+  node:20-alpine npm run check
+```
 
-### Phase 2: Short Test
-1. Implement authentication tests
-2. Implement navigation tests
-3. Implement basic UI tests
-4. Verify short test passes
+## Validation Gates
 
-### Phase 3: Long Test
-1. Extend with upload/download tests
-2. Add sharing/forwarding tests
-3. Implement cache management tests
-4. Add error state tests
+### Always Required For Non-Documentation Blocks
+After every logical block that changes executable behavior, test files, or validation-sensitive UI contracts:
+1. run `npm run check` in Docker
+2. run the required short suite for the touched supported behavior
+3. run the relevant long suite only if the touched advanced flow is implemented and currently claimed as supported
+4. record the result in `.kilo/status.md`
 
-### Phase 4: Integration
-1. Update AGENTS.md with testing rules
-2. Create Kilo commands
-3. Set up CI/CD pipeline
-4. Document test usage
+### Documentation-Only Blocks
+When the work is limited to markdown/process truth alignment and intentionally does not change code, tests, selectors, or supported executable behavior:
+1. do not invent validation that was not run
+2. record the validation deferral in `.kilo/status.md`
+3. do not claim restored product behavior from documentation edits alone
+
+## Suite Definitions
+
+### Short Suite
+**Purpose**: fast validation of currently supported baseline UI.
+
+**Required coverage**:
+- auth screen rendering
+- phone auth flow
+- QR screen rendering or QR baseline behavior that is actually implemented
+- dialogs screen rendering and tab semantics
+- settings open/close baseline
+- gallery baseline only when the current status/spec accept it as supported
+- viewer baseline only when the current status/spec accept it as supported
+
+**Not allowed**:
+- commented-out assertions
+- no-op tests that only navigate without checking behavior
+- assertions for unsupported download/share/upload/cache/mobile flows
+
+### Long Suite
+**Purpose**: extended validation of supported advanced flows only.
+
+**Retention rule**:
+- keep a long test only if the feature exists in real UI and `APPLICATION_SPEC.md` currently claims it as supported
+- rewrite or remove long tests that depend on unsupported dialogs, menus, downloads, uploads, sharing, cache confirmations, or mobile-only UI that is not actually present
+
+## Stable UI Contract For Tests
+
+### Screen markers
+- `data-testid="auth-screen"`
+- `data-testid="dialogs-screen"`
+- `data-testid="gallery-screen"`
+- `data-testid="settings-screen"`
+
+### Auth markers
+- `phone-input`
+- `send-code-button`
+- `verification-code-input`
+- `submit-code-button`
+- `2fa-password-input`
+- `submit-password-button`
+- `auth-status`
+- `qr-form`
+- `qr-canvas`
+- `qr-refresh-button`
+- `qr-2fa-section`
+- `qr-2fa-password-input`
+- `qr-2fa-submit-button`
+
+### Dialog markers
+- `galleries-tab`
+- `groups-tab`
+- `chats-tab`
+- `galleries-list`
+- `groups-list`
+- `chats-list`
+- `dialog-search`
+- `empty-galleries`
+- `dialog-item`
+- `dialog-toggle-button`
+
+### Selector policy
+- Do not invent selectors that are not present in the UI.
+- Prefer stable hooks over text-only selectors when available.
+- Conditional UI must be tested conditionally or with setup that truthfully makes it appear.
+
+## Current Known Testing Gaps
+1. Long Playwright specs still need pruning or rewrite so they cover executable supported flows only.
+2. Any long spec expecting unsupported upload, download, share, forward, cache-confirmation, or mobile-menu UI must not remain a required claim.
+3. Product and test truth must continue to be synchronized in `APPLICATION_SPEC.md` and `.kilo/status.md` whenever supported behavior changes.
+
+## Failure Handling
+- Treat required-suite failures as blocking for the affected logical block.
+- Fix the product or rewrite the test only when the test no longer matches supported behavior.
+- Never hide a failing requirement by replacing it with a weaker or placeholder assertion.
+- Record failing validations and their current disposition in `.kilo/status.md` immediately.
+
+## Agent Requirements
+- Read `APPLICATION_SPEC.md` and `.kilo/status.md` before changing tests.
+- Update `.kilo/status.md` whenever test scope, validation state, deferrals, blockers, or accepted gaps change.
+- Record each validation command and result in `.kilo/status.md`.
+- Never count a suite as useful coverage if the assertions are effectively empty.
 
 ## Success Criteria
 
-### Short Test Success
-- All authentication flows work
-- Navigation between screens works
-- Basic UI interactions function
-- Test completes within 60 seconds
-- No critical errors in console
+### Short Suite Success
+- Every required short test performs real assertions
+- No required short test is a placeholder or commented-out shell
+- Short suite matches supported baseline behavior described in `APPLICATION_SPEC.md`
 
-### Long Test Success
-- All short test criteria met
-- Upload/download functionality works
-- Sharing/forwarding works
-- Cache management functions
-- Error states handled properly
-- Mobile responsiveness verified
-- Test completes within 5 minutes
-
-## Maintenance
-
-### Test Updates
-- Update tests when UI changes
-- Keep mock data current
-- Review test coverage quarterly
-- Update testing rules as needed
-
-### Performance Monitoring
-- Track test execution time
-- Monitor test stability
-- Address flaky tests promptly
-- Optimize slow tests
+### Long Suite Success
+- Every retained long test covers a real supported advanced flow
+- Unsupported advanced flows are documented as gaps instead of being hidden behind placeholder or stale assertions
 
 ## References
-- [Playwright Documentation](https://playwright.dev/)
-- [Mock Data Specification](samples/INDEX.md)
-- [Application Specification](APPLICATION_SPEC.md)
-- [Agent Instructions](AGENTS.md)
+- `APPLICATION_SPEC.md`
+- `.kilo/status.md`
+- `AGENTS.md`
+- `playwright.config.ts`
+- `docker-compose.yml`
