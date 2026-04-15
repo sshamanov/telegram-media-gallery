@@ -24,6 +24,9 @@
     toggleSelectedMedia,
     selectMediaRange,
     selectAllVisibleMedia,
+    downloadQueueState,
+    enqueueDownloads,
+    cancelDownloads,
   } from '../../stores/gallery'
   import { galleryIds, toggleGallery } from '../../stores/dialogs'
   import { settings } from '../../stores/settings'
@@ -162,6 +165,15 @@
     }
   }
 
+  async function handleBulkDownload(): Promise<void> {
+    if (selectedCount === 0) {
+      return
+    }
+
+    const selectedItems = visibleItems.filter((item) => $selectedMediaIds.has(item.id))
+    await enqueueDownloads(selectedItems)
+  }
+
   onMount(() => {
     scroller?.focus()
   })
@@ -197,9 +209,49 @@
           >
             Select All
           </button>
-        </div>
-      </header>
-    {:else}
+          <button
+            class="button primary"
+            type="button"
+            on:click={() => handleBulkDownload()}
+            disabled={selectedCount === 0 || $downloadQueueState.active}
+            data-testid="gallery-selection-download"
+          >
+            Download
+          </button>
+         </div>
+       </header>
+
+       {#if $downloadQueueState.active}
+         <div class="panel download-panel" data-testid="gallery-download-panel">
+           <div class="download-progress">
+             <div class="download-status">
+               Downloading {$downloadQueueState.currentIndex + 1} of {$downloadQueueState.totalItems} items
+               {#if $downloadQueueState.currentIndex >= 0 && $downloadQueueState.items[$downloadQueueState.currentIndex]}
+                 - {$downloadQueueState.items[$downloadQueueState.currentIndex].fileName}
+               {/if}
+             </div>
+             <div class="progress-bar">
+               <div
+                 class="progress-fill"
+                 style="width: {$downloadQueueState.currentIndex >= 0 && $downloadQueueState.items[$downloadQueueState.currentIndex]
+                   ? $downloadQueueState.items[$downloadQueueState.currentIndex].progress + '%'
+                   : '0%'}"
+               ></div>
+             </div>
+             <div class="download-actions">
+               <button
+                 class="button ghost small"
+                 type="button"
+                 on:click={cancelDownloads}
+                 data-testid="gallery-download-cancel"
+               >
+                 Cancel
+               </button>
+             </div>
+           </div>
+         </div>
+       {/if}
+     {:else}
       <header class="panel gallery-header">
         <button class="button ghost" type="button" on:click={back} data-testid="gallery-back-button">← Back</button>
 
@@ -376,6 +428,43 @@
     display: flex;
     gap: 10px;
     padding: 12px;
+  }
+
+  .download-panel {
+    padding: 12px;
+  }
+
+  .download-progress {
+    display: grid;
+    gap: 8px;
+  }
+
+  .download-status {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+  }
+
+  .progress-bar {
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    transition: width 0.3s ease;
+  }
+
+  .download-actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .button.small {
+    padding: 6px 12px;
+    font-size: 0.85rem;
   }
 
   .filter-bar {

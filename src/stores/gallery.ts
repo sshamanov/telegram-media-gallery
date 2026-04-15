@@ -2,7 +2,7 @@ import { get, writable } from 'svelte/store'
 import { debugLog } from '../lib/debug'
 import { classifyMediaType } from '../lib/media'
 import { getTelegramAdapter, type MessagePage } from '../lib/telegram/adapter'
-import type { Dialog, GalleryViewMode, MediaItem, Message, UploadMode, UploadQueueItem, UploadQueueState, UploadState } from '../types/telegram'
+import type { Dialog, GalleryViewMode, MediaItem, Message, UploadMode, UploadQueueItem, UploadQueueState, UploadState, DownloadQueueState, DownloadQueueItem } from '../types/telegram'
 import { persisted } from './persisted'
 
 const PAGE_SIZE = 100
@@ -32,6 +32,14 @@ export const uploadQueueState = writable<UploadQueueState>({
   mode: 'media',
   currentIndex: -1,
   items: [],
+})
+
+export const downloadQueueState = writable<DownloadQueueState>({
+  active: false,
+  currentIndex: -1,
+  items: [],
+  totalItems: 0,
+  completedItems: 0,
 })
 
 export const selectionMode = writable(false)
@@ -477,4 +485,107 @@ export function selectAllVisibleMedia(itemIds: string[]): void {
 
 export function isMediaSelected(itemId: string): boolean {
   return get(selectedMediaIds).has(itemId)
+}
+
+function updateDownloadQueueItem(itemId: string, updater: (item: DownloadQueueItem) => DownloadQueueItem): void {
+  downloadQueueState.update((current) => ({
+    ...current,
+    items: current.items.map((item) => item.id === itemId ? updater(item) : item),
+  }))
+}
+
+async function processDownloadQueue(mediaItems: MediaItem[]): Promise<void> {
+  for (let index = 0; index < get(downloadQueueState).items.length; index += 1) {
+    const snapshot = get(downloadQueueState)
+    const item = snapshot.items[index]
+
+    if (!item || item.status === 'cancelled' || item.status === 'complete') {
+      continue
+    }
+
+    downloadQueueState.update((current) => ({ ...current, active: true, currentIndex: index }))
+    updateDownloadQueueItem(item.id, (current) => ({ ...current, status: 'downloading', progress: 0, error: null }))
+
+    const mediaItem = mediaItems.find((m) => m.id === item.mediaItemId)
+    if (!mediaItem) {
+      updateDownloadQueueItem(item.id, (current) => ({
+        ...current,
+        status: 'error',
+        error: 'Media item not found',
+      }))
+      continue
+    }
+
+    const controller = new AbortController()
+
+    try {
+      const { getCachedOrDownloadBlob, saveBlob } = await import('../lib/files')
+      
+      const blob = await getCachedOrDownloadBlob(mediaItem, 'full', {
+        onProgress: (progress) => {
+          updateDownloadQueueItem(item.id, (current) => ({ ...current, progress }))
+        },
+        abortSignal: controller.signal,
+      })
+
+      if (!blob) {
+        throw new Error('Download failed: no blob returned')
+      }
+
+      saveBlob(blob, item.fileName)
+      updateDownloadQueueItem(item.id, (current) => ({ ...current, progress: 100, status: 'complete', error: null }))
+      downloadQueueState.update((current) => ({ ...current, completedItems: current.completedItems + 1 }))
+    } catch (error) {
+      const isCancelled = controller.signal.aborted
+      updateDownloadQueueItem(item.id, (current) => ({
+        ...current,
+        progress: isCancelled ? current.progress : 0,
+        status: isCancelled ? 'cancelled' : 'error',
+        error: isCancelled ? 'Download cancelled' : error instanceof Error ? error.message : 'Download failed',
+      }))
+    }
+  }
+
+  downloadQueueState.update((current) => ({ ...current, active: false, currentIndex: -1 }))
+}
+
+export async function enqueueDownloads(mediaItems: MediaItem[]): Promise<void> {
+  if (mediaItems.length === 0) {
+    return
+  }
+
+  const items: DownloadQueueItem[] = mediaItems.map((item) => ({
+    id: crypto.randomUUID(),
+    mediaItemId: item.id,
+    fileName: item.filename,
+    progress: 0,
+    status: 'queued',
+    error: null,
+  }))
+
+  downloadQueueState.set({
+    active: true,
+    currentIndex: 0,
+    items,
+    totalItems: items.length,
+    completedItems: 0,
+  })
+
+  await processDownloadQueue(mediaItems)
+}
+
+export function cancelDownloads(): void {
+  downloadQueueState.update((current) => ({
+    ...current,
+    active: false,
+    currentIndex: -1,
+    items: current.items.map((item, index) =>
+      item.status === 'complete'
+        ? item
+        : {
+            ...item,
+            status: index >= current.currentIndex ? 'cancelled' : item.status,
+            error: index >= current.currentIndex ? 'Download cancelled' : item.error,
+          }),
+  }))
 }

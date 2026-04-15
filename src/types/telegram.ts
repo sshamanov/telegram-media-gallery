@@ -117,3 +117,22 @@ export interface UploadQueueState {
   currentIndex: number
   items: UploadQueueItem[]
 }
+
+export type DownloadQueueItemStatus = 'queued' | 'downloading' | 'complete' | 'error' | 'cancelled'
+
+export interface DownloadQueueItem {
+  id: string
+  mediaItemId: string
+  fileName: string
+  progress: number
+  status: DownloadQueueItemStatus
+  error: string | null
+}
+
+export interface DownloadQueueState {
+  active: boolean
+  currentIndex: number
+  items: DownloadQueueItem[]
+  totalItems: number
+  completedItems: number
+}

@@ -130,4 +130,71 @@ test.describe('Gallery View @short', () => {
     await expect(galleryPage.getByTestId('gallery-back-button')).toBeVisible();
     await expect(galleryPage.getByTestId('gallery-selection-header')).not.toBeVisible();
   });
+
+  test('selection mode: download button appears when items selected', async ({ galleryPage }) => {
+    const firstDialog = galleryPage.locator('[data-testid="dialog-item"]').first();
+    await firstDialog.click();
+
+    const firstMediaItem = galleryPage.locator('[data-testid="media-item"]').first();
+    await expect(firstMediaItem).toBeVisible({ timeout: 5000 });
+
+    // Enter selection mode with ctrl click
+    await galleryPage.keyboard.down('Control');
+    await firstMediaItem.click();
+    await galleryPage.keyboard.up('Control');
+
+    await expect(galleryPage.getByTestId('gallery-selection-header')).toBeVisible();
+    
+    // Download button should be visible and enabled
+    const downloadButton = galleryPage.getByTestId('gallery-selection-download');
+    await expect(downloadButton).toBeVisible();
+    await expect(downloadButton).toBeEnabled();
+  });
+
+  test('selection mode: download button disabled when no items selected', async ({ galleryPage }) => {
+    const firstDialog = galleryPage.locator('[data-testid="dialog-item"]').first();
+    await firstDialog.click();
+
+    const firstMediaItem = galleryPage.locator('[data-testid="media-item"]').first();
+    await expect(firstMediaItem).toBeVisible({ timeout: 5000 });
+
+    // Enter selection mode with ctrl click
+    await galleryPage.keyboard.down('Control');
+    await firstMediaItem.click();
+    await galleryPage.keyboard.up('Control');
+
+    await expect(galleryPage.getByTestId('gallery-selection-header')).toBeVisible();
+    
+    // Click to deselect
+    await firstMediaItem.click();
+    
+    // Download button should be disabled
+    const downloadButton = galleryPage.getByTestId('gallery-selection-download');
+    await expect(downloadButton).toBeVisible();
+    await expect(downloadButton).toBeDisabled();
+  });
+
+  test('selection mode: download panel appears when download starts', async ({ galleryPage }) => {
+    const firstDialog = galleryPage.locator('[data-testid="dialog-item"]').first();
+    await firstDialog.click();
+
+    const firstMediaItem = galleryPage.locator('[data-testid="media-item"]').first();
+    await expect(firstMediaItem).toBeVisible({ timeout: 5000 });
+
+    // Enter selection mode with ctrl click
+    await galleryPage.keyboard.down('Control');
+    await firstMediaItem.click();
+    await galleryPage.keyboard.up('Control');
+
+    await expect(galleryPage.getByTestId('gallery-selection-header')).toBeVisible();
+    
+    // Click download button
+    await galleryPage.getByTestId('gallery-selection-download').click();
+    
+    // Download panel should appear
+    await expect(galleryPage.getByTestId('gallery-download-panel')).toBeVisible({ timeout: 5000 });
+    
+    // Should show download status
+    await expect(galleryPage.locator('.download-status')).toBeVisible();
+  });
 });

@@ -1,6 +1,6 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-15 12:09 +02:00
+**Last Updated:** 2026-04-15 15:27 +02:00
 **Current Phase:** Phase 1 complete, ready for Phase 2 actions implementation
 **Active Plan:** `.kilo/plans/1776176222439-sunny-river.md`
 **Branch:** `main`
@@ -41,7 +41,7 @@
 - `completed` Update APPLICATION_SPEC.md with Phase 1 supported behavior
 - `completed` Run validation (npm run check, short tests) and update status
 - `completed` Implement multi-select with long-press on mobile
-- `pending` Add bulk download (chained individual downloads)
+- `completed` Add bulk download (chained individual downloads)
 - `pending` Implement forward to Telegram chat functionality
 - `pending` Add Android Share API integration
 - `pending` Implement copy to clipboard (images only)
@@ -63,11 +63,12 @@
 - 2026-04-15 12:11 +02:00 - Updated `APPLICATION_SPEC.md` with Phase 1 supported behavior documentation.
 - 2026-04-15 12:12 +02:00 - Ran validation (type check and short tests) confirming Phase 1 features work correctly.
 - 2026-04-15 14:41 +02:00 - Completed Phase 2 selection mode implementation: added gallery store state, selection header, long-press mobile entry, ctrl/meta toggle, shift-range selection, and test coverage.
+- 2026-04-15 15:27 +02:00 - Completed Phase 2 bulk download implementation: added download queue state, download button to selection header, progress tracking UI, and test coverage.
 
 ## Current Blockers And Known Gaps
 
 ### Product blockers
-- Phase 2 actions (multi-select, bulk download, forward, share, copy) are not yet implemented.
+- Phase 2 actions (forward, share, copy) are not yet implemented.
 - Upload mode selector (Send as media vs Send as file) needs refinement for large files.
 - Code-rule cleanup for direct production `console.*` removal is now complete.
 
@@ -77,13 +78,19 @@
 
 ### Rule violations or drift still tracked
 - The repo must continue to avoid claiming Phase 2+ gallery completion before long-test and product truth are reconciled.
-- Phase 2 actions (multi-select, bulk download, forward, share, copy, advanced upload UX) remain tracked as gaps until implemented end-to-end.
+- Phase 2 actions (forward, share, copy, advanced upload UX) remain tracked as gaps until implemented end-to-end.
 
 ## Spec/Status Drift
 - No known drift remains across `AGENTS.md`, `APPLICATION_SPEC.md`, `TESTING_STRATEGY.md`, and `.kilo/status.md` for process rules and accepted supported-behavior claims.
 - Product-level drift may still exist in code paths not rewritten in this documentation-only block; those are tracked as blockers rather than accepted support.
 
 ## Last Validation
+- 2026-04-15 15:27 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:20-alpine npm run check`
+  - Result: passed with 2 Svelte accessibility warnings (non-interactive element with tabindex, non-interactive element with mouse/keyboard listeners)
+  - Main note: type checking passes cleanly after bulk download implementation.
+- 2026-04-15 15:27 +02:00 - `docker-compose run --rm playwright npx playwright test --config=playwright.config.ts --grep "@short" --project=desktop-chrome --reporter=line`
+  - Result: passed (`27 passed`)
+  - Main note: short suite validates bulk download functionality including download button visibility, enabled/disabled states, and download panel appearance.
 - 2026-04-15 14:41 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:20-alpine npm run check`
   - Result: passed with 2 Svelte accessibility warnings (non-interactive element with tabindex, non-interactive element with mouse/keyboard listeners)
   - Main note: type checking passes cleanly after selection mode implementation.
@@ -118,6 +125,7 @@
 ## Recent Commit Log
 | Commit | Date | Description |
 |--------|------|-------------|
+| `4afef34` | 2026-04-15 | feat: add gallery selection mode |
 | `7b33ceb` | 2026-04-15 | Document Phase 1 gallery features and update status ledger |
 | `48d3955` | 2026-04-15 | Prune long Playwright specs to executable-only coverage |
 | `077fcab` | 2026-04-15 | Replace direct console.* calls with debug utility |
@@ -140,6 +148,7 @@
 
 ## Cross References
 - Active recovery plan: `.kilo/plans/1776176222439-sunny-river.md`
+- Active implementation plan: `.kilo/plans/1776274073000-bulk-download.md`
 - Rewrite plan: `.kilo/plans/1775737553407-cosmic-engine.md`
 - Testing strategy: `TESTING_STRATEGY.md`
 - Architecture spec: `APPLICATION_SPEC.md`
