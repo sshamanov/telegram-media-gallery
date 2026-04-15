@@ -1,5 +1,6 @@
 import type { Dialog, Message, TgMedia, UploadMode } from '../../types/telegram'
 import type { MessagePage, TelegramAdapter } from './adapter'
+import { debugWarn } from '../debug'
 
 // Load dialogs from JSON
 let DIALOGS: Dialog[] = []
@@ -15,7 +16,7 @@ async function loadDialogs(): Promise<Dialog[]> {
     DIALOGS = await response.json()
     return DIALOGS
   } catch (error) {
-    console.error('Failed to load dialogs.json, using fallback:', error)
+    debugWarn('Failed to load dialogs.json, using fallback:', error)
     // Fallback to hardcoded dialogs
     DIALOGS = [
       {
@@ -76,7 +77,7 @@ async function loadDialogMessages(dialogId: string): Promise<Message[]> {
     messagesCache.set(dialogId, data.messages)
     return data.messages
   } catch (error) {
-    console.error(`Failed to load messages for dialog ${dialogId}:`, error)
+    debugWarn(`Failed to load messages for dialog ${dialogId}:`, error)
     
     // Fallback to simulated messages
     const messages: Message[] = []
@@ -122,7 +123,7 @@ async function loadFileFromSamples(fileName: string): Promise<Uint8Array> {
     const buffer = await response.arrayBuffer()
     return new Uint8Array(buffer)
   } catch (error) {
-    console.error(`Failed to load file ${fileName}:`, error)
+    debugWarn(`Failed to load file ${fileName}:`, error)
     // Return empty data as fallback
     return new Uint8Array(0)
   }
@@ -256,7 +257,7 @@ export class MockTelegramAdapter implements TelegramAdapter {
           return fileData
         }
       } catch (error) {
-        console.warn(`Failed to load thumbnail for ${media.fileName}:`, error)
+        debugWarn(`Failed to load thumbnail for ${media.fileName}:`, error)
       }
     }
     
@@ -356,7 +357,7 @@ export class MockTelegramAdapter implements TelegramAdapter {
           return fileData
         }
       } catch (error) {
-        console.warn(`Failed to load full file ${media.fileName}:`, error)
+        debugWarn(`Failed to load full file ${media.fileName}:`, error)
       }
     }
     

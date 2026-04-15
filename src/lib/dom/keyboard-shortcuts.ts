@@ -8,6 +8,8 @@
  * - Support for modifier keys (Ctrl, Alt, Shift, Meta)
  */
 
+import { debugLog } from '../debug'
+
 export interface KeyboardShortcut {
   /** Keyboard key (e.g., 'k', 'ArrowLeft', 'Escape') */
   key: string
@@ -110,7 +112,7 @@ class KeyboardShortcutsManager {
       description: 'Go to galleries tab',
       action: () => {
         // Would navigate to galleries tab
-        console.log('Shift+G - Go to galleries')
+        debugLog('Shift+G - Go to galleries')
       }
     })
 
@@ -121,7 +123,7 @@ class KeyboardShortcutsManager {
       context: 'gallery',
       action: () => {
         // Would toggle gallery bookmark
-        console.log('Ctrl+G - Toggle gallery bookmark')
+        debugLog('Ctrl+G - Toggle gallery bookmark')
       }
     })
   }
