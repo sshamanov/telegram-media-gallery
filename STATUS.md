@@ -1,7 +1,7 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-16 01:19 +02:00
-**Current Phase:** Phase 3 planning complete; implementation kickoff queued
+**Last Updated:** 2026-04-16 01:39 +02:00
+**Current Phase:** Phase 3 Block 1 complete; Block 2 queued
 **Active Plan:** `.kilo/plans/1776295158000-phase-3-offline-kickoff.md`
 **Branch:** `main`
 **Ahead Of `origin/main`:** 37 commits
@@ -24,7 +24,7 @@
 - **Plan file:** `.kilo/plans/1776295158000-phase-3-offline-kickoff.md`
 - **Goal:** turn roadmap Phase 3 storage/offline scope into an execution-ready implementation order with truthful dependencies, touched files, and validation gates.
 - **Execution strategy:** land the real service-worker precache and production validation path first, then add offline dialog bootstrap, harden OPFS migration/fallback, align offline media behavior with the actual cache stack, and finish offline action guards plus Phase 3 coverage.
-- **Status:** planning complete; Block 1 ready for implementation
+- **Status:** Block 1 completed pending commit hash recording; Block 2 is next
 
 - **Plan file:** `.kilo/plans/1776291840732-kind-meadow.md`
 - **Goal:** finalize the canonical execution-ledger migration from `.kilo/status.md` to `STATUS.md` and reconcile authoritative governance references.
@@ -50,7 +50,7 @@
 - `completed` Record the ledger-migration commit hash for `.kilo/plans/1776291840732-kind-meadow.md` in `STATUS.md`.
 - `completed` Create and register `.kilo/plans/1776295158000-phase-3-offline-kickoff.md` as the active Phase 3 plan.
 - `completed` Capture Phase 3 ordered backlog blocks, touched files, dependencies, and validation gates from current readiness findings.
-- `pending` Implement Block 1: real app-shell service-worker precache and production-mode validation path.
+- `completed` Implement Block 1: real app-shell service-worker precache and production-mode validation path.
 - `pending` Implement Block 2: persisted dialog snapshot for offline bootstrap.
 - `pending` Implement Block 3: OPFS migration and fallback hardening.
 - `pending` Implement Block 4: offline media/thumb behavior alignment.
@@ -60,6 +60,8 @@
 - 2026-04-16 01:19 +02:00 - Activated `.kilo/plans/1776295158000-phase-3-offline-kickoff.md` as the new active Phase 3 plan derived from the roadmap Phase 3 scope and current readiness findings.
 - 2026-04-16 01:19 +02:00 - Recorded the missing ledger-migration completion hash `4bb25e9` for `.kilo/plans/1776291840732-kind-meadow.md` and closed the migration block in the active ledger sections.
 - 2026-04-16 01:19 +02:00 - Registered the ordered Phase 3 backlog: service-worker precache/production validation, offline dialog bootstrap, OPFS migration/fallback hardening, offline media alignment, and final offline guards plus coverage.
+- 2026-04-16 01:22 +02:00 - Started Block 1 implementation for real app-shell precache, explicit service-worker cache versioning, and a production-mode offline Playwright path.
+- 2026-04-16 01:39 +02:00 - Completed Block 1 implementation: production builds now emit a precached app-shell service worker, a plain-HTTP dist server backs offline validation, and long Playwright coverage proves offline shell bootstrap after one online visit.
 - 2026-04-16 01:11 +02:00 - Activated `.kilo/plans/1776291840732-kind-meadow.md` to finalize migration of the canonical execution ledger from `.kilo/status.md` to `STATUS.md`.
 - 2026-04-16 01:11 +02:00 - Updated active governance docs so forward-looking workflow references now use `STATUS.md`; preserved old `.kilo/status.md` references only where they remain factual history.
 - 2026-04-16 01:11 +02:00 - Confirmed `.kilo/status.md.js` is already absent and `.gitignore` already allows tracked `STATUS.md`; no further file-removal or ignore cleanup was required.
@@ -91,13 +93,13 @@
 
 ### Product blockers
 - Upload mode selector (Send as media vs Send as file) needs refinement for large files.
-- Phase 3 implementation has not started yet; Block 1 must establish real service-worker precache and a production-mode validation path before any offline support claim can move forward.
 - Offline bootstrap still lacks a persisted last-known dialog snapshot, so offline dialog list behavior is not yet a supported feature.
 - OPFS migration and fallback semantics remain incomplete, so storage behavior must still be treated as partially prepared groundwork rather than accepted support.
 
 ### Process/documentation blockers
 - No active migration blocker remains; the only intentional stale `.kilo/status.md` mentions are preserved historical facts in old ledger entries, old plans, and old commit descriptions.
 - `kilo.jsonc` already relies on broad `*.md` edit permissions, so no explicit `STATUS.md` permission cleanup was needed in this block.
+- Production offline validation now uses `scripts/serve-dist.mjs` instead of `vite preview` because the preview path served self-signed HTTPS, which prevented reliable service-worker installation in the Playwright production harness.
 
 ### Rule violations or drift still tracked
 - No active rule violation is tracked for the ledger migration.
@@ -108,9 +110,19 @@
 - ✅ `APPLICATION_SPEC.md` and `TESTING_STRATEGY.md` now align with the dedicated Playwright compose workflow.
 - ✅ Stale accepted-gap text for completed Phase 2 UX work has been removed from `APPLICATION_SPEC.md`.
 - ✅ `APPLICATION_SPEC.md` cross-references the new active Phase 3 plan while continuing to treat Phase 3 behavior as planned only.
+- ✅ Production app-shell precache behavior and the dedicated production offline validation path are now reflected in spec and status.
 - ℹ️ Historical references to `.kilo/status.md` remain in dated records by design and are not treated as active drift.
 
 ## Last Validation
+- 2026-04-16 01:39 +02:00 - `docker-compose -f docker-compose.test.yml up --build playwright-prod --abort-on-container-exit --exit-code-from playwright-prod`
+  - Result: passed (`1 passed`)
+  - Main note: dedicated production-mode Playwright validation proves one online visit installs the service worker and a later offline reload still boots the cached app shell from `dist/`.
+- 2026-04-16 01:38 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run build`
+  - Result: passed with pre-existing accessibility warnings and chunk size warnings
+  - Main note: production build now emits a rendered `dist/sw.js` with explicit app-shell cache versioning and hashed JS/CSS precache entries.
+- 2026-04-16 01:38 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
+  - Result: passed with 0 errors, 6 warnings (same pre-existing DialogPicker and GalleryGrid accessibility warnings)
+  - Main note: Block 1 code and test-harness changes type-check cleanly.
 - 2026-04-16 01:19 +02:00 - validation deferred for Phase 3 planning-only documentation block
   - Result: deferred
   - Reason: this logical block creates the dedicated Phase 3 execution plan and updates governing documentation only; no executable product behavior, test selectors, or runtime code changed.
@@ -224,11 +236,10 @@
 | `71863bf` | 2026-04-14 | Add global status document with project progress tracking |
 
 ## Next Execution Order
-1. Implement Block 1 from `.kilo/plans/1776295158000-phase-3-offline-kickoff.md`: real app-shell service-worker precache and production-mode validation path.
-2. Implement Block 2: persisted dialog snapshot for offline bootstrap.
-3. Implement Block 3: harden OPFS migration and fallback behavior.
-4. Implement Block 4: align offline thumbnail/full-media behavior with the actual cache architecture.
-5. Implement Block 5: finish offline action guards and Phase 3 coverage.
+1. Implement Block 2 from `.kilo/plans/1776295158000-phase-3-offline-kickoff.md`: persisted dialog snapshot for offline bootstrap.
+2. Implement Block 3: harden OPFS migration and fallback behavior.
+3. Implement Block 4: align offline thumbnail/full-media behavior with the actual cache architecture.
+4. Implement Block 5: finish offline action guards and Phase 3 coverage.
 
 ## Cross References
 - Active implementation plan: `.kilo/plans/1776295158000-phase-3-offline-kickoff.md`

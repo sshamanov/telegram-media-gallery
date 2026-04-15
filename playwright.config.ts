@@ -1,9 +1,24 @@
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig, devices } from '@playwright/test'
 
-// Determine if running in container mode (Playwright container connecting to external app server)
-const isContainerMode = process.env.PLAYWRIGHT_CONTAINER_MODE === 'true';
+const isContainerMode = process.env.PLAYWRIGHT_CONTAINER_MODE === 'true'
+const serverMode = process.env.PLAYWRIGHT_SERVER_MODE === 'production' ? 'production' : 'development'
+const baseURL = process.env.PLAYWRIGHT_BASE_URL || (serverMode === 'production' ? 'http://127.0.0.1:5173' : 'https://localhost:5173')
+const ignoreHTTPSErrors = baseURL.startsWith('https://')
 
-const config = {
+const webServer = {
+  command: serverMode === 'production'
+    ? 'npm run build && npm run serve:dist -- --host 0.0.0.0 --port 5173'
+    : 'npm run dev -- --host 0.0.0.0 --port 5173',
+  url: baseURL,
+  reuseExistingServer: serverMode !== 'production' && !process.env.CI,
+  timeout: 120 * 1000,
+  ignoreHTTPSErrors,
+  env: {
+    VITE_USE_MOCK_ADAPTER: 'true',
+  },
+}
+
+export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
@@ -11,10 +26,10 @@ const config = {
   workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
   use: {
-    baseURL: process.env.PLAYWRIGHT_BASE_URL || 'https://localhost:5173',
+    baseURL,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
-    ignoreHTTPSErrors: true,
+    ignoreHTTPSErrors,
   },
   projects: [
     {
@@ -26,21 +41,5 @@ const config = {
       use: { ...devices['Pixel 5'] },
     },
   ],
-};
-
-// Only include webServer configuration when NOT in container mode
-// In container mode, the app service already runs the server
-if (!isContainerMode) {
-  config.webServer = {
-    command: 'npm run dev',
-    url: 'https://localhost:5173',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000,
-    ignoreHTTPSErrors: true,
-    env: {
-      VITE_USE_MOCK_ADAPTER: 'true',
-    },
-  };
-}
-
-export default defineConfig(config);
+  ...(isContainerMode ? {} : { webServer }),
+})

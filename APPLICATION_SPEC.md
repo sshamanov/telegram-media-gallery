@@ -15,7 +15,8 @@ Browser-based photo/video gallery using Telegram as a storage backend. Client-on
 - Settings baseline is supported as a dedicated screen with inline cache/storage actions.
 - Gallery baseline and viewer baseline are implemented with Phase 1 media types (photos, videos, PDF, audio, documents).
 - Phase 2 actions (multi-select, bulk download, forward, share, copy, upload queue) are implemented and available in the UI.
-- Advanced gallery capabilities (OPFS cache, service worker, offline support) remain planned for Phase 3.
+- Production builds now register a real service worker that precaches the app shell (`/`, `/index.html`, hashed JS/CSS assets) and clears stale shell caches on activate.
+- Offline dialog/bootstrap/media behavior beyond the cached app shell remains planned for later Phase 3 blocks.
 
 ## Core Architecture
 
@@ -65,6 +66,7 @@ All Telegram API calls go through `src/lib/telegram/adapter.ts`. Feature code mu
 - If no environment override is present and Telegram API credentials are absent, the app defaults to mock mode.
 - `docker-compose.yml` is reserved for manual app-server usage and must not force mock mode.
 - `docker-compose.test.yml` is the dedicated Playwright/agent test compose path and may force mock mode for deterministic test runs.
+- `docker-compose.test.yml` also defines the production preview path used to validate offline shell bootstrap from `dist/`.
 
 ### Mock Mode Behavior
 - **Phone**: any phone number is accepted
@@ -199,7 +201,7 @@ Do not claim end-to-end support for these until they are rebuilt and revalidated
 ## Caching Strategy
 - **Thumbnails**: IndexedDB
 - **Full media**: OPFS where available in later phases
-- **Service worker cache**: app/offline shell resources when phase-scoped work restores that behavior
+- **Service worker cache**: production app shell precache for `/`, `/index.html`, and hashed JS/CSS assets; broader offline behavior remains phase-scoped
 - **Storage breakdown**: shown in settings with clear actions for each cache area
 
 ## Component Layout
@@ -264,6 +266,7 @@ Short tests are intended to validate only currently supported baseline behavior:
 - Long tests must cover only executable, supported flows.
 - If an advanced flow is not restored end-to-end, it must not remain as a required assertion.
 - Unsupported advanced behavior must be tracked as a gap instead of being hidden behind weakened tests.
+- Service-worker acceptance uses a dedicated production preview path; dev-server-only checks do not satisfy offline shell validation.
 
 ## Development Workflow
 

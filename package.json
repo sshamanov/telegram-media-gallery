@@ -7,9 +7,11 @@
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "build": "vite build",
     "preview": "vite preview",
+    "serve:dist": "node scripts/serve-dist.mjs",
     "test:install-browsers": "playwright install chromium",
     "test:short": "playwright test --config=playwright.config.ts --grep \"@short\" --project=desktop-chrome",
     "test:long": "playwright test --config=playwright.config.ts --grep \"@long\" --project=desktop-chrome",
+    "test:offline-shell": "playwright test --config=playwright.config.ts tests/e2e/long/offline.spec.ts --project=desktop-chrome",
     "test:all": "playwright test --config=playwright.config.ts",
     "test:ui": "playwright test --config=playwright.config.ts --grep \"@short\" --project=desktop-chrome",
     "test:visual": "echo 'Visual regression tests would use Playwright screenshot comparison'"
