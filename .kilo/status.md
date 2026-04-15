@@ -1,6 +1,6 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-15 15:27 +02:00
+**Last Updated:** 2026-04-15 21:20 +02:00
 **Current Phase:** Phase 1 complete, ready for Phase 2 actions implementation
 **Active Plan:** `.kilo/plans/1776176222439-sunny-river.md`
 **Branch:** `main`
@@ -86,12 +86,12 @@
 - Product-level drift may still exist in code paths not rewritten in this documentation-only block; those are tracked as blockers rather than accepted support.
 
 ## Last Validation
-- 2026-04-15 15:27 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:20-alpine npm run check`
+- 2026-04-15 21:15 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:20-alpine npm run check`
   - Result: passed with 2 Svelte accessibility warnings (non-interactive element with tabindex, non-interactive element with mouse/keyboard listeners)
-  - Main note: type checking passes cleanly after bulk download implementation.
-- 2026-04-15 15:27 +02:00 - `docker-compose run --rm playwright npx playwright test --config=playwright.config.ts --grep "@short" --project=desktop-chrome --reporter=line`
-  - Result: passed (`27 passed`)
-  - Main note: short suite validates bulk download functionality including download button visibility, enabled/disabled states, and download panel appearance.
+  - Main note: type checking passes cleanly after forward implementation and test fixes.
+- 2026-04-15 21:15 +02:00 - `docker-compose run --rm playwright npx playwright test --config=playwright.config.ts --reporter=line`
+  - Result: passed (`86 passed`)
+  - Main note: All tests pass including short suite (30 tests), long suite (11 tests), smoke tests (2 tests), and mobile tests (43 tests). Forward functionality fully validated.
 - 2026-04-15 14:41 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:20-alpine npm run check`
   - Result: passed with 2 Svelte accessibility warnings (non-interactive element with tabindex, non-interactive element with mouse/keyboard listeners)
   - Main note: type checking passes cleanly after selection mode implementation.
@@ -126,6 +126,7 @@
 ## Recent Commit Log
 | Commit | Date | Description |
 |--------|------|-------------|
+| `792dd0b` | 2026-04-15 | feat: add forward to Telegram chat functionality |
 | `96de4d5` | 2026-04-15 | feat: add bulk download for selected media items |
 | `4afef34` | 2026-04-15 | feat: add gallery selection mode |
 | `7b33ceb` | 2026-04-15 | Document Phase 1 gallery features and update status ledger |
@@ -141,12 +142,10 @@
 | `71863bf` | 2026-04-14 | Add global status document with project progress tracking |
 
 ## Next Execution Order
-1. Implement bulk download (chained individual downloads).
-2. Add forward to Telegram chat functionality.
-3. Implement Android Share API integration.
-4. Add copy to clipboard (images only).
-5. Enhance upload with progress panel and queue UX.
-6. Consider addressing the accessibility warning (non-interactive element with tabindex in GalleryGrid).
+1. Implement Android Share API integration.
+2. Add copy to clipboard (images only).
+3. Enhance upload with progress panel and queue UX.
+4. Consider addressing the accessibility warning (non-interactive element with tabindex in GalleryGrid).
 
 ## Cross References
 - Active recovery plan: `.kilo/plans/1776176222439-sunny-river.md`
