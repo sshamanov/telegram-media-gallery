@@ -1,8 +1,8 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-16 00:45 +02:00
-**Current Phase:** Phase 2 implementation complete, all UX gaps addressed
-**Active Plan:** `.kilo/plans/1776287315253-happy-moon.md`
+**Last Updated:** 2026-04-16 01:14 +02:00
+**Current Phase:** Ledger migration complete; Phase 3 planning next
+**Active Plan:** `.kilo/plans/1776291840732-kind-meadow.md`
 **Branch:** `main`
 **Ahead Of `origin/main`:** 37 commits
 
@@ -10,20 +10,26 @@
 
 ## Authority Split
 - `APPLICATION_SPEC.md` is the architecture and supported-behavior source of truth.
-- `.kilo/status.md` is the execution ledger for active work, todo state, validations, blockers, and commits.
+- `STATUS.md` is the execution ledger for active work, todo state, validations, blockers, and commits.
 - `AGENTS.md` enforces synchronization between both documents.
 
 ## Current Reality
 - Auth, dialog, settings, gallery baseline, and viewer baseline are the current accepted baseline scope.
-- Advanced gallery capabilities remain partially restored and are not accepted as fully supported behavior.
-- Documentation work is being used to reconcile process truth before any new code or test changes.
+- Phase 2 actions are implemented; authoritative docs now treat `STATUS.md` as the canonical execution ledger.
+- Advanced gallery capabilities remain planned for Phase 3 and are not accepted as fully supported behavior.
+- Historical references to `.kilo/status.md` remain only where they are part of dated facts, old plans, or old commit descriptions.
 - This ledger must stay stricter than historical claims and must not overstate completion.
 
 ## Active Plan
-- **Plan file:** `.kilo/plans/1776287315253-happy-moon.md`
+- **Plan file:** `.kilo/plans/1776291840732-kind-meadow.md`
+- **Goal:** finalize the canonical execution-ledger migration from `.kilo/status.md` to `STATUS.md` and reconcile authoritative governance references.
+- **Execution strategy:** update active workflow docs to point at `STATUS.md`, keep historical `.kilo/status.md` references only where factual, confirm dedicated Playwright compose references remain correct, run Docker type-check validation, and close the migration block with a single documentation/config commit.
+- **Status:** completed with validation; pending commit log entry for this block
+
+- **Plan file:** (completed) `.kilo/plans/1776287315253-happy-moon.md`
 - **Goal:** reconcile Phase 2 spec and status, run required validation, audit acceptance criteria, finish remaining UX gaps
 - **Execution strategy:** update docs to match implemented Phase 2 features, run comprehensive validation, audit Phase 2 acceptance criteria, implement missing upload queue UX and edge cases
-- **Status:** in progress
+- **Status:** completed with commit `d7fee13`
 
 - **Plan file:** (completed) `.kilo/plans/1776281608527-nimble-canyon.md`
 - **Goal:** migrate runtime baseline from node:20-alpine to node:24-alpine across compose files and documentation; validate compatibility.
@@ -36,42 +42,19 @@
 - **Status:** completed with commit `b28eb0b`
 
 ## Current Todo States
-- `completed` Rewrite `.kilo/status.md` into structured execution ledger with active plan, todo states, blockers, validations, and commit log.
-- `completed` Update `AGENTS.md` to require status updates for every plan, todo state change, validation, logical block, and commit.
-- `completed` Correct `APPLICATION_SPEC.md` to match current architecture, test workflow, and known gaps.
-- `completed` Align `TESTING_STRATEGY.md` and stale Kilo docs with executable-only test policy.
-- `completed` Rebuild `src/components/gallery/GalleryGrid.svelte` to a smaller working baseline.
-- `completed` Restore real short Playwright coverage for gallery/viewer baseline.
-- `completed` Update `kilo.jsonc` with explicit agent-level permissions for `.kilo/status.md` edits.
-- `completed` Prune or rewrite long Playwright specs to executable-only coverage.
-- `completed` Run required validation (`npm run check`, short tests, relevant long tests) and record results here.
-- `completed` Clean up direct production `console.*` usage (replace with debug utility).
-- `completed` Add Phase 1 media types (PDF, audio, documents) support to gallery
-- `completed` Implement per-gallery filter bar with type pills
-- `completed` Add list view mode with 48px thumb/icon + filename + date + size
-- `completed` Update APPLICATION_SPEC.md with Phase 1 supported behavior
-- `completed` Run validation (npm run check, short tests) and update status
-- `completed` Implement multi-select with long-press on mobile
-- `completed` Add bulk download (chained individual downloads)
-- `completed` Implement forward to Telegram chat functionality
-- `completed` Fix mock media and grid controls (plan: `.kilo/plans/1776256839612-quiet-orchid.md`)
-- `completed` Investigate real Telegram auth failure for phone code and QR 2FA flows
-- `completed` Separate manual compose workflow from agent Playwright/mock compose workflow
-- `completed` Migrate runtime baseline to Node 24 (plan: `.kilo/plans/1776281608527-nimble-canyon.md`)
-- `completed` Add Android Share API integration
-- `completed` Implement copy to clipboard (images only)
-- `completed` Enhance upload with progress panel and queue UX
-- `completed` Update `.kilo/status.md` to register new plan as active and update current phase
-- `completed` Read current implementations for Phase 2 features (share, copy, upload queue UX, forward UX, selection UX)
-- `completed` Update APPLICATION_SPEC.md to truthfully reflect Phase 2 implementation status
-- `completed` Run Docker type check on Node 24
-- `completed` Run build on Node 24
-- `completed` Run short Playwright suite via docker-compose.test.yml
-- `completed` Run relevant long Playwright coverage for supported flows
-- `completed` Audit Phase 2 acceptance criteria against actual implementation
-- `completed` Update `.kilo/status.md` with validation results and audit findings
+- `completed` Register `.kilo/plans/1776291840732-kind-meadow.md` as the active migration plan in `STATUS.md`.
+- `completed` Update authoritative governance docs so active workflow references use `STATUS.md` as the canonical ledger.
+- `completed` Reconcile authoritative test-compose references to `docker-compose.test.yml`.
+- `completed` Confirm redundant `.kilo/status.md.js` artifact is absent and leave `.kilo/status.md` removed.
+- `completed` Clean active/normative ledger sections so `STATUS.md` is self-canonical while preserving dated historical `.kilo/status.md` references.
+- `completed` Run required Docker type-check validation for this migration block.
+- `pending` Start Phase 3 planning after the ledger migration commit is recorded.
 
 ## Plan And Todo History
+- 2026-04-16 01:11 +02:00 - Activated `.kilo/plans/1776291840732-kind-meadow.md` to finalize migration of the canonical execution ledger from `.kilo/status.md` to `STATUS.md`.
+- 2026-04-16 01:11 +02:00 - Updated active governance docs so forward-looking workflow references now use `STATUS.md`; preserved old `.kilo/status.md` references only where they remain factual history.
+- 2026-04-16 01:11 +02:00 - Confirmed `.kilo/status.md.js` is already absent and `.gitignore` already allows tracked `STATUS.md`; no further file-removal or ignore cleanup was required.
+- 2026-04-16 01:11 +02:00 - Reconciled authoritative docs: fixed dedicated Playwright compose references and removed stale accepted-gap claims for already-completed Phase 2 UX work.
 - 2026-04-14 19:41 +02:00 - Activated `.kilo/plans/1776176222439-sunny-river.md`.
 - 2026-04-14 19:42 +02:00 - Created execution todo set for process recovery, gallery baseline rebuild, and test restoration.
 - 2026-04-14 19:53 +02:00 - Completed initial process-document alignment across status, AGENTS, spec, testing strategy, and stale Kilo docs.
@@ -98,36 +81,27 @@
 ## Current Blockers And Known Gaps
 
 ### Product blockers
-- Phase 2 actions (share, copy, forward) are now complete.
 - Upload mode selector (Send as media vs Send as file) needs refinement for large files.
-- Code-rule cleanup for direct production `console.*` removal is now complete.
-- Mock media thumbnails and grid-columns button are now fixed.
-- Real Telegram auth investigation completed: compose separation resolved the issue.
-- Manual compose workflow no longer forces mock mode; dedicated test compose handles Playwright validation.
+- Phase 3 work (OPFS cache, service worker, offline support) remains planned and not yet started in this block.
 
 ### Process/documentation blockers
-- Validation for the latest markdown-only rewrite has been intentionally deferred because the user explicitly requested no code, Playwright, or test work in that block.
-- Long Playwright coverage audit and rewrite is now complete; all retained long assertions map to supported behavior.
+- No active migration blocker remains; the only intentional stale `.kilo/status.md` mentions are preserved historical facts in old ledger entries, old plans, and old commit descriptions.
+- `kilo.jsonc` already relies on broad `*.md` edit permissions, so no explicit `STATUS.md` permission cleanup was needed in this block.
 
 ### Rule violations or drift still tracked
-- Phase 2 core functionality is implemented (selection, download, forward, share, copy, upload queue)
-- Phase 2 UX gaps have been addressed:
-  1. ✅ Upload queue now has per-item cancel/retry controls
-  2. ✅ File System Access API folder picker added for bulk downloads (falls back to per-file)
-  3. ✅ FLOOD_WAIT pause/resume implemented for bulk operations
-  4. ✅ Success/error toasts added for share and copy operations
-  5. ✅ Large-file share errors show user-facing toasts
-- ✅ Accessibility warning in GalleryGrid fixed (added role="application")
-- Comprehensive validation tests have been run and pass for implemented features
+- No active rule violation is tracked for the ledger migration.
+- Historical `.kilo/status.md` mentions remain intentionally unedited when rewriting them would falsify dated records.
 
 ## Spec/Status Drift
-- ✅ `APPLICATION_SPEC.md` updated to reflect Phase 2 as implemented
-- ✅ `.kilo/status.md` metadata updated with current plan and phase
-- ✅ Latest Phase 2 validation recorded
-- ✅ Phase 2 acceptance criteria audit completed
-- ⚠️ Phase 2 implementation gaps identified: upload queue UX missing per-item controls, missing File System Access API, missing FLOOD_WAIT handling, missing share/copy toasts
+- ✅ `STATUS.md` is the canonical execution ledger in active workflow documentation.
+- ✅ `APPLICATION_SPEC.md` and `TESTING_STRATEGY.md` now align with the dedicated Playwright compose workflow.
+- ✅ Stale accepted-gap text for completed Phase 2 UX work has been removed from `APPLICATION_SPEC.md`.
+- ℹ️ Historical references to `.kilo/status.md` remain in dated records by design and are not treated as active drift.
 
 ## Last Validation
+- 2026-04-16 01:14 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
+  - Result: passed with 0 errors, 6 warnings (DialogPicker overlay accessibility warnings and GalleryGrid keyboard/a11y warnings remain pre-existing).
+  - Main note: required migration-block validation passed after governance-doc reconciliation and ledger canonicalization updates.
 - 2026-04-16 00:45 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
   - Result: passed with 0 errors, 6 warnings (accessibility warnings in DialogPicker; GalleryGrid warning fixed)
   - Main note: type checking passes cleanly after Phase 2 UX gap implementation.
@@ -234,22 +208,15 @@
 | `71863bf` | 2026-04-14 | Add global status document with project progress tracking |
 
 ## Next Execution Order
-1. ✅ Read current implementations for Phase 2 features (share, copy, upload queue UX, forward UX, selection UX)
-2. ✅ Update APPLICATION_SPEC.md to truthfully reflect Phase 2 implementation status
-3. ✅ Run Docker type check and build on Node 24
-4. ✅ Run short and relevant long Playwright suites via docker-compose.test.yml
-5. ✅ Audit Phase 2 acceptance criteria against actual implementation
-6. ✅ Update .kilo/status.md with validation results and audit findings
-7. ✅ Implement upload queue per-item cancel/retry controls
-8. ✅ Add desktop File System Access API folder picker for bulk downloads
-9. ✅ Implement FLOOD_WAIT pause/resume for bulk operations
-10. ✅ Add success/error toasts for share and copy flows
-11. ✅ Add user-facing toast for large-file share errors
-12. ✅ Fix accessibility warning in GalleryGrid
-13. Plan Phase 3 features (OPFS cache, service worker, offline support)
+1. ✅ Finalize the canonical ledger migration to `STATUS.md`.
+2. ✅ Reconcile authoritative governance docs and compose references.
+3. ✅ Run Docker type check for the migration block.
+4. Record the migration commit hash in `STATUS.md`.
+5. Start Phase 3 planning (OPFS cache, service worker, offline support).
 
 ## Cross References
-- Active implementation plan: `.kilo/plans/1776287315253-happy-moon.md`
+- Active implementation plan: `.kilo/plans/1776291840732-kind-meadow.md`
+- Previous implementation plan: `.kilo/plans/1776287315253-happy-moon.md`
 - Previous implementation plan: `.kilo/plans/1776281608527-nimble-canyon.md`
 - Previous implementation plan: `.kilo/plans/1776256839612-quiet-orchid.md`
 - Previous recovery plan: `.kilo/plans/1776176222439-sunny-river.md`

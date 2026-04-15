@@ -6,15 +6,15 @@ Define the executable validation policy for Telegram Gallery. This document cove
 ## Document Role
 - `TESTING_STRATEGY.md` defines how validation must be run and what counts as valid coverage.
 - `APPLICATION_SPEC.md` defines which product behavior is currently supported.
-- `.kilo/status.md` records the latest validation results, deferrals, blockers, and scope changes.
+- `STATUS.md` records the latest validation results, deferrals, blockers, and scope changes.
 - If these documents disagree, reconcile them before claiming a suite or flow is complete.
 
 ## Core Rules
 - Required suites must contain executable assertions only.
 - Commented-out, placeholder, speculative, weakened, or aspirational tests do not satisfy process gates.
-- If behavior is not currently supported, remove it from required test claims and document it as a gap in `APPLICATION_SPEC.md` and `.kilo/status.md`.
+- If behavior is not currently supported, remove it from required test claims and document it as a gap in `APPLICATION_SPEC.md` and `STATUS.md`.
 - `npm run check` is a required gate for every non-documentation logical block.
-- Documentation-only work may defer code/test validation only when the deferral is explicitly recorded in `.kilo/status.md`.
+- Documentation-only work may defer code/test validation only when the deferral is explicitly recorded in `STATUS.md`.
 
 ## Test Stack
 - **Framework**: Playwright
@@ -53,12 +53,12 @@ After every logical block that changes executable behavior, test files, or valid
 1. run `npm run check` in Docker
 2. run the required short suite for the touched supported behavior
 3. run the relevant long suite only if the touched advanced flow is implemented and currently claimed as supported
-4. record the result in `.kilo/status.md`
+4. record the result in `STATUS.md`
 
 ### Documentation-Only Blocks
 When the work is limited to markdown/process truth alignment and intentionally does not change code, tests, selectors, or supported executable behavior:
 1. do not invent validation that was not run
-2. record the validation deferral in `.kilo/status.md`
+2. record the validation deferral in `STATUS.md`
 3. do not claim restored product behavior from documentation edits alone
 
 ## Suite Definitions
@@ -128,20 +128,19 @@ When the work is limited to markdown/process truth alignment and intentionally d
 - Conditional UI must be tested conditionally or with setup that truthfully makes it appear.
 
 ## Current Known Testing Gaps
-1. Long Playwright specs still need pruning or rewrite so they cover executable supported flows only.
-2. Any long spec expecting unsupported upload, download, share, forward, cache-confirmation, or mobile-menu UI must not remain a required claim.
-3. Product and test truth must continue to be synchronized in `APPLICATION_SPEC.md` and `.kilo/status.md` whenever supported behavior changes.
+1. Mock-mode coverage validates supported UI flows but does not prove production-grade Telegram media fidelity.
+2. Product and test truth must continue to be synchronized in `APPLICATION_SPEC.md` and `STATUS.md` whenever supported behavior changes.
 
 ## Failure Handling
 - Treat required-suite failures as blocking for the affected logical block.
 - Fix the product or rewrite the test only when the test no longer matches supported behavior.
 - Never hide a failing requirement by replacing it with a weaker or placeholder assertion.
-- Record failing validations and their current disposition in `.kilo/status.md` immediately.
+- Record failing validations and their current disposition in `STATUS.md` immediately.
 
 ## Agent Requirements
-- Read `APPLICATION_SPEC.md` and `.kilo/status.md` before changing tests.
-- Update `.kilo/status.md` whenever test scope, validation state, deferrals, blockers, or accepted gaps change.
-- Record each validation command and result in `.kilo/status.md`.
+- Read `APPLICATION_SPEC.md` and `STATUS.md` before changing tests.
+- Update `STATUS.md` whenever test scope, validation state, deferrals, blockers, or accepted gaps change.
+- Record each validation command and result in `STATUS.md`.
 - Never count a suite as useful coverage if the assertions are effectively empty.
 
 ## Success Criteria
@@ -157,7 +156,7 @@ When the work is limited to markdown/process truth alignment and intentionally d
 
 ## References
 - `APPLICATION_SPEC.md`
-- `.kilo/status.md`
+- `STATUS.md`
 - `AGENTS.md`
 - `playwright.config.ts`
-- `docker-compose.yml`
+- `docker-compose.test.yml` - dedicated Playwright validation compose file

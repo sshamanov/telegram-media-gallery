@@ -5,7 +5,7 @@ Browser-based photo/video gallery using Telegram as a storage backend. Client-on
 
 ## Document Authority
 - `APPLICATION_SPEC.md` is the architecture and supported-behavior source of truth.
-- `.kilo/status.md` is the execution ledger for active plans, todo states, validations, blockers, and commits.
+- `STATUS.md` is the execution ledger for active plans, todo states, validations, blockers, and commits.
 - `AGENTS.md` defines the required execution workflow and document-maintenance rules.
 - If code, spec, and status disagree, reconcile the documents before claiming a feature or flow is complete.
 
@@ -186,18 +186,15 @@ The accepted gallery baseline is limited to the currently restored behavior:
 - Viewer close path is part of the accepted baseline
 - Viewer baseline is treated as supported only to the extent validated by the current short suite and status ledger
 
-### Advanced Gallery Features Not Yet Accepted As Restored
+### Advanced Gallery Features Still Planned Or Not Yet Accepted
 Do not claim end-to-end support for these until they are rebuilt and revalidated:
-- UI-layer infinite scroll restoration
-- bulk selection and bulk actions
-- download / share / copy / forward flows
-- gallery onboarding hints
+- OPFS full-media cache
+- service worker offline shell behavior
 - masonry layout
+- desktop layout variants
 - keyboard gallery navigation beyond validated viewer baseline behavior
 - pull-to-refresh
-- advanced upload UX beyond what is explicitly revalidated later
-
-These paths may exist partially in code or stores, but they are not currently accepted as supported behavior.
+- gallery onboarding hints
 
 ## Caching Strategy
 - **Thumbnails**: IndexedDB
@@ -233,7 +230,7 @@ src/components/
 ## Testing Workflow
 
 ### Required Validation Policy
-- `npm run check` must pass before a logical block is complete unless the block is intentionally documentation-only and the deferral is recorded in `.kilo/status.md`.
+- `npm run check` must pass before a logical block is complete unless the block is intentionally documentation-only and the deferral is recorded in `STATUS.md`.
 - Required Playwright suites must contain executable assertions only.
 - Commented-out, placeholder, or speculative tests do not satisfy process gates.
 
@@ -249,10 +246,10 @@ Current repo scripts include:
 ### Docker Compose Test Flow
 Use Docker Compose for Playwright validation:
 ```bash
-docker-compose up --build playwright
+docker-compose -f docker-compose.test.yml up --build playwright
 
 # Specific suite/project example
-docker-compose run --rm playwright npx playwright test --config=playwright.config.ts --grep "@short" --project=desktop-chrome
+docker-compose -f docker-compose.test.yml run --rm playwright npx playwright test --config=playwright.config.ts --grep "@short" --project=desktop-chrome
 ```
 
 ### Current Required Short-Test Contract
@@ -272,9 +269,9 @@ Short tests are intended to validate only currently supported baseline behavior:
 
 ### Required Order
 1. Read `APPLICATION_SPEC.md`
-2. Read `.kilo/status.md`
+2. Read `STATUS.md`
 3. Read the active plan file
-4. Update `.kilo/status.md` before starting non-trivial work
+4. Update `STATUS.md` before starting non-trivial work
 5. Implement or rewrite one logical block
 6. Run required validation or record a truthful deferral for documentation-only work
 7. Update spec/status to match reality
@@ -283,7 +280,7 @@ Short tests are intended to validate only currently supported baseline behavior:
 ### Commit Discipline
 - Commit after every logical block of work
 - Conventional Commits only: `feat`, `fix`, `refactor`, `style`, `chore`, `docs`, `test`
-- Record validation and commit results in `.kilo/status.md`
+- Record validation and commit results in `STATUS.md`
 
 ## Supported Media Types And Gallery Features
 
@@ -329,11 +326,7 @@ Short tests are intended to validate only currently supported baseline behavior:
 
 ## Known Issues And Accepted Gaps
 1. Upload mode selector (Send as media vs Send as file) needs refinement for large files.
-2. Upload queue UX lacks per-item cancel/retry controls (only bulk cancel available)
-3. File System Access API folder picker not implemented for bulk downloads (falls back to per-file downloads)
-4. FLOOD_WAIT pause/resume behavior not implemented for bulk operations
-5. Accessibility warning in GalleryGrid (non-interactive element with tabindex)
-6. Mock mode is sufficient for baseline UI validation but does not prove production-grade Telegram media fidelity.
+2. Mock mode is sufficient for baseline UI validation but does not prove production-grade Telegram media fidelity.
 
 ## Browser Compatibility
 - Primary targets: Chrome desktop and Android Chrome (PWA)
@@ -342,8 +335,8 @@ Short tests are intended to validate only currently supported baseline behavior:
 
 ## Cross References
 - Agent rules: `AGENTS.md`
-- Execution ledger: `.kilo/status.md`
-- Active plan: `.kilo/plans/1776287315253-happy-moon.md`
+- Execution ledger: `STATUS.md`
+- Active plan: `.kilo/plans/1776291840732-kind-meadow.md`
 - Testing guide: `TESTING_STRATEGY.md`
 - Mock data reference: `samples/INDEX.md`
 
