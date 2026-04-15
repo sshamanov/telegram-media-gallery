@@ -336,7 +336,7 @@ Short tests are intended to validate only currently supported baseline behavior:
 ## Cross References
 - Agent rules: `AGENTS.md`
 - Execution ledger: `STATUS.md`
-- Active plan: `.kilo/plans/1776291840732-kind-meadow.md`
+- Active plan: `.kilo/plans/1776295158000-phase-3-offline-kickoff.md`
 - Testing guide: `TESTING_STRATEGY.md`
 - Mock data reference: `samples/INDEX.md`
 

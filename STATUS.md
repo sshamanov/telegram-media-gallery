@@ -1,8 +1,8 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-16 01:14 +02:00
-**Current Phase:** Ledger migration complete; Phase 3 planning next
-**Active Plan:** `.kilo/plans/1776291840732-kind-meadow.md`
+**Last Updated:** 2026-04-16 01:19 +02:00
+**Current Phase:** Phase 3 planning complete; implementation kickoff queued
+**Active Plan:** `.kilo/plans/1776295158000-phase-3-offline-kickoff.md`
 **Branch:** `main`
 **Ahead Of `origin/main`:** 37 commits
 
@@ -21,10 +21,15 @@
 - This ledger must stay stricter than historical claims and must not overstate completion.
 
 ## Active Plan
+- **Plan file:** `.kilo/plans/1776295158000-phase-3-offline-kickoff.md`
+- **Goal:** turn roadmap Phase 3 storage/offline scope into an execution-ready implementation order with truthful dependencies, touched files, and validation gates.
+- **Execution strategy:** land the real service-worker precache and production validation path first, then add offline dialog bootstrap, harden OPFS migration/fallback, align offline media behavior with the actual cache stack, and finish offline action guards plus Phase 3 coverage.
+- **Status:** planning complete; Block 1 ready for implementation
+
 - **Plan file:** `.kilo/plans/1776291840732-kind-meadow.md`
 - **Goal:** finalize the canonical execution-ledger migration from `.kilo/status.md` to `STATUS.md` and reconcile authoritative governance references.
 - **Execution strategy:** update active workflow docs to point at `STATUS.md`, keep historical `.kilo/status.md` references only where factual, confirm dedicated Playwright compose references remain correct, run Docker type-check validation, and close the migration block with a single documentation/config commit.
-- **Status:** completed with validation; pending commit log entry for this block
+- **Status:** completed with commit `4bb25e9`
 
 - **Plan file:** (completed) `.kilo/plans/1776287315253-happy-moon.md`
 - **Goal:** reconcile Phase 2 spec and status, run required validation, audit acceptance criteria, finish remaining UX gaps
@@ -42,15 +47,19 @@
 - **Status:** completed with commit `b28eb0b`
 
 ## Current Todo States
-- `completed` Register `.kilo/plans/1776291840732-kind-meadow.md` as the active migration plan in `STATUS.md`.
-- `completed` Update authoritative governance docs so active workflow references use `STATUS.md` as the canonical ledger.
-- `completed` Reconcile authoritative test-compose references to `docker-compose.test.yml`.
-- `completed` Confirm redundant `.kilo/status.md.js` artifact is absent and leave `.kilo/status.md` removed.
-- `completed` Clean active/normative ledger sections so `STATUS.md` is self-canonical while preserving dated historical `.kilo/status.md` references.
-- `completed` Run required Docker type-check validation for this migration block.
-- `pending` Start Phase 3 planning after the ledger migration commit is recorded.
+- `completed` Record the ledger-migration commit hash for `.kilo/plans/1776291840732-kind-meadow.md` in `STATUS.md`.
+- `completed` Create and register `.kilo/plans/1776295158000-phase-3-offline-kickoff.md` as the active Phase 3 plan.
+- `completed` Capture Phase 3 ordered backlog blocks, touched files, dependencies, and validation gates from current readiness findings.
+- `pending` Implement Block 1: real app-shell service-worker precache and production-mode validation path.
+- `pending` Implement Block 2: persisted dialog snapshot for offline bootstrap.
+- `pending` Implement Block 3: OPFS migration and fallback hardening.
+- `pending` Implement Block 4: offline media/thumb behavior alignment.
+- `pending` Implement Block 5: offline action guards and final Phase 3 coverage.
 
 ## Plan And Todo History
+- 2026-04-16 01:19 +02:00 - Activated `.kilo/plans/1776295158000-phase-3-offline-kickoff.md` as the new active Phase 3 plan derived from the roadmap Phase 3 scope and current readiness findings.
+- 2026-04-16 01:19 +02:00 - Recorded the missing ledger-migration completion hash `4bb25e9` for `.kilo/plans/1776291840732-kind-meadow.md` and closed the migration block in the active ledger sections.
+- 2026-04-16 01:19 +02:00 - Registered the ordered Phase 3 backlog: service-worker precache/production validation, offline dialog bootstrap, OPFS migration/fallback hardening, offline media alignment, and final offline guards plus coverage.
 - 2026-04-16 01:11 +02:00 - Activated `.kilo/plans/1776291840732-kind-meadow.md` to finalize migration of the canonical execution ledger from `.kilo/status.md` to `STATUS.md`.
 - 2026-04-16 01:11 +02:00 - Updated active governance docs so forward-looking workflow references now use `STATUS.md`; preserved old `.kilo/status.md` references only where they remain factual history.
 - 2026-04-16 01:11 +02:00 - Confirmed `.kilo/status.md.js` is already absent and `.gitignore` already allows tracked `STATUS.md`; no further file-removal or ignore cleanup was required.
@@ -82,7 +91,9 @@
 
 ### Product blockers
 - Upload mode selector (Send as media vs Send as file) needs refinement for large files.
-- Phase 3 work (OPFS cache, service worker, offline support) remains planned and not yet started in this block.
+- Phase 3 implementation has not started yet; Block 1 must establish real service-worker precache and a production-mode validation path before any offline support claim can move forward.
+- Offline bootstrap still lacks a persisted last-known dialog snapshot, so offline dialog list behavior is not yet a supported feature.
+- OPFS migration and fallback semantics remain incomplete, so storage behavior must still be treated as partially prepared groundwork rather than accepted support.
 
 ### Process/documentation blockers
 - No active migration blocker remains; the only intentional stale `.kilo/status.md` mentions are preserved historical facts in old ledger entries, old plans, and old commit descriptions.
@@ -96,9 +107,13 @@
 - ✅ `STATUS.md` is the canonical execution ledger in active workflow documentation.
 - ✅ `APPLICATION_SPEC.md` and `TESTING_STRATEGY.md` now align with the dedicated Playwright compose workflow.
 - ✅ Stale accepted-gap text for completed Phase 2 UX work has been removed from `APPLICATION_SPEC.md`.
+- ✅ `APPLICATION_SPEC.md` cross-references the new active Phase 3 plan while continuing to treat Phase 3 behavior as planned only.
 - ℹ️ Historical references to `.kilo/status.md` remain in dated records by design and are not treated as active drift.
 
 ## Last Validation
+- 2026-04-16 01:19 +02:00 - validation deferred for Phase 3 planning-only documentation block
+  - Result: deferred
+  - Reason: this logical block creates the dedicated Phase 3 execution plan and updates governing documentation only; no executable product behavior, test selectors, or runtime code changed.
 - 2026-04-16 01:14 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
   - Result: passed with 0 errors, 6 warnings (DialogPicker overlay accessibility warnings and GalleryGrid keyboard/a11y warnings remain pre-existing).
   - Main note: required migration-block validation passed after governance-doc reconciliation and ledger canonicalization updates.
@@ -184,6 +199,7 @@
 ## Recent Commit Log
 | Commit | Date | Description |
 |--------|------|-------------|
+| `4bb25e9` | 2026-04-16 | docs: finalize STATUS.md ledger migration |
 | `d7fee13` | 2026-04-16 | feat: complete Phase 2 UX gaps with per-item upload controls, folder picker, FLOOD_WAIT handling, and toasts |
 | `39077e6` | 2026-04-15 | docs: reconcile Phase 2 spec and status with validation |
 | `fc04eb1` | 2026-04-15 | docs: update status ledger with completed Phase 2 features |
@@ -208,14 +224,15 @@
 | `71863bf` | 2026-04-14 | Add global status document with project progress tracking |
 
 ## Next Execution Order
-1. ✅ Finalize the canonical ledger migration to `STATUS.md`.
-2. ✅ Reconcile authoritative governance docs and compose references.
-3. ✅ Run Docker type check for the migration block.
-4. Record the migration commit hash in `STATUS.md`.
-5. Start Phase 3 planning (OPFS cache, service worker, offline support).
+1. Implement Block 1 from `.kilo/plans/1776295158000-phase-3-offline-kickoff.md`: real app-shell service-worker precache and production-mode validation path.
+2. Implement Block 2: persisted dialog snapshot for offline bootstrap.
+3. Implement Block 3: harden OPFS migration and fallback behavior.
+4. Implement Block 4: align offline thumbnail/full-media behavior with the actual cache architecture.
+5. Implement Block 5: finish offline action guards and Phase 3 coverage.
 
 ## Cross References
-- Active implementation plan: `.kilo/plans/1776291840732-kind-meadow.md`
+- Active implementation plan: `.kilo/plans/1776295158000-phase-3-offline-kickoff.md`
+- Previous implementation plan: `.kilo/plans/1776291840732-kind-meadow.md`
 - Previous implementation plan: `.kilo/plans/1776287315253-happy-moon.md`
 - Previous implementation plan: `.kilo/plans/1776281608527-nimble-canyon.md`
 - Previous implementation plan: `.kilo/plans/1776256839612-quiet-orchid.md`
