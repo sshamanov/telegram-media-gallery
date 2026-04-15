@@ -13,8 +13,9 @@ Browser-based photo/video gallery using Telegram as a storage backend. Client-on
 - Auth baseline is supported through the real app shell and the mock adapter.
 - Dialog browsing baseline is supported, including Galleries / Groups / Chats tabs and conditional search.
 - Settings baseline is supported as a dedicated screen with inline cache/storage actions.
-- Gallery baseline and viewer baseline have recently been rebuilt and are the accepted baseline target, but advanced gallery capabilities are still not accepted as restored until they are revalidated and recorded in `.kilo/status.md`.
-- This document does not claim that all historical gallery, upload, download, share, cache, or mobile flows are currently restored.
+- Gallery baseline and viewer baseline are implemented with Phase 1 media types (photos, videos, PDF, audio, documents).
+- Phase 2 actions (multi-select, bulk download, forward, share, copy, upload queue) are implemented and available in the UI.
+- Advanced gallery capabilities (OPFS cache, service worker, offline support) remain planned for Phase 3.
 
 ## Core Architecture
 
@@ -309,15 +310,15 @@ Short tests are intended to validate only currently supported baseline behavior:
 - Filter bar with zero-item tabs disabled
 - List view shows filename, date, and size
 
-### Phase 2 (Actions) - Partially Implemented / Planned
-- Multi-select with long-press on mobile
-- Bulk download (chained individual downloads)
-- Forward to Telegram chat
-- Android Share API integration
-- Copy to clipboard (images only)
-- Bulk upload with queue UX
-- Upload progress panel
-- Dialog picker for forwarding
+### Phase 2 (Actions) - Implemented
+- Multi-select with long-press on mobile, ctrl/meta toggle, shift-range selection
+- Bulk download (chained individual downloads) with progress tracking
+- Forward to Telegram chat with dialog picker
+- Android Share API integration (Web Share API)
+- Copy to clipboard (images only) with Clipboard API
+- Bulk upload with queue UX and per-file progress
+- Upload progress panel with cancel controls
+- Selection header with Download, Forward, Share, Copy actions
 
 ### Phase 3+ (Advanced) - Planned
 - OPFS full-media cache
@@ -327,10 +328,12 @@ Short tests are intended to validate only currently supported baseline behavior:
 - Light theme support
 
 ## Known Issues And Accepted Gaps
-1. Phase 2 actions (multi-select, bulk operations) are not yet implemented.
-2. Upload mode selector (Send as media vs Send as file) needs refinement for large files.
-3. Some production code still contains direct `console.*` usage and must be aligned with `src/lib/debug.ts` or removed in later code work.
-4. Mock mode is sufficient for baseline UI validation but does not prove production-grade Telegram media fidelity.
+1. Upload mode selector (Send as media vs Send as file) needs refinement for large files.
+2. Upload queue UX lacks per-item cancel/retry controls (only bulk cancel available)
+3. File System Access API folder picker not implemented for bulk downloads (falls back to per-file downloads)
+4. FLOOD_WAIT pause/resume behavior not implemented for bulk operations
+5. Accessibility warning in GalleryGrid (non-interactive element with tabindex)
+6. Mock mode is sufficient for baseline UI validation but does not prove production-grade Telegram media fidelity.
 
 ## Browser Compatibility
 - Primary targets: Chrome desktop and Android Chrome (PWA)
@@ -340,7 +343,7 @@ Short tests are intended to validate only currently supported baseline behavior:
 ## Cross References
 - Agent rules: `AGENTS.md`
 - Execution ledger: `.kilo/status.md`
-- Active recovery plan: `.kilo/plans/1776176222439-sunny-river.md`
+- Active plan: `.kilo/plans/1776287315253-happy-moon.md`
 - Testing guide: `TESTING_STRATEGY.md`
 - Mock data reference: `samples/INDEX.md`
 

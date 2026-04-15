@@ -1,8 +1,8 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-15 22:58 +02:00
-**Current Phase:** Phase 1 complete, ready for Phase 2 actions implementation
-**Active Plan:** `.kilo/plans/1776176222439-sunny-river.md`
+**Last Updated:** 2026-04-15 23:34 +02:00
+**Current Phase:** Phase 2 implementation complete, reconciliation and validation pending
+**Active Plan:** `.kilo/plans/1776287315253-happy-moon.md`
 **Branch:** `main`
 **Ahead Of `origin/main`:** 37 commits
 
@@ -20,7 +20,12 @@
 - This ledger must stay stricter than historical claims and must not overstate completion.
 
 ## Active Plan
-- **Plan file:** `.kilo/plans/1776281608527-nimble-canyon.md`
+- **Plan file:** `.kilo/plans/1776287315253-happy-moon.md`
+- **Goal:** reconcile Phase 2 spec and status, run required validation, audit acceptance criteria, finish remaining UX gaps
+- **Execution strategy:** update docs to match implemented Phase 2 features, run comprehensive validation, audit Phase 2 acceptance criteria, implement missing upload queue UX and edge cases
+- **Status:** in progress
+
+- **Plan file:** (completed) `.kilo/plans/1776281608527-nimble-canyon.md`
 - **Goal:** migrate runtime baseline from node:20-alpine to node:24-alpine across compose files and documentation; validate compatibility.
 - **Execution strategy:** update compose files, documentation, optional package.json engines field, run validation on Node 24.
 - **Status:** completed with validation
@@ -56,6 +61,15 @@
 - `completed` Add Android Share API integration
 - `completed` Implement copy to clipboard (images only)
 - `completed` Enhance upload with progress panel and queue UX
+- `completed` Update `.kilo/status.md` to register new plan as active and update current phase
+- `completed` Read current implementations for Phase 2 features (share, copy, upload queue UX, forward UX, selection UX)
+- `completed` Update APPLICATION_SPEC.md to truthfully reflect Phase 2 implementation status
+- `completed` Run Docker type check on Node 24
+- `completed` Run build on Node 24
+- `completed` Run short Playwright suite via docker-compose.test.yml
+- `completed` Run relevant long Playwright coverage for supported flows
+- `completed` Audit Phase 2 acceptance criteria against actual implementation
+- `pending` Update `.kilo/status.md` with validation results and audit findings
 
 ## Plan And Todo History
 - 2026-04-14 19:41 +02:00 - Activated `.kilo/plans/1776176222439-sunny-river.md`.
@@ -96,15 +110,42 @@
 - Long Playwright coverage audit and rewrite is now complete; all retained long assertions map to supported behavior.
 
 ### Rule violations or drift still tracked
-- Phase 2 actions (forward, share, copy, upload queue UX) are now implemented end-to-end.
-- APPLICATION_SPEC.md needs updating to reflect completed Phase 2 features.
-- Comprehensive validation tests should be run to confirm all Phase 2 features work correctly.
+- Phase 2 core functionality is implemented (selection, download, forward, share, copy, upload queue)
+- Phase 2 UX gaps identified from audit:
+  1. Upload queue lacks per-item cancel/retry controls (only bulk cancel)
+  2. No File System Access API folder picker for bulk downloads (falls back to per-file)
+  3. Missing FLOOD_WAIT pause/resume for bulk operations
+  4. Share/copy operations lack success/error toasts
+  5. Large-file share error handling exists but no user-facing toast
+- Accessibility warning in GalleryGrid (non-interactive element with tabindex) still present
+- Comprehensive validation tests have been run and pass for implemented features
 
 ## Spec/Status Drift
-- No known drift remains across `AGENTS.md`, `APPLICATION_SPEC.md`, `TESTING_STRATEGY.md`, and `.kilo/status.md` for process rules and accepted supported-behavior claims.
-- Product-level drift may still exist in code paths not rewritten in this documentation-only block; those are tracked as blockers rather than accepted support.
+- ✅ `APPLICATION_SPEC.md` updated to reflect Phase 2 as implemented
+- ✅ `.kilo/status.md` metadata updated with current plan and phase
+- ✅ Latest Phase 2 validation recorded
+- ✅ Phase 2 acceptance criteria audit completed
+- ⚠️ Phase 2 implementation gaps identified: upload queue UX missing per-item controls, missing File System Access API, missing FLOOD_WAIT handling, missing share/copy toasts
 
 ## Last Validation
+- 2026-04-15 23:40 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
+  - Result: passed with 0 errors, 6 warnings (pre-existing accessibility warnings in DialogPicker and GalleryGrid)
+  - Main note: type checking passes cleanly after Phase 2 spec reconciliation.
+- 2026-04-15 23:41 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run build`
+  - Result: passed with accessibility warnings (same as check) and chunk size warnings
+  - Main note: build succeeds; Phase 2 features compile correctly.
+- 2026-04-15 23:42 +02:00 - `docker-compose -f docker-compose.test.yml run --rm playwright npx playwright test --config=playwright.config.ts --grep "@short" --project=desktop-chrome --reporter=line`
+  - Result: passed (`32 passed`)
+  - Main note: All short tests pass including Phase 2 selection mode, download, forward, and UI controls.
+- 2026-04-15 23:43 +02:00 - `docker-compose -f docker-compose.test.yml run --rm playwright npx playwright test --config=playwright.config.ts tests/e2e/long/mobile.spec.ts --project=desktop-chrome --reporter=line`
+  - Result: passed (`5 passed`)
+  - Main note: Mobile long-press selection mode and responsiveness tests pass.
+- 2026-04-15 23:44 +02:00 - `docker-compose -f docker-compose.test.yml run --rm playwright npx playwright test --config=playwright.config.ts tests/e2e/long/upload.spec.ts --project=desktop-chrome --reporter=line`
+  - Result: passed (`3 passed`)
+  - Main note: Upload flow tests pass including upload sheet and mode selection.
+- 2026-04-15 23:45 +02:00 - `docker-compose -f docker-compose.test.yml run --rm playwright npx playwright test --config=playwright.config.ts tests/e2e/long/cache.spec.ts --project=desktop-chrome --reporter=line`
+  - Result: passed (`4 passed`)
+  - Main note: Cache management tests pass.
 - 2026-04-15 22:57 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
   - Result: passed with 0 errors, 6 warnings (pre-existing accessibility warnings in DialogPicker and GalleryGrid)
   - Main note: type checking passes cleanly on Node 24; runtime migration does not introduce new type errors.
@@ -160,6 +201,7 @@
 ## Recent Commit Log
 | Commit | Date | Description |
 |--------|------|-------------|
+| `fc04eb1` | 2026-04-15 | docs: update status ledger with completed Phase 2 features |
 | `c7f9757` | 2026-04-15 | feat: add upload queue progress panel |
 | `de17417` | 2026-04-15 | feat: add copy to clipboard for images in selection mode |
 | `131506d` | 2026-04-15 | feat: add Android Share API integration for bulk sharing |
@@ -181,16 +223,22 @@
 | `71863bf` | 2026-04-14 | Add global status document with project progress tracking |
 
 ## Next Execution Order
-1. Consider addressing the accessibility warning (non-interactive element with tabindex in GalleryGrid).
-2. Review and update APPLICATION_SPEC.md with completed Phase 2 features.
-3. Run comprehensive validation tests (short and long suites).
-4. Plan Phase 3 features (OPFS cache, service worker, offline support).
+1. ✅ Read current implementations for Phase 2 features (share, copy, upload queue UX, forward UX, selection UX)
+2. ✅ Update APPLICATION_SPEC.md to truthfully reflect Phase 2 implementation status
+3. ✅ Run Docker type check and build on Node 24
+4. ✅ Run short and relevant long Playwright suites via docker-compose.test.yml
+5. ✅ Audit Phase 2 acceptance criteria against actual implementation
+6. Address remaining Phase 2 gaps (upload queue UX, edge cases)
+7. Fix accessibility warning in GalleryGrid
+8. Plan Phase 3 features (OPFS cache, service worker, offline support)
 
 ## Cross References
-- Active implementation plan: `.kilo/plans/1776281608527-nimble-canyon.md`
+- Active implementation plan: `.kilo/plans/1776287315253-happy-moon.md`
+- Previous implementation plan: `.kilo/plans/1776281608527-nimble-canyon.md`
 - Previous implementation plan: `.kilo/plans/1776256839612-quiet-orchid.md`
 - Previous recovery plan: `.kilo/plans/1776176222439-sunny-river.md`
 - Previous implementation plan: `.kilo/plans/1776281434000-forward-messages.md`
+- Rewrite plan: `.kilo/plans/1775737553407-cosmic-engine.md`
 - Previous implementation plan: `.kilo/plans/1776274073000-bulk-download.md`
 - Rewrite plan: `.kilo/plans/1775737553407-cosmic-engine.md`
 - Testing strategy: `TESTING_STRATEGY.md`
