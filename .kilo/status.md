@@ -201,6 +201,7 @@
 ## Recent Commit Log
 | Commit | Date | Description |
 |--------|------|-------------|
+| `39077e6` | 2026-04-15 | docs: reconcile Phase 2 spec and status with validation |
 | `fc04eb1` | 2026-04-15 | docs: update status ledger with completed Phase 2 features |
 | `c7f9757` | 2026-04-15 | feat: add upload queue progress panel |
 | `de17417` | 2026-04-15 | feat: add copy to clipboard for images in selection mode |
