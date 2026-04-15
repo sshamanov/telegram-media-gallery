@@ -78,4 +78,64 @@ test.describe('Mobile Responsiveness @long', () => {
     // Viewer should open
     await expect(page.locator('.pswp').or(page.locator('[role="dialog"]'))).toBeVisible({ timeout: 5000 });
   });
+
+  test('long-press enters selection mode on mobile', async ({ page }) => {
+    // Login and navigate to gallery
+    await page.goto('/');
+    await page.getByRole('tab', { name: /phone/i }).click();
+    await page.getByTestId('phone-input').fill('1234567890');
+    await page.getByTestId('send-code-button').click();
+    
+    // Wait for code step
+    await page.waitForSelector('[data-auth-step="code"]', { timeout: 5000 });
+    
+    // Enter mock code
+    await page.getByTestId('verification-code-input').fill('000000');
+    await page.getByTestId('submit-code-button').click();
+    
+    // Wait for dialogs
+    await expect(page.getByTestId('dialogs-screen')).toBeVisible({ timeout: 10000 });
+    
+    // Tap on dialog
+    const firstDialog = page.locator('[data-testid="dialog-item"]').first();
+    await firstDialog.click();
+    
+    await expect(page.getByTestId('gallery-root')).toBeVisible({ timeout: 10000 });
+    
+    // Long-press on media item (hold for 500ms+)
+    const firstMediaItem = page.locator('[data-testid="media-item"]').first();
+    
+    // Use touch events for mobile long-press
+    // Get bounding box for the element
+    const box = await firstMediaItem.boundingBox();
+    if (!box) {
+      throw new Error('Media item not found or not visible');
+    }
+    
+    // Calculate center coordinates
+    const centerX = box.x + box.width / 2;
+    const centerY = box.y + box.height / 2;
+    
+    // Simulate touch long press using touch events
+    await page.dispatchEvent('[data-testid="media-item"]:first-child', 'pointerdown', {
+      pointerType: 'touch',
+      clientX: centerX,
+      clientY: centerY,
+    });
+    
+    await page.waitForTimeout(600); // Slightly longer than the 500ms threshold
+    
+    await page.dispatchEvent('[data-testid="media-item"]:first-child', 'pointerup', {
+      pointerType: 'touch',
+      clientX: centerX,
+      clientY: centerY,
+    });
+    
+    // Selection header should appear
+    await expect(page.getByTestId('gallery-selection-header')).toBeVisible({ timeout: 5000 });
+    await expect(page.getByTestId('gallery-selection-count')).toContainText('1 of');
+    
+    // Item should show selected state
+    await expect(firstMediaItem).toHaveClass(/selected/);
+  });
 });

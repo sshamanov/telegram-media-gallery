@@ -34,6 +34,10 @@ export const uploadQueueState = writable<UploadQueueState>({
   items: [],
 })
 
+export const selectionMode = writable(false)
+export const selectedMediaIds = writable<Set<string>>(new Set())
+export const selectionAnchorId = writable<string | null>(null)
+
 let loadedMessageIds = new Set<number>()
 let activeUploadAbortController: AbortController | null = null
 
@@ -81,6 +85,9 @@ function resetDialogState(dialog: Dialog | null): void {
   totalMessageCount.set(null)
   currentLoadId.update((value) => value + 1)
   loadedMessageIds = new Set<number>()
+  selectionMode.set(false)
+  selectedMediaIds.set(new Set())
+  selectionAnchorId.set(null)
 }
 
 async function fetchPage(limit: number, offset?: { id: number; date: number } | null): Promise<MessagePage> {
@@ -406,4 +413,68 @@ export function cancelUploadQueueItem(itemId: string): void {
 
 export async function uploadToCurrentDialog(file: File, mode: UploadMode = get(uploadMode)): Promise<void> {
   await enqueueUploadToCurrentDialog([file], mode)
+}
+
+export function enterSelectionMode(itemId?: string): void {
+  selectionMode.set(true)
+  if (itemId) {
+    selectedMediaIds.set(new Set([itemId]))
+    selectionAnchorId.set(itemId)
+  } else {
+    selectedMediaIds.set(new Set())
+    selectionAnchorId.set(null)
+  }
+}
+
+export function exitSelectionMode(): void {
+  selectionMode.set(false)
+  selectedMediaIds.set(new Set())
+  selectionAnchorId.set(null)
+}
+
+export function toggleSelectedMedia(itemId: string): void {
+  selectedMediaIds.update((current) => {
+    const next = new Set(current)
+    if (next.has(itemId)) {
+      next.delete(itemId)
+    } else {
+      next.add(itemId)
+    }
+    return next
+  })
+  selectionAnchorId.set(itemId)
+}
+
+export function selectOnlyMedia(itemId: string): void {
+  selectedMediaIds.set(new Set([itemId]))
+  selectionAnchorId.set(itemId)
+}
+
+export function selectMediaRange(itemIds: string[], startId: string, endId: string): void {
+  const startIndex = itemIds.indexOf(startId)
+  const endIndex = itemIds.indexOf(endId)
+  if (startIndex === -1 || endIndex === -1) {
+    return
+  }
+
+  const [from, to] = startIndex <= endIndex ? [startIndex, endIndex] : [endIndex, startIndex]
+  const rangeIds = itemIds.slice(from, to + 1)
+  
+  selectedMediaIds.update((current) => {
+    const next = new Set(current)
+    rangeIds.forEach((id) => next.add(id))
+    return next
+  })
+  selectionAnchorId.set(endId)
+}
+
+export function selectAllVisibleMedia(itemIds: string[]): void {
+  selectedMediaIds.set(new Set(itemIds))
+  if (itemIds.length > 0) {
+    selectionAnchorId.set(itemIds[0])
+  }
+}
+
+export function isMediaSelected(itemId: string): boolean {
+  return get(selectedMediaIds).has(itemId)
 }

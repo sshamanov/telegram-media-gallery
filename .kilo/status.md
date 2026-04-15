@@ -40,7 +40,7 @@
 - `completed` Add list view mode with 48px thumb/icon + filename + date + size
 - `completed` Update APPLICATION_SPEC.md with Phase 1 supported behavior
 - `completed` Run validation (npm run check, short tests) and update status
-- `pending` Implement multi-select with long-press on mobile
+- `completed` Implement multi-select with long-press on mobile
 - `pending` Add bulk download (chained individual downloads)
 - `pending` Implement forward to Telegram chat functionality
 - `pending` Add Android Share API integration
@@ -62,6 +62,7 @@
 - 2026-04-15 12:10 +02:00 - Verified per-gallery filter bar with type pills and list view mode are already implemented.
 - 2026-04-15 12:11 +02:00 - Updated `APPLICATION_SPEC.md` with Phase 1 supported behavior documentation.
 - 2026-04-15 12:12 +02:00 - Ran validation (type check and short tests) confirming Phase 1 features work correctly.
+- 2026-04-15 14:41 +02:00 - Completed Phase 2 selection mode implementation: added gallery store state, selection header, long-press mobile entry, ctrl/meta toggle, shift-range selection, and test coverage.
 
 ## Current Blockers And Known Gaps
 
@@ -83,6 +84,15 @@
 - Product-level drift may still exist in code paths not rewritten in this documentation-only block; those are tracked as blockers rather than accepted support.
 
 ## Last Validation
+- 2026-04-15 14:41 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:20-alpine npm run check`
+  - Result: passed with 2 Svelte accessibility warnings (non-interactive element with tabindex, non-interactive element with mouse/keyboard listeners)
+  - Main note: type checking passes cleanly after selection mode implementation.
+- 2026-04-15 14:41 +02:00 - `docker-compose run --rm playwright npx playwright test --config=playwright.config.ts --grep "@short" --project=desktop-chrome --reporter=line`
+  - Result: passed (`24 passed`)
+  - Main note: short suite validates selection mode with ctrl-click entry, toggle, select-all, and cancel functionality.
+- 2026-04-15 14:41 +02:00 - `docker-compose run --rm playwright npx playwright test --config=playwright.config.ts tests/e2e/long/mobile.spec.ts --project=desktop-chrome --reporter=line`
+  - Result: passed (`5 passed`)
+  - Main note: mobile long-press test validates touch-based selection mode entry.
 - 2026-04-15 12:11 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:20-alpine npm run check`
   - Result: passed with 1 Svelte accessibility warning (non-interactive element with tabindex)
   - Main note: type checking passes cleanly after Phase 1 feature verification.
@@ -121,13 +131,12 @@
 | `71863bf` | 2026-04-14 | Add global status document with project progress tracking |
 
 ## Next Execution Order
-1. Start Phase 2 gallery actions: multi-select with long-press on mobile.
-2. Implement bulk download (chained individual downloads).
-3. Add forward to Telegram chat functionality.
-4. Implement Android Share API integration.
-5. Add copy to clipboard (images only).
-6. Enhance upload with progress panel and queue UX.
-7. Consider addressing the accessibility warning (non-interactive element with tabindex in GalleryGrid).
+1. Implement bulk download (chained individual downloads).
+2. Add forward to Telegram chat functionality.
+3. Implement Android Share API integration.
+4. Add copy to clipboard (images only).
+5. Enhance upload with progress panel and queue UX.
+6. Consider addressing the accessibility warning (non-interactive element with tabindex in GalleryGrid).
 
 ## Cross References
 - Active recovery plan: `.kilo/plans/1776176222439-sunny-river.md`

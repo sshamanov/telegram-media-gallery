@@ -16,6 +16,14 @@
     openViewer,
     setGalleryViewMode,
     totalMessageCount,
+    selectionMode,
+    selectedMediaIds,
+    selectionAnchorId,
+    enterSelectionMode,
+    exitSelectionMode,
+    toggleSelectedMedia,
+    selectMediaRange,
+    selectAllVisibleMedia,
   } from '../../stores/gallery'
   import { galleryIds, toggleGallery } from '../../stores/dialogs'
   import { settings } from '../../stores/settings'
@@ -32,6 +40,7 @@
   $: counts = countFilters($mediaItems)
   $: visibleItems = $mediaItems.filter((item) => isVisible(item, activeFilter, hiddenFilters))
   $: gridTemplate = `repeat(${$settings.gridColumns}, minmax(0, 1fr))`
+  $: selectedCount = $selectedMediaIds.size
 
   $: if ($currentDialog?.id) {
     showUploadSheet = false
@@ -72,12 +81,36 @@
     }
   }
 
-  function handleItemActivate(itemId: string, _event: MouseEvent): void {
+  function handleItemActivate(itemId: string, event: MouseEvent): void {
+    if ($selectionMode) {
+      toggleSelectedMedia(itemId)
+      return
+    }
+
+    if (event.shiftKey) {
+      if (!$selectionAnchorId) {
+        enterSelectionMode(itemId)
+      } else {
+        selectMediaRange(visibleItems.map(item => item.id), $selectionAnchorId, itemId)
+      }
+      return
+    }
+
+    if (event.ctrlKey || event.metaKey) {
+      enterSelectionMode(itemId)
+      return
+    }
+
     openById(itemId)
   }
 
   function handleItemLongPress(itemId: string): void {
-    openById(itemId)
+    if (!$selectionMode) {
+      enterSelectionMode(itemId)
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        navigator.vibrate(50)
+      }
+    }
   }
 
   function selectFilter(filterId: GalleryFilterId): void {
@@ -123,76 +156,107 @@
     }
   }
 
+  function handleKeyDown(event: KeyboardEvent): void {
+    if (event.key === 'Escape' && $selectionMode) {
+      exitSelectionMode()
+    }
+  }
+
   onMount(() => {
     scroller?.focus()
   })
 </script>
 
 {#if $currentDialog}
-  <section
-    bind:this={scroller}
-    class="gallery-shell"
-    aria-label="Gallery"
-    tabindex="0"
-    on:scroll={() => void handleScroll()}
-    data-testid="gallery-root"
-  >
-    <header class="panel gallery-header">
-      <button class="button ghost" type="button" on:click={back} data-testid="gallery-back-button">← Back</button>
+    <section
+      bind:this={scroller}
+      class="gallery-shell"
+      aria-label="Gallery"
+      tabindex="0"
+      on:scroll={() => void handleScroll()}
+      on:keydown={handleKeyDown}
+      data-testid="gallery-root"
+    >
+    {#if $selectionMode}
+      <header class="panel gallery-header selection-header" data-testid="gallery-selection-header">
+        <button class="button ghost" type="button" on:click={exitSelectionMode} data-testid="gallery-selection-cancel">Cancel</button>
 
-      <div class="title-block">
-        <h2>{$currentDialog.title}</h2>
-        <div class="muted count-label">
-          {visibleItems.length} visible
-          {$mediaItems.length !== visibleItems.length ? ` / ${$mediaItems.length} loaded` : ' media loaded'}
-          {$totalMessageCount !== null ? ` (${$totalMessageCount} total messages)` : ''}
+        <div class="title-block">
+          <h2>{selectedCount} selected</h2>
+          <div class="muted count-label" data-testid="gallery-selection-count">
+            {selectedCount} of {visibleItems.length} visible items selected
+          </div>
         </div>
-      </div>
 
-      <div class="actions">
-        <button
-          class="button secondary"
-          type="button"
-          on:click={toggleViewMode}
-          aria-label="Toggle view mode"
-          use:tooltip={{ text: 'Toggle view mode' }}
-          data-testid="gallery-view-toggle"
-        >
-          {$galleryViewMode === 'grid' ? 'List' : 'Grid'}
-        </button>
+        <div class="actions">
+          <button
+            class="button secondary"
+            type="button"
+            on:click={() => selectAllVisibleMedia(visibleItems.map(item => item.id))}
+            data-testid="gallery-selection-select-all"
+          >
+            Select All
+          </button>
+        </div>
+      </header>
+    {:else}
+      <header class="panel gallery-header">
+        <button class="button ghost" type="button" on:click={back} data-testid="gallery-back-button">← Back</button>
 
-        <button
-          class="button secondary"
-          type="button"
-          aria-label="Grid columns"
-          use:tooltip={{ text: 'Grid columns' }}
-        >
-          {$settings.gridColumns}x
-        </button>
+        <div class="title-block">
+          <h2>{$currentDialog.title}</h2>
+          <div class="muted count-label">
+            {visibleItems.length} visible
+            {$mediaItems.length !== visibleItems.length ? ` / ${$mediaItems.length} loaded` : ' media loaded'}
+            {$totalMessageCount !== null ? ` (${$totalMessageCount} total messages)` : ''}
+          </div>
+        </div>
 
-        <button
-          class={`button ${$galleryIds.includes($currentDialog.id) ? 'danger' : 'secondary'}`}
-          type="button"
-          on:click={() => toggleGallery($currentDialog.id)}
-          aria-label="Toggle gallery bookmark"
-          use:tooltip={{ text: $galleryIds.includes($currentDialog.id) ? 'Remove from galleries' : 'Add to galleries' }}
-          data-testid="gallery-bookmark-toggle"
-        >
-          ★
-        </button>
+        <div class="actions">
+          <button
+            class="button secondary"
+            type="button"
+            on:click={toggleViewMode}
+            aria-label="Toggle view mode"
+            use:tooltip={{ text: 'Toggle view mode' }}
+            data-testid="gallery-view-toggle"
+          >
+            {$galleryViewMode === 'grid' ? 'List' : 'Grid'}
+          </button>
 
-        <button
-          class="button secondary"
-          type="button"
-          on:click={toggleUploadSheet}
-          aria-label="Upload media"
-          use:tooltip={{ text: 'Upload media' }}
-          data-testid="gallery-upload-toggle"
-        >
-          Upload
-        </button>
-      </div>
-    </header>
+          <button
+            class="button secondary"
+            type="button"
+            aria-label="Grid columns"
+            use:tooltip={{ text: 'Grid columns' }}
+          >
+            {$settings.gridColumns}x
+          </button>
+
+          <button
+            class={`button ${$galleryIds.includes($currentDialog.id) ? 'danger' : 'secondary'}`}
+            type="button"
+            on:click={() => toggleGallery($currentDialog.id)}
+            aria-label="Toggle gallery bookmark"
+            use:tooltip={{ text: $galleryIds.includes($currentDialog.id) ? 'Remove from galleries' : 'Add to galleries' }}
+            data-testid="gallery-bookmark-toggle"
+          >
+            ★
+          </button>
+
+          <button
+            class="button secondary"
+            type="button"
+            on:click={toggleUploadSheet}
+            aria-label="Upload media"
+            use:tooltip={{ text: 'Upload media' }}
+            data-testid="gallery-upload-toggle"
+          >
+            Upload
+          </button>
+        </div>
+      </header>
+    {/if}
 
     {#if showUploadSheet}
       <div class="panel upload-sheet" data-testid="gallery-upload-sheet">
@@ -225,6 +289,8 @@
             item={item}
             onActivate={handleItemActivate}
             onLongPress={handleItemLongPress}
+            selectionMode={$selectionMode}
+            selected={$selectedMediaIds.has(item.id)}
           />
         {/each}
       </div>
@@ -235,6 +301,8 @@
             item={item}
             onActivate={handleItemActivate}
             onLongPress={handleItemLongPress}
+            selectionMode={$selectionMode}
+            selected={$selectedMediaIds.has(item.id)}
           />
         {/each}
       </div>
