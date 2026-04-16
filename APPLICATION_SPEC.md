@@ -348,7 +348,7 @@ Short tests are intended to validate only currently supported baseline behavior:
 - Light theme support
 
 ## Known Issues And Accepted Gaps
-1. Upload mode selector (Send as media vs Send as file) needs refinement for large files.
+1. Upload mode selector (Send as media vs Send as file) now auto‑adjusts for large files: files exceeding Telegram size limits for their media type (photo >10 MB, video >1 GB, audio >200 MB) are automatically sent as documents, with a user‑visible warning toast.
 2. Mock mode is sufficient for baseline UI validation but does not prove production-grade Telegram media fidelity.
 
 ## Browser Compatibility

@@ -1,5 +1,6 @@
 import { TelegramClient, type Chat, type Message as MtcuteMessage, type Photo, type Video, type Document, type Audio, type Voice } from '@mtcute/web'
 import { debugLog, debugWarn } from '../debug'
+import { getSizeLimitForMediaType } from './constants'
 import type { Dialog, Message, TgMedia, UploadMode } from '../../types/telegram'
 import type { MessagePage, TelegramAdapter } from './adapter'
 import { getTelegramApiCredentials } from './adapter'
@@ -62,19 +63,26 @@ function uploadMediaType(file: File, mode: UploadMode): 'audio' | 'document' | '
     return 'document'
   }
 
+  let detected: 'photo' | 'video' | 'audio' | 'document' = 'document'
+
   if (file.type.startsWith('image/')) {
-    return 'photo'
+    detected = 'photo'
+  } else if (file.type.startsWith('video/')) {
+    detected = 'video'
+  } else if (file.type.startsWith('audio/')) {
+    detected = 'audio'
   }
 
-  if (file.type.startsWith('video/')) {
-    return 'video'
+  // If detected media type has a size limit and file exceeds it, fall back to document
+  if (detected !== 'document') {
+    const limit = getSizeLimitForMediaType(detected)
+    if (file.size > limit) {
+      debugLog(`File size ${file.size} exceeds ${detected} limit ${limit}, falling back to document`)
+      detected = 'document'
+    }
   }
 
-  if (file.type.startsWith('audio/')) {
-    return 'audio'
-  }
-
-  return 'document'
+  return detected
 }
 
 function mapPeer(peer: Chat | import('@mtcute/web').User): Dialog {

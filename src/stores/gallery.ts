@@ -3,11 +3,39 @@ import { debugLog } from '../lib/debug'
 import { classifyMediaType, isImageItem } from '../lib/media'
 import { getTelegramAdapter, type MessagePage } from '../lib/telegram/adapter'
 import { blobToFile, getCachedBlob, getCachedOrDownloadBlob, parseFloodWaitSeconds, sleep } from '../lib/files'
+import { getSizeLimitForMediaType } from '../lib/telegram/constants'
 import { isOffline, pushToast } from './ui'
 import type { Dialog, GalleryViewMode, MediaItem, Message, UploadMode, UploadQueueItem, UploadQueueState, UploadState, DownloadQueueState, DownloadQueueItem, ForwardQueueState, ForwardQueueItem, ShareQueueState, ShareQueueItem, CopyQueueState, CopyQueueItem } from '../types/telegram'
 import { persisted } from './persisted'
 
 const PAGE_SIZE = 100
+
+function detectUploadMediaType(file: File, mode: UploadMode): { mediaType: 'photo' | 'video' | 'audio' | 'document', fallback: boolean } {
+  if (mode === 'file') {
+    return { mediaType: 'document', fallback: false }
+  }
+
+  let detected: 'photo' | 'video' | 'audio' | 'document' = 'document'
+
+  if (file.type.startsWith('image/')) {
+    detected = 'photo'
+  } else if (file.type.startsWith('video/')) {
+    detected = 'video'
+  } else if (file.type.startsWith('audio/')) {
+    detected = 'audio'
+  }
+
+  let fallback = false
+  if (detected !== 'document') {
+    const limit = getSizeLimitForMediaType(detected)
+    if (file.size > limit) {
+      detected = 'document'
+      fallback = true
+    }
+  }
+
+  return { mediaType: detected, fallback }
+}
 
 export const currentDialog = writable<Dialog | null>(null)
 export const mediaItems = writable<MediaItem[]>([])
@@ -338,6 +366,16 @@ async function uploadQueueItems(dialogId: string, mode: UploadMode, itemIds?: st
     activeUploadAbortController = controller
 
     try {
+      // Detect if file size exceeds media-type limit and would fall back to document
+      const { fallback } = detectUploadMediaType(item.file, mode)
+      if (fallback) {
+        pushToast({
+          kind: 'warning',
+          text: `File too large for media upload; sending as document.`,
+          dismissible: true,
+        })
+      }
+
       await getTelegramAdapter().uploadAndSend(dialogId, item.file, mode, (progress) => {
         updateQueueItem(item.id, (current) => ({ ...current, progress }))
         const latest = get(uploadQueueState).items.find((entry) => entry.id === item.id) ?? null
