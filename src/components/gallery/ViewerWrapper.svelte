@@ -13,7 +13,7 @@
     viewerIndex,
     viewerItems,
   } from '../../stores/gallery'
-  import { isOffline } from '../../stores/ui'
+  import { isOffline, pushToast } from '../../stores/ui'
   import InfoPanel from './InfoPanel.svelte'
   import type { MediaItem } from '../../types/telegram'
   import type { SlideData } from 'photoswipe'
@@ -389,6 +389,15 @@
       return
     }
 
+    if ($isOffline) {
+      pushToast({
+        kind: 'warning',
+        text: 'Downloads are unavailable offline unless the file is already open in the viewer cache.',
+        dismissible: true,
+      })
+      return
+    }
+
     const blob = await getCachedOrDownloadedBlob(item, 'full', pswpOpenToken)
     if (!blob) {
       return
@@ -405,6 +414,15 @@
   async function shareCurrent(): Promise<void> {
     const item = get(activeItem)
     if (!item || typeof navigator.share !== 'function' || typeof navigator.canShare !== 'function') {
+      return
+    }
+
+    if ($isOffline) {
+      pushToast({
+        kind: 'warning',
+        text: 'Sharing is unavailable offline because uncached media cannot be fetched.',
+        dismissible: true,
+      })
       return
     }
 
@@ -505,9 +523,9 @@
   <div class="viewer-ui" bind:this={viewerUiElement}>
     <div class="topbar">
       <button class="button ghost" type="button" on:click={closeOverlay}>✕</button>
-      <button class="button ghost" type="button" on:click={downloadCurrent} title="Download" disabled={$isOffline}>⬇</button>
+      <button class="button ghost" type="button" on:click={downloadCurrent} title={$isOffline ? 'Downloads are unavailable offline unless the file is already open in the viewer cache.' : 'Download'} disabled={$isOffline}>⬇</button>
       {#if $activeItem && typeof navigator.share === 'function' && typeof navigator.canShare === 'function'}
-        <button class="button ghost" type="button" on:click={shareCurrent} title="Share" disabled={$isOffline || $activeItem.size > shareLimitBytes}>↑</button>
+        <button class="button ghost" type="button" on:click={shareCurrent} title={$isOffline ? 'Sharing is unavailable offline because uncached media cannot be fetched.' : 'Share'} disabled={$isOffline || $activeItem.size > shareLimitBytes}>↑</button>
       {/if}
       {#if $activeItem && isImageItem($activeItem) && typeof navigator.clipboard?.write === 'function' && typeof ClipboardItem !== 'undefined'}
         <button class="button ghost" type="button" on:click={copyCurrent} title="Copy image" disabled={$isOffline}>⧉</button>

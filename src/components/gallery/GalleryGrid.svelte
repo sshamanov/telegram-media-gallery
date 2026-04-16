@@ -7,6 +7,7 @@
   import { tooltip } from '../../lib/dom/tooltips'
   import { navigateToDialogList } from '../../lib/routing'
   import {
+    canDownloadMediaSelectionOffline,
     currentDialog,
     galleryViewMode,
     hasMoreMedia,
@@ -44,8 +45,7 @@
   } from '../../stores/gallery'
   import { galleryIds, toggleGallery } from '../../stores/dialogs'
   import { settings, updateSettings } from '../../stores/settings'
-  import { pushToast } from '../../stores/ui'
-  import { isOffline } from '../../stores/ui'
+  import { isOffline, pushToast } from '../../stores/ui'
   import type { GalleryFilterId, MediaItem, UploadMode as UploadModeType } from '../../types/telegram'
 
   let activeFilter: GalleryFilterId = 'all'
@@ -54,15 +54,18 @@
   let pendingUploadMode: UploadModeType = 'media'
   let scroller: HTMLElement | null = null
   let showDialogPicker = false
+  let offlineDownloadReady = false
 
   $: hiddenFilters = $settings.defaultHiddenFilters ?? []
   $: counts = countFilters($mediaItems)
   $: visibleItems = $mediaItems.filter((item) => isVisible(item, activeFilter, hiddenFilters))
+  $: selectedItems = visibleItems.filter((item) => $selectedMediaIds.has(item.id))
   $: gridTemplate = `repeat(${$settings.gridColumns}, minmax(0, 1fr))`
   $: selectedCount = $selectedMediaIds.size
   $: galleryStatusText = $isOffline
     ? 'Offline - cached thumbnails remain visible, cached full media still opens, and uncached items fall back to placeholders.'
     : null
+  $: void refreshOfflineSelectionState(selectedItems, $isOffline)
 
   $: if ($currentDialog?.id) {
     showUploadSheet = false
@@ -190,12 +193,29 @@
     }
   }
 
+  async function refreshOfflineSelectionState(items: MediaItem[], offline: boolean): Promise<void> {
+    if (!offline) {
+      offlineDownloadReady = false
+      return
+    }
+
+    offlineDownloadReady = await canDownloadMediaSelectionOffline(items)
+  }
+
   async function handleBulkDownload(): Promise<void> {
     if (selectedCount === 0) {
       return
     }
 
-    const selectedItems = visibleItems.filter((item) => $selectedMediaIds.has(item.id))
+    if ($isOffline) {
+      pushToast({
+        kind: 'warning',
+        text: 'Downloads are unavailable offline unless the file is already open in the viewer cache.',
+        dismissible: true,
+      })
+      return
+    }
+
     let directoryHandle: FileSystemDirectoryHandle | null = null
 
     // Try to use File System Access API on desktop
@@ -220,6 +240,15 @@
       return
     }
 
+    if ($isOffline) {
+      pushToast({
+        kind: 'warning',
+        text: 'Forwarding is unavailable offline until Telegram connectivity returns.',
+        dismissible: true,
+      })
+      return
+    }
+
     showDialogPicker = true
   }
 
@@ -228,7 +257,6 @@
       return
     }
 
-    const selectedItems = visibleItems.filter((item) => $selectedMediaIds.has(item.id))
     await enqueueForwards(selectedItems, dialogId)
   }
 
@@ -237,7 +265,15 @@
       return
     }
 
-    const selectedItems = visibleItems.filter((item) => $selectedMediaIds.has(item.id))
+    if ($isOffline) {
+      pushToast({
+        kind: 'warning',
+        text: 'Sharing is unavailable offline because uncached media cannot be fetched.',
+        dismissible: true,
+      })
+      return
+    }
+
     await enqueueShares(selectedItems)
   }
 
@@ -290,8 +326,9 @@
             class="button primary"
             type="button"
             on:click={() => handleBulkDownload()}
-            disabled={selectedCount === 0 || $downloadQueueState.active}
+            disabled={selectedCount === 0 || $downloadQueueState.active || $isOffline}
             data-testid="gallery-selection-download"
+            title={$isOffline ? 'Downloads are unavailable offline unless the file is already open in the viewer cache.' : undefined}
           >
             Download
           </button>
@@ -299,8 +336,9 @@
             class="button secondary"
             type="button"
             on:click={() => handleForward()}
-            disabled={selectedCount === 0}
+            disabled={selectedCount === 0 || $isOffline}
             data-testid="gallery-selection-forward"
+            title={$isOffline ? 'Forwarding is unavailable offline until Telegram connectivity returns.' : undefined}
           >
             Forward
           </button>
@@ -308,8 +346,9 @@
             class="button secondary"
             type="button"
             on:click={() => handleShare()}
-            disabled={selectedCount === 0 || typeof navigator.share !== 'function' || typeof navigator.canShare !== 'function'}
+            disabled={selectedCount === 0 || $isOffline || typeof navigator.share !== 'function' || typeof navigator.canShare !== 'function'}
             data-testid="gallery-selection-share"
+            title={$isOffline ? 'Sharing is unavailable offline because uncached media cannot be fetched.' : undefined}
           >
             Share
           </button>
@@ -324,6 +363,14 @@
           </button>
          </div>
        </header>
+
+        {#if $isOffline}
+          <p class="gallery-offline-actions muted" data-testid="gallery-offline-actions-status">
+            Download, forward, and share stay disabled offline. {offlineDownloadReady
+              ? 'The selected items are cached for viewer playback, but export and relay actions still require connectivity.'
+              : 'Some selected items are not fully cached for export.'}
+          </p>
+        {/if}
 
         {#if $downloadQueueState.active}
           <div class="panel download-panel" data-testid="gallery-download-panel">

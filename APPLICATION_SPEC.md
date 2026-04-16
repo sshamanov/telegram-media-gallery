@@ -19,6 +19,7 @@ Browser-based photo/video gallery using Telegram as a storage backend. Client-on
 - Dialog bootstrap now persists a sanitized last-known dialog snapshot and can render that cached state while offline after a prior online sync.
 - Full-media cache storage now uses OPFS when it is usable, falls back explicitly to IndexedDB when it is not, and keeps one-time IndexedDB-to-OPFS migration state resumable and visible in settings.
 - Offline gallery/viewer behavior is limited to the current cache stack: already-loaded gallery items can reuse cached thumbnails in-session, offline viewer playback/rendering works only for full media already cached in OPFS or IndexedDB fallback, and uncached full media shows an explicit offline placeholder instead of a broken load.
+- While offline, download, forward, and share affordances are intentionally disabled so the UI does not imply unavailable export or Telegram relay behavior.
 
 ## Core Architecture
 
@@ -178,6 +179,7 @@ All Telegram API calls go through `src/lib/telegram/adapter.ts`. Feature code mu
 - Settings opens from the dialogs header and closes via a back button
 - Storage information is shown inline with clear buttons and no confirmation dialog
 - Settings labels the active full-media backend truthfully and reports migration/fallback state for full-media storage
+- Settings explains that offline download, forward, and share actions remain disabled until connectivity returns
 
 ## Gallery And Viewer Support
 
@@ -195,6 +197,7 @@ The accepted gallery baseline is limited to the currently restored behavior:
 - Viewer close path is part of the accepted baseline
 - Viewer baseline is treated as supported only to the extent validated by the current short suite and status ledger
 - While offline, the viewer reads full media only from the local full-media cache (OPFS or IndexedDB fallback); if that full media is missing, the viewer shows an explicit `Not available offline` placeholder
+- While offline, viewer download/share buttons stay disabled even when cached full media is viewable, so the controls do not overclaim export capabilities
 
 ### Advanced Gallery Features Still Planned Or Not Yet Accepted
 Do not claim end-to-end support for these until they are rebuilt and revalidated:
@@ -277,6 +280,7 @@ Short tests are intended to validate only currently supported baseline behavior:
 - Unsupported advanced behavior must be tracked as a gap instead of being hidden behind weakened tests.
 - Service-worker acceptance uses a dedicated production preview path; dev-server-only checks do not satisfy offline shell validation.
 - Offline dialog acceptance requires proving the dialog list renders from the persisted snapshot after a prior online load.
+- Final Phase 3 acceptance requires executable coverage for offline action guards in gallery/viewer UI plus cache/settings wording that matches shipped behavior.
 
 ## Development Workflow
 
@@ -330,8 +334,15 @@ Short tests are intended to validate only currently supported baseline behavior:
 - Upload progress panel with cancel controls
 - Selection header with Download, Forward, Share, Copy actions
 
+### Phase 3 (Offline Foundations) - Implemented
+- Production app-shell precache with explicit service-worker cache versioning and stale-cache cleanup
+- Persisted offline dialog snapshot bootstrap after a prior online sync
+- OPFS full-media cache with explicit IndexedDB fallback and resumable migration reporting
+- Offline gallery thumbnail reuse and viewer cached-media rendering with explicit uncached placeholder behavior
+- Offline guards for download, forward, and share actions so unsupported offline export/relay paths are disabled truthfully
+
 ### Phase 3+ (Advanced) - Planned
-- Broader service-worker/offline media behavior beyond app-shell precache and dialog snapshot bootstrap
+- Broader service-worker/offline media behavior beyond the current app-shell precache, dialog snapshot bootstrap, cached thumbnail reuse, and cached full-media viewer support
 - Masonry layout toggle
 - Desktop layout variants
 - Light theme support

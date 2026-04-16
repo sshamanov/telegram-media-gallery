@@ -1,7 +1,7 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-16 03:48 +02:00
-**Current Phase:** Phase 3 Block 4 complete; Block 5 queued
+**Last Updated:** 2026-04-16 08:57 +02:00
+**Current Phase:** Phase 3 complete
 **Active Plan:** `.kilo/plans/1776295158000-phase-3-offline-kickoff.md`
 **Branch:** `main`
 **Ahead Of `origin/main`:** 37 commits
@@ -24,7 +24,7 @@
 - **Plan file:** `.kilo/plans/1776295158000-phase-3-offline-kickoff.md`
 - **Goal:** turn roadmap Phase 3 storage/offline scope into an execution-ready implementation order with truthful dependencies, touched files, and validation gates.
 - **Execution strategy:** land the real service-worker precache and production validation path first, then add offline dialog bootstrap, harden OPFS migration/fallback, align offline media behavior with the actual cache stack, and finish offline action guards plus Phase 3 coverage.
-- **Status:** Blocks 1-4 completed; Block 5 is next
+- **Status:** completed with commit `463f704`; all planned Phase 3 blocks are implemented
 
 - **Plan file:** `.kilo/plans/1776291840732-kind-meadow.md`
 - **Goal:** finalize the canonical execution-ledger migration from `.kilo/status.md` to `STATUS.md` and reconcile authoritative governance references.
@@ -54,7 +54,7 @@
 - `completed` Implement Block 2: persisted dialog snapshot for offline bootstrap.
 - `completed` Implement Block 3: OPFS migration and fallback hardening.
 - `completed` Implement Block 4: offline media/thumb behavior alignment.
-- `pending` Implement Block 5: offline action guards and final Phase 3 coverage.
+- `completed` Implement Block 5: offline action guards and final Phase 3 coverage.
 
 ## Plan And Todo History
 - 2026-04-16 01:19 +02:00 - Activated `.kilo/plans/1776295158000-phase-3-offline-kickoff.md` as the new active Phase 3 plan derived from the roadmap Phase 3 scope and current readiness findings.
@@ -70,6 +70,10 @@
 - 2026-04-16 03:13 +02:00 - Started Block 4 implementation for truthful offline thumbnail/full-media behavior, cached-vs-uncached viewer placeholders, and matching coverage updates.
 - 2026-04-16 03:45 +02:00 - Completed Block 4 implementation: offline gallery cards now reuse cached thumbnail data or generate thumbnail cache entries from locally cached full media, offline viewer loads read full media only from the real cache backends and show the existing placeholder when uncached, cache UI copy now explains service-worker vs media-storage responsibilities, and production offline coverage proves cached-vs-uncached media behavior.
 - 2026-04-16 03:48 +02:00 - Recorded Block 4 commit `4852cc7` (`feat: align offline media cache behavior`).
+- 2026-04-16 08:43 +02:00 - Cleaned stray interrupted artifacts before Block 5 start by discarding unrelated `kilo.jsonc` modifications and removing untracked `.kilo/package-lock.json`.
+- 2026-04-16 08:43 +02:00 - Started Block 5 implementation for offline action guards, truthful settings/action copy, and final Phase 3 acceptance coverage.
+- 2026-04-16 08:56 +02:00 - Completed Block 5 implementation: gallery and viewer now disable offline download/forward/share affordances with truthful messaging, settings documents the offline action limits, and final long cache/offline coverage closes the Phase 3 acceptance matrix.
+- 2026-04-16 08:57 +02:00 - Recorded Block 5 commit `463f704` (`feat: guard offline gallery actions`).
 - 2026-04-16 01:11 +02:00 - Activated `.kilo/plans/1776291840732-kind-meadow.md` to finalize migration of the canonical execution ledger from `.kilo/status.md` to `STATUS.md`.
 - 2026-04-16 01:11 +02:00 - Updated active governance docs so forward-looking workflow references now use `STATUS.md`; preserved old `.kilo/status.md` references only where they remain factual history.
 - 2026-04-16 01:11 +02:00 - Confirmed `.kilo/status.md.js` is already absent and `.gitignore` already allows tracked `STATUS.md`; no further file-removal or ignore cleanup was required.
@@ -101,7 +105,6 @@
 
 ### Product blockers
 - Upload mode selector (Send as media vs Send as file) needs refinement for large files.
-- Block 5 still needs offline action guards so download/share/copy/forward affordances match connectivity and cache truth end-to-end.
 
 ### Process/documentation blockers
 - No active migration blocker remains; the only intentional stale `.kilo/status.md` mentions are preserved historical facts in old ledger entries, old plans, and old commit descriptions.
@@ -109,6 +112,7 @@
 - Production offline validation now uses `scripts/serve-dist.mjs` instead of `vite preview` because the preview path served self-signed HTTPS, which prevented reliable service-worker installation in the Playwright production harness.
 - Port 5173 must be freed before switching between host-networked test compose services; a leftover `app` container caused one failed Block 2 offline validation attempt before teardown and retry.
 - Block 4 long offline validation needed two test-harness fixes before passing: PhotoSwipe remained open after the first cached-media assertion, and the initial uncached-media check targeted an adjacent slide that had been prefetched; the final coverage now seeds deterministic cache state and asserts the placeholder on an explicitly uncached slide.
+- Block 5 production offline validation first failed because the dev-mode `app` compose service still occupied host port 5173; rerunning after `docker-compose -f docker-compose.test.yml down` restored deterministic production binding.
 
 ### Rule violations or drift still tracked
 - No active rule violation is tracked for the ledger migration.
@@ -123,9 +127,22 @@
 - ✅ `APPLICATION_SPEC.md` and runtime behavior now align on sanitized offline dialog snapshot bootstrap and cached-state UI wording.
 - ✅ `APPLICATION_SPEC.md`, runtime backend selection, and settings/cache reporting now align on resumable OPFS migration plus explicit IndexedDB fallback semantics.
 - ✅ `APPLICATION_SPEC.md`, gallery/viewer runtime behavior, and offline tests now align on thumbnail IndexedDB responsibility, full-media cache responsibility, and uncached offline placeholder behavior.
+- ✅ `APPLICATION_SPEC.md`, settings copy, gallery/viewer controls, and final long coverage now align on offline download/forward/share guards and the accepted Phase 3 surface.
 - ℹ️ Historical references to `.kilo/status.md` remain in dated records by design and are not treated as active drift.
 
 ## Last Validation
+- 2026-04-16 08:56 +02:00 - `docker-compose -f docker-compose.test.yml down && docker-compose -f docker-compose.test.yml up --build playwright-prod --abort-on-container-exit --exit-code-from playwright-prod`
+  - Result: passed (`5 passed`)
+  - Main note: production offline coverage now proves the accepted Phase 3 surface, including app-shell bootstrap, persisted dialogs, cached gallery thumbnails, cached-vs-uncached viewer behavior, and disabled offline download/forward/share controls.
+- 2026-04-16 08:53 +02:00 - `docker-compose -f docker-compose.test.yml run --rm playwright npx playwright test --config=playwright.config.ts tests/e2e/long/cache.spec.ts --project=desktop-chrome --reporter=line`
+  - Result: passed (`4 passed`)
+  - Main note: long cache coverage now also verifies the settings screen explains that offline download, forwarding, and sharing remain disabled.
+- 2026-04-16 08:52 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
+  - Result: passed with 0 errors, 6 warnings (same pre-existing DialogPicker and GalleryGrid accessibility warnings)
+  - Main note: Block 5 offline guard, settings copy, and coverage changes type-check cleanly.
+- 2026-04-16 08:53 +02:00 - `docker-compose -f docker-compose.test.yml up --build playwright-prod --abort-on-container-exit --exit-code-from playwright-prod`
+  - Result: failed (`timed out waiting for production preview`)
+  - Main note: the dev-mode `app` compose service still owned host port 5173, so the production preview server could not bind; rerunning after `docker-compose -f docker-compose.test.yml down` resolved the issue.
 - 2026-04-16 03:44 +02:00 - `docker-compose -f docker-compose.test.yml down && docker-compose -f docker-compose.test.yml up --build playwright-prod --abort-on-container-exit --exit-code-from playwright-prod`
   - Result: passed (`4 passed`)
   - Main note: production offline coverage now proves cached gallery thumbnails remain visible in-session and seeded cached-vs-uncached full media resolves to real rendering vs the explicit offline placeholder.
@@ -262,6 +279,7 @@
 ## Recent Commit Log
 | Commit | Date | Description |
 |--------|------|-------------|
+| `463f704` | 2026-04-16 | feat: guard offline gallery actions |
 | `4852cc7` | 2026-04-16 | feat: align offline media cache behavior |
 | `4bb25e9` | 2026-04-16 | docs: finalize STATUS.md ledger migration |
 | `d7fee13` | 2026-04-16 | feat: complete Phase 2 UX gaps with per-item upload controls, folder picker, FLOOD_WAIT handling, and toasts |
@@ -288,7 +306,7 @@
 | `71863bf` | 2026-04-14 | Add global status document with project progress tracking |
 
 ## Next Execution Order
-1. Implement Block 5 from `.kilo/plans/1776295158000-phase-3-offline-kickoff.md`: finish offline action guards and final Phase 3 coverage.
+1. No remaining backlog blocks from `.kilo/plans/1776295158000-phase-3-offline-kickoff.md`.
 
 ## Cross References
 - Active implementation plan: `.kilo/plans/1776295158000-phase-3-offline-kickoff.md`

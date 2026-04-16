@@ -1,6 +1,6 @@
 <script lang="ts">
   import { allDialogs } from '../../stores/dialogs'
-  import { pushToast } from '../../stores/ui'
+  import { isOffline, pushToast } from '../../stores/ui'
   import type { Dialog } from '../../types/telegram'
 
   export let open = false
@@ -23,6 +23,15 @@
 
   async function handleConfirm(): Promise<void> {
     if (!selectedDialog) {
+      return
+    }
+
+    if ($isOffline) {
+      pushToast({
+        kind: 'warning',
+        text: 'Forwarding is unavailable offline until Telegram connectivity returns.',
+        dismissible: true,
+      })
       return
     }
 
@@ -107,8 +116,9 @@
           class="button primary"
           type="button"
           on:click={handleConfirm}
-          disabled={!selectedDialog || isForwarding}
+          disabled={!selectedDialog || isForwarding || $isOffline}
           data-testid="dialog-picker-confirm"
+          title={$isOffline ? 'Forwarding is unavailable offline until Telegram connectivity returns.' : undefined}
         >
           {isForwarding ? 'Forwarding...' : 'Forward'}
         </button>

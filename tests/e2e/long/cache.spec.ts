@@ -96,6 +96,8 @@ async function prepareStorage(page: import('@playwright/test').Page, options?: {
 }
 
 test.describe('Cache Management @long', () => {
+  test.describe.configure({ mode: 'serial' })
+
   test('storage section renders in settings', async ({ galleryPage }) => {
     await openSettings(galleryPage)
     await expect(galleryPage.locator('fieldset').filter({ hasText: 'Storage' })).toBeVisible()
@@ -145,5 +147,12 @@ test.describe('Cache Management @long', () => {
     await expect(page.getByTestId('full-media-migration-status')).toContainText('remain in IndexedDB')
     await expect(page.getByTestId('full-media-primary-row')).toContainText('0 items')
     await expect(page.getByTestId('full-media-legacy-row')).toContainText('1 items')
+  })
+
+  test('settings explain that offline export and relay actions remain disabled', async ({ galleryPage }) => {
+    await openSettings(galleryPage)
+    await expect(galleryPage.getByTestId('offline-actions-status')).toContainText('downloads stay disabled')
+    await expect(galleryPage.getByTestId('offline-actions-status')).toContainText('forwarding stays disabled')
+    await expect(galleryPage.getByTestId('offline-actions-status')).toContainText('sharing stays disabled')
   })
 })

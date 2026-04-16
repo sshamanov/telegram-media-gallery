@@ -169,4 +169,31 @@ test.describe('Offline app shell @long', () => {
     await expect.poll(async () => page.locator('[data-testid="viewer-offline-placeholder"]:visible').count()).toBeGreaterThan(0)
     await expect(page.getByText('Not available offline').first()).toBeVisible()
   })
+
+  test('disables offline download, forward, and share actions in the gallery and viewer', async ({ page, context }) => {
+    await seedOfflineMediaCache(page)
+    await page.goto('/')
+    await loginWithMockPhone(page)
+    await waitForServiceWorkerReady(page)
+    await openPersonalGallery(page)
+    await filterToPhotos(page)
+
+    await page.getByTestId('media-item').first().click({ modifiers: ['ControlOrMeta'] })
+    await expect(page.getByTestId('gallery-selection-header')).toBeVisible()
+
+    await context.setOffline(true)
+
+    await expect(page.getByTestId('gallery-selection-download')).toBeDisabled()
+    await expect(page.getByTestId('gallery-selection-forward')).toBeDisabled()
+    await expect(page.getByTestId('gallery-selection-share')).toBeDisabled()
+    await expect(page.getByTestId('gallery-offline-actions-status')).toContainText('disabled offline')
+
+    await page.getByTestId('gallery-selection-cancel').click()
+    await page.getByTestId('media-item').first().click()
+    await expect(page.locator('.pswp')).toBeVisible({ timeout: 10000 })
+    await expect(page.getByRole('button', { name: '⬇' })).toBeDisabled()
+    if (await page.getByRole('button', { name: '↑' }).count() > 0) {
+      await expect(page.getByRole('button', { name: '↑' })).toBeDisabled()
+    }
+  })
 })

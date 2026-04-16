@@ -2,8 +2,8 @@ import { get, writable } from 'svelte/store'
 import { debugLog } from '../lib/debug'
 import { classifyMediaType, isImageItem } from '../lib/media'
 import { getTelegramAdapter, type MessagePage } from '../lib/telegram/adapter'
-import { blobToFile, getCachedOrDownloadBlob, parseFloodWaitSeconds, sleep } from '../lib/files'
-import { pushToast } from './ui'
+import { blobToFile, getCachedBlob, getCachedOrDownloadBlob, parseFloodWaitSeconds, sleep } from '../lib/files'
+import { isOffline, pushToast } from './ui'
 import type { Dialog, GalleryViewMode, MediaItem, Message, UploadMode, UploadQueueItem, UploadQueueState, UploadState, DownloadQueueState, DownloadQueueItem, ForwardQueueState, ForwardQueueItem, ShareQueueState, ShareQueueItem, CopyQueueState, CopyQueueItem } from '../types/telegram'
 import { persisted } from './persisted'
 
@@ -610,6 +610,11 @@ export async function enqueueDownloads(mediaItems: MediaItem[], directoryHandle?
     return
   }
 
+  if (get(isOffline)) {
+    pushToast({ kind: 'warning', text: 'Downloads are unavailable offline unless the file is already open in the viewer cache.', dismissible: true })
+    return
+  }
+
   const items: DownloadQueueItem[] = mediaItems.map((item) => ({
     id: crypto.randomUUID(),
     mediaItemId: item.id,
@@ -689,6 +694,11 @@ async function processForwardQueue(): Promise<void> {
 
 export async function enqueueForwards(mediaItems: MediaItem[], targetDialogId: string): Promise<void> {
   if (mediaItems.length === 0) {
+    return
+  }
+
+  if (get(isOffline)) {
+    pushToast({ kind: 'warning', text: 'Forwarding is unavailable offline until Telegram connectivity returns.', dismissible: true })
     return
   }
 
@@ -828,6 +838,11 @@ async function processShareQueue(mediaItems: MediaItem[]): Promise<void> {
 
 export async function enqueueShares(mediaItems: MediaItem[]): Promise<void> {
   if (mediaItems.length === 0) {
+    return
+  }
+
+  if (get(isOffline)) {
+    pushToast({ kind: 'warning', text: 'Sharing is unavailable offline because uncached media cannot be fetched.', dismissible: true })
     return
   }
 
@@ -995,4 +1010,13 @@ export function cancelCopies(): void {
             error: index >= current.currentIndex ? 'Copy cancelled' : item.error,
           }),
   }))
+}
+
+export async function canDownloadMediaSelectionOffline(mediaItems: MediaItem[]): Promise<boolean> {
+  if (mediaItems.length === 0) {
+    return false
+  }
+
+  const cached = await Promise.all(mediaItems.map((item) => getCachedBlob(item, 'full')))
+  return cached.every((blob) => blob !== null)
 }

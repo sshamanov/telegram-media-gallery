@@ -184,6 +184,9 @@
         <div class="muted storage-status-detail" data-testid="full-media-migration-status">
           {describeMigrationStatus()}
         </div>
+        <div class="muted storage-status-detail" data-testid="offline-actions-status">
+          Offline actions: downloads stay disabled, forwarding stays disabled, and sharing stays disabled until connectivity returns.
+        </div>
       </div>
 
       <div class="storage-rows">
