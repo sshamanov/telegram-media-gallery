@@ -1,8 +1,7 @@
 <script lang="ts">
   import { onDestroy, onMount } from 'svelte'
-  import { getCachedOrDownloadBlob } from '../../lib/files'
-  import { formatDuration, hasThumbnail, isImageItem, isVideoItem, mediaGlyph } from '../../lib/media'
-  import { createImageThumbnail, createVideoThumbnail } from '../../lib/thumbnails'
+  import { formatDuration, hasThumbnail, mediaGlyph } from '../../lib/media'
+  import { loadThumbnailBlob } from '../../lib/thumbnails'
   import type { MediaItem as GalleryMediaItem } from '../../types/telegram'
 
   export let item: GalleryMediaItem
@@ -16,6 +15,7 @@
   let observer: IntersectionObserver | null = null
   let longPressTimer: ReturnType<typeof setTimeout> | null = null
   let longPressTriggered = false
+  let thumbLoadToken = 0
 
   function showVideoBadge(value: GalleryMediaItem): boolean {
     return ['video', 'document-video', 'large-video'].includes(value.type)
@@ -33,34 +33,24 @@
     return formatDuration(value.media.durationSeconds ?? null)
   }
 
+  function setThumbUrl(nextUrl: string | null): void {
+    if (thumbUrl) {
+      URL.revokeObjectURL(thumbUrl)
+    }
+    thumbUrl = nextUrl
+  }
+
   async function loadThumb(): Promise<void> {
     if (!hasThumbnail(item)) {
       return
     }
 
-    const cached = await getCachedOrDownloadBlob(item, 'thumb')
-    if (cached) {
-      thumbUrl = URL.createObjectURL(cached)
+    const loadToken = ++thumbLoadToken
+    const thumbnailBlob = await loadThumbnailBlob(item)
+    if (thumbnailBlob && loadToken === thumbLoadToken) {
+      setThumbUrl(URL.createObjectURL(thumbnailBlob))
       return
     }
-
-    if (!isImageItem(item) && !isVideoItem(item)) {
-      return
-    }
-
-    const fullBlob = await getCachedOrDownloadBlob(item, 'full')
-    if (!fullBlob) {
-      return
-    }
-
-    const generated = isImageItem(item)
-      ? await createImageThumbnail(fullBlob)
-      : await createVideoThumbnail(fullBlob)
-
-    if (!generated) {
-      return
-    }
-    thumbUrl = URL.createObjectURL(generated)
   }
 
   function clearLongPress(): void {
@@ -109,11 +99,10 @@
   })
 
   onDestroy(() => {
+    thumbLoadToken += 1
     observer?.disconnect()
     clearLongPress()
-    if (thumbUrl) {
-      URL.revokeObjectURL(thumbUrl)
-    }
+    setThumbUrl(null)
   })
 </script>
 

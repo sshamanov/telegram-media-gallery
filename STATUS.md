@@ -1,7 +1,7 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-16 03:13 +02:00
-**Current Phase:** Phase 3 Block 3 complete; Block 4 queued
+**Last Updated:** 2026-04-16 03:48 +02:00
+**Current Phase:** Phase 3 Block 4 complete; Block 5 queued
 **Active Plan:** `.kilo/plans/1776295158000-phase-3-offline-kickoff.md`
 **Branch:** `main`
 **Ahead Of `origin/main`:** 37 commits
@@ -24,7 +24,7 @@
 - **Plan file:** `.kilo/plans/1776295158000-phase-3-offline-kickoff.md`
 - **Goal:** turn roadmap Phase 3 storage/offline scope into an execution-ready implementation order with truthful dependencies, touched files, and validation gates.
 - **Execution strategy:** land the real service-worker precache and production validation path first, then add offline dialog bootstrap, harden OPFS migration/fallback, align offline media behavior with the actual cache stack, and finish offline action guards plus Phase 3 coverage.
-- **Status:** Blocks 1-3 completed; Block 4 is next
+- **Status:** Blocks 1-4 completed; Block 5 is next
 
 - **Plan file:** `.kilo/plans/1776291840732-kind-meadow.md`
 - **Goal:** finalize the canonical execution-ledger migration from `.kilo/status.md` to `STATUS.md` and reconcile authoritative governance references.
@@ -53,7 +53,7 @@
 - `completed` Implement Block 1: real app-shell service-worker precache and production-mode validation path.
 - `completed` Implement Block 2: persisted dialog snapshot for offline bootstrap.
 - `completed` Implement Block 3: OPFS migration and fallback hardening.
-- `pending` Implement Block 4: offline media/thumb behavior alignment.
+- `completed` Implement Block 4: offline media/thumb behavior alignment.
 - `pending` Implement Block 5: offline action guards and final Phase 3 coverage.
 
 ## Plan And Todo History
@@ -67,6 +67,9 @@
 - 2026-04-16 01:50 +02:00 - Completed Block 2 implementation: live dialog loads now persist a sanitized snapshot, offline startup/reload restores the dialog list from cached state when available, logout/session-expiry clears the snapshot, and production offline coverage proves cached dialog rendering after an online sync.
 - 2026-04-16 02:35 +02:00 - Started Block 3 implementation for deterministic OPFS migration state, resumable IndexedDB fallback, and truthful storage/backend reporting in settings.
 - 2026-04-16 03:10 +02:00 - Completed Block 3 implementation: startup now probes OPFS usability before selecting the full-media backend, legacy IndexedDB full-media migration persists resumable progress and partial-failure state, runtime full-media reads/writes use explicit IndexedDB fallback when OPFS is unavailable or fails, and settings/cache UI now reports the active backend plus legacy IndexedDB residue truthfully.
+- 2026-04-16 03:13 +02:00 - Started Block 4 implementation for truthful offline thumbnail/full-media behavior, cached-vs-uncached viewer placeholders, and matching coverage updates.
+- 2026-04-16 03:45 +02:00 - Completed Block 4 implementation: offline gallery cards now reuse cached thumbnail data or generate thumbnail cache entries from locally cached full media, offline viewer loads read full media only from the real cache backends and show the existing placeholder when uncached, cache UI copy now explains service-worker vs media-storage responsibilities, and production offline coverage proves cached-vs-uncached media behavior.
+- 2026-04-16 03:48 +02:00 - Recorded Block 4 commit `4852cc7` (`feat: align offline media cache behavior`).
 - 2026-04-16 01:11 +02:00 - Activated `.kilo/plans/1776291840732-kind-meadow.md` to finalize migration of the canonical execution ledger from `.kilo/status.md` to `STATUS.md`.
 - 2026-04-16 01:11 +02:00 - Updated active governance docs so forward-looking workflow references now use `STATUS.md`; preserved old `.kilo/status.md` references only where they remain factual history.
 - 2026-04-16 01:11 +02:00 - Confirmed `.kilo/status.md.js` is already absent and `.gitignore` already allows tracked `STATUS.md`; no further file-removal or ignore cleanup was required.
@@ -98,13 +101,14 @@
 
 ### Product blockers
 - Upload mode selector (Send as media vs Send as file) needs refinement for large files.
-- Offline gallery/viewer behavior still needs Block 4 alignment so uncached full media and thumbnail offline behavior match the now-truthful backend reporting.
+- Block 5 still needs offline action guards so download/share/copy/forward affordances match connectivity and cache truth end-to-end.
 
 ### Process/documentation blockers
 - No active migration blocker remains; the only intentional stale `.kilo/status.md` mentions are preserved historical facts in old ledger entries, old plans, and old commit descriptions.
 - `kilo.jsonc` already relies on broad `*.md` edit permissions, so no explicit `STATUS.md` permission cleanup was needed in this block.
 - Production offline validation now uses `scripts/serve-dist.mjs` instead of `vite preview` because the preview path served self-signed HTTPS, which prevented reliable service-worker installation in the Playwright production harness.
 - Port 5173 must be freed before switching between host-networked test compose services; a leftover `app` container caused one failed Block 2 offline validation attempt before teardown and retry.
+- Block 4 long offline validation needed two test-harness fixes before passing: PhotoSwipe remained open after the first cached-media assertion, and the initial uncached-media check targeted an adjacent slide that had been prefetched; the final coverage now seeds deterministic cache state and asserts the placeholder on an explicitly uncached slide.
 
 ### Rule violations or drift still tracked
 - No active rule violation is tracked for the ledger migration.
@@ -118,9 +122,25 @@
 - ✅ Production app-shell precache behavior and the dedicated production offline validation path are now reflected in spec and status.
 - ✅ `APPLICATION_SPEC.md` and runtime behavior now align on sanitized offline dialog snapshot bootstrap and cached-state UI wording.
 - ✅ `APPLICATION_SPEC.md`, runtime backend selection, and settings/cache reporting now align on resumable OPFS migration plus explicit IndexedDB fallback semantics.
+- ✅ `APPLICATION_SPEC.md`, gallery/viewer runtime behavior, and offline tests now align on thumbnail IndexedDB responsibility, full-media cache responsibility, and uncached offline placeholder behavior.
 - ℹ️ Historical references to `.kilo/status.md` remain in dated records by design and are not treated as active drift.
 
 ## Last Validation
+- 2026-04-16 03:44 +02:00 - `docker-compose -f docker-compose.test.yml down && docker-compose -f docker-compose.test.yml up --build playwright-prod --abort-on-container-exit --exit-code-from playwright-prod`
+  - Result: passed (`4 passed`)
+  - Main note: production offline coverage now proves cached gallery thumbnails remain visible in-session and seeded cached-vs-uncached full media resolves to real rendering vs the explicit offline placeholder.
+- 2026-04-16 03:43 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
+  - Result: passed with 0 errors, 6 warnings (same pre-existing DialogPicker and GalleryGrid accessibility warnings)
+  - Main note: Block 4 offline media, cache, and test-harness changes type-check cleanly.
+- 2026-04-16 03:27 +02:00 - `docker-compose -f docker-compose.test.yml down && docker-compose -f docker-compose.test.yml run --rm playwright npx playwright test --config=playwright.config.ts tests/e2e/short/gallery.spec.ts tests/e2e/short/viewer.spec.ts --project=desktop-chrome --reporter=line`
+  - Result: passed (`19 passed`)
+  - Main note: gallery and viewer baseline behavior remain intact after the offline cache-path changes.
+- 2026-04-16 03:41 +02:00 - `docker-compose -f docker-compose.test.yml down && docker-compose -f docker-compose.test.yml up --build playwright-prod --abort-on-container-exit --exit-code-from playwright-prod`
+  - Result: failed (`1 failed, 3 passed`)
+  - Main note: the first uncached-media assertion used a viewer-navigation path that could still hit prefetched adjacent media; coverage was rewritten to seed deterministic thumbnail/full-media cache state instead of assuming PhotoSwipe left neighboring slides uncached.
+- 2026-04-16 03:33 +02:00 - `docker-compose -f docker-compose.test.yml down && docker-compose -f docker-compose.test.yml up --build playwright-prod --abort-on-container-exit --exit-code-from playwright-prod`
+  - Result: failed (`1 failed, 3 passed`)
+  - Main note: the initial viewer-close assertion was brittle because PhotoSwipe remained open after the cached-media check even though the Svelte overlay hid; the long test was revised to avoid that unstable close dependency.
 - 2026-04-16 03:12 +02:00 - `docker-compose -f docker-compose.test.yml down && docker-compose -f docker-compose.test.yml run --rm playwright npx playwright test --config=playwright.config.ts tests/e2e/long/cache.spec.ts --project=desktop-chrome --reporter=line`
   - Result: passed (`3 passed`)
   - Main note: final Block 3 cache coverage still passes after normalizing the zero-legacy-entry completed state so settings now keep OPFS active without a stale pending status.
@@ -242,6 +262,7 @@
 ## Recent Commit Log
 | Commit | Date | Description |
 |--------|------|-------------|
+| `4852cc7` | 2026-04-16 | feat: align offline media cache behavior |
 | `4bb25e9` | 2026-04-16 | docs: finalize STATUS.md ledger migration |
 | `d7fee13` | 2026-04-16 | feat: complete Phase 2 UX gaps with per-item upload controls, folder picker, FLOOD_WAIT handling, and toasts |
 | `39077e6` | 2026-04-15 | docs: reconcile Phase 2 spec and status with validation |
@@ -267,8 +288,7 @@
 | `71863bf` | 2026-04-14 | Add global status document with project progress tracking |
 
 ## Next Execution Order
-1. Implement Block 4 from `.kilo/plans/1776295158000-phase-3-offline-kickoff.md`: align offline thumbnail/full-media behavior with the actual cache architecture.
-2. Implement Block 5: finish offline action guards and Phase 3 coverage.
+1. Implement Block 5 from `.kilo/plans/1776295158000-phase-3-offline-kickoff.md`: finish offline action guards and final Phase 3 coverage.
 
 ## Cross References
 - Active implementation plan: `.kilo/plans/1776295158000-phase-3-offline-kickoff.md`

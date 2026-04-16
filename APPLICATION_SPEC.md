@@ -18,7 +18,7 @@ Browser-based photo/video gallery using Telegram as a storage backend. Client-on
 - Production builds now register a real service worker that precaches the app shell (`/`, `/index.html`, hashed JS/CSS assets) and clears stale shell caches on activate.
 - Dialog bootstrap now persists a sanitized last-known dialog snapshot and can render that cached state while offline after a prior online sync.
 - Full-media cache storage now uses OPFS when it is usable, falls back explicitly to IndexedDB when it is not, and keeps one-time IndexedDB-to-OPFS migration state resumable and visible in settings.
-- Offline gallery/viewer behavior beyond truthful cache reporting and storage-backend handling remains planned for later Phase 3 blocks.
+- Offline gallery/viewer behavior is limited to the current cache stack: already-loaded gallery items can reuse cached thumbnails in-session, offline viewer playback/rendering works only for full media already cached in OPFS or IndexedDB fallback, and uncached full media shows an explicit offline placeholder instead of a broken load.
 
 ## Core Architecture
 
@@ -188,11 +188,13 @@ The accepted gallery baseline is limited to the currently restored behavior:
 3. filter by media type
 4. toggle grid/list view
 5. open viewer on item activation
+6. while offline in the current session, gallery cards keep showing thumbnails only when the thumbnail already exists in IndexedDB or can be generated from locally cached full media; otherwise the card falls back to the normal file/glyph placeholder
 
 ### Accepted Viewer Baseline
 - Viewer opens from gallery item activation
 - Viewer close path is part of the accepted baseline
 - Viewer baseline is treated as supported only to the extent validated by the current short suite and status ledger
+- While offline, the viewer reads full media only from the local full-media cache (OPFS or IndexedDB fallback); if that full media is missing, the viewer shows an explicit `Not available offline` placeholder
 
 ### Advanced Gallery Features Still Planned Or Not Yet Accepted
 Do not claim end-to-end support for these until they are rebuilt and revalidated:
@@ -208,7 +210,7 @@ Do not claim end-to-end support for these until they are rebuilt and revalidated
 - **Full media**: OPFS when the browser exposes a usable implementation; otherwise IndexedDB fallback remains active
 - **Full-media migration**: legacy IndexedDB full-media entries migrate to OPFS on startup when OPFS is usable; successful entries are removed from IndexedDB, failed entries remain visible and retry on later launches
 - **Dialogs**: sanitized last-known dialog snapshot in localStorage for offline bootstrap and reconnect recovery only
-- **Service worker cache**: production app shell precache for `/`, `/index.html`, and hashed JS/CSS assets; broader offline behavior remains phase-scoped
+- **Service worker cache**: production app shell precache for `/`, `/index.html`, and hashed JS/CSS assets only; Telegram/media payloads are not stored in the service-worker cache
 - **Storage breakdown**: shown in settings with separate reporting for thumbnails, active full-media backend, legacy IndexedDB full media when present, and service-worker cache
 
 ## Component Layout

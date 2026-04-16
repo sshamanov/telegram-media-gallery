@@ -5,6 +5,10 @@ import type { MediaItem } from '../types/telegram'
 
 export type CachedMediaKind = 'thumb' | 'full'
 
+function isOfflineRuntime(): boolean {
+  return typeof navigator !== 'undefined' && navigator.onLine === false
+}
+
 function cloneBufferToBlob(buffer: Uint8Array, type: string): Blob {
   const cloned = new Uint8Array(buffer.byteLength)
   cloned.set(buffer)
@@ -13,6 +17,27 @@ function cloneBufferToBlob(buffer: Uint8Array, type: string): Blob {
 
 export function mediaCacheKey(item: MediaItem, kind: CachedMediaKind): string {
   return `${item.dialogId}:${item.messageId}:${kind}`
+}
+
+export async function getCachedBlob(item: MediaItem, kind: CachedMediaKind): Promise<Blob | null> {
+  const cacheKey = mediaCacheKey(item, kind)
+
+  if (kind === 'full') {
+    return readFullMediaBlob(cacheKey, item.dialogId, item.messageId, item.mimeType || 'application/octet-stream')
+  }
+
+  return readCachedBlob(cacheKey, kind)
+}
+
+export async function writeMediaBlobToCache(item: MediaItem, kind: CachedMediaKind, blob: Blob): Promise<void> {
+  const cacheKey = mediaCacheKey(item, kind)
+
+  if (kind === 'full') {
+    await writeFullMediaBlob(cacheKey, item.dialogId, item.messageId, item.mimeType || 'application/octet-stream', blob)
+    return
+  }
+
+  await writeCachedBlob(cacheKey, blob, kind)
 }
 
 /**
@@ -28,17 +53,13 @@ export async function getCachedOrDownloadBlob(
   const mimeType = kind === 'thumb' ? 'image/jpeg' : item.mimeType || 'application/octet-stream'
 
   // --- read from cache ---
-  if (kind === 'full') {
-    const cachedFullBlob = await readFullMediaBlob(
-      mediaCacheKey(item, kind),
-      item.dialogId,
-      item.messageId,
-      mimeType,
-    )
-    if (cachedFullBlob) return cachedFullBlob
-  } else {
-    const idbBlob = await readCachedBlob(mediaCacheKey(item, kind), kind)
-    if (idbBlob) return idbBlob
+  const cachedBlob = await getCachedBlob(item, kind)
+  if (cachedBlob) {
+    return cachedBlob
+  }
+
+  if (isOfflineRuntime()) {
+    return null
   }
 
   // --- download ---
@@ -52,17 +73,7 @@ export async function getCachedOrDownloadBlob(
   const blob = cloneBufferToBlob(buffer, mimeType)
 
   // --- write to cache ---
-  if (kind === 'full') {
-    await writeFullMediaBlob(
-      mediaCacheKey(item, kind),
-      item.dialogId,
-      item.messageId,
-      mimeType,
-      blob,
-    )
-  } else {
-    await writeCachedBlob(mediaCacheKey(item, kind), blob, kind)
-  }
+  await writeMediaBlobToCache(item, kind, blob)
 
   return blob
 }

@@ -2,9 +2,7 @@
   import { derived, get, type Readable } from 'svelte/store'
   import { onDestroy } from 'svelte'
   import PhotoSwipe from 'photoswipe'
-  import { blobToFile, getCachedOrDownloadBlob } from '../../lib/files'
-  import { readFullMediaBlob } from '../../lib/cache/opfs'
-  import { readCachedBlob } from '../../lib/cache/indexeddb'
+  import { blobToFile, getCachedBlob, getCachedOrDownloadBlob } from '../../lib/files'
   import { formatSize, isAudioItem, isDownloadOnlyItem, isImageItem, isPdfItem, isTextItem, isTextLikeFileName, isVideoItem, mediaKindLabel } from '../../lib/media'
   import { readTextBlob } from '../../lib/thumbnails'
   import { createGallerySwipeGestures } from '../../lib/dom/swipe-gestures'
@@ -47,36 +45,9 @@
     $viewerIndex === null ? null : ($viewerItems[$viewerIndex] ?? $mediaItems[$viewerIndex] ?? null),
   )
 
-  async function isCachedLocally(item: MediaItem, kind: 'thumb' | 'full'): Promise<boolean> {
-    if (kind === 'full') {
-      const mimeType = item.mimeType || 'application/octet-stream'
-      const blob = await readFullMediaBlob(
-        `${item.dialogId}:${item.messageId}:${kind}`,
-        item.dialogId,
-        item.messageId,
-        mimeType,
-      )
-      return blob !== null
-    }
-    const cacheKey = `${item.dialogId}:${item.messageId}:${kind}`
-    const blob = await readCachedBlob(cacheKey, kind)
-    return blob !== null
-  }
-
   async function getCachedOrDownloadedBlob(item: MediaItem, kind: 'thumb' | 'full', token: number): Promise<Blob | null> {
-    // When offline, only return cached blobs — never attempt download
     if ($isOffline) {
-      if (kind === 'full') {
-        const mimeType = item.mimeType || 'application/octet-stream'
-        return readFullMediaBlob(
-          `${item.dialogId}:${item.messageId}:${kind}`,
-          item.dialogId,
-          item.messageId,
-          mimeType,
-        )
-      }
-      const cacheKey = `${item.dialogId}:${item.messageId}:${kind}`
-      return readCachedBlob(cacheKey, kind)
+      return getCachedBlob(item, kind)
     }
 
     if (token !== pswpOpenToken) return null
@@ -124,6 +95,7 @@
 
   function renderOfflinePlaceholder(content: ViewerContent): void {
     const wrapper = createShell('viewer-fallback viewer-offline')
+    wrapper.dataset.testid = 'viewer-offline-placeholder'
     const icon = document.createElement('div')
     icon.className = 'viewer-offline-icon'
     icon.textContent = '📵'
@@ -133,6 +105,26 @@
     sub.textContent = 'This item is not cached. Connect to load it.'
     wrapper.append(icon, title, sub)
     content.element = wrapper
+  }
+
+  function replaceImageSource(content: ViewerContent, item: MediaItem, image: HTMLImageElement, nextUrl: string, options?: {
+    revokePreviewOnLoad?: boolean
+  }): void {
+    const previousFullUrl = typeof content.fullUrl === 'string' ? content.fullUrl : null
+    image.onload = () => {
+      updateImageDimensions(content, item, image)
+
+      if (options?.revokePreviewOnLoad && typeof content.previewUrl === 'string') {
+        URL.revokeObjectURL(content.previewUrl)
+        content.previewUrl = null
+      }
+
+      if (previousFullUrl && previousFullUrl !== nextUrl) {
+        URL.revokeObjectURL(previousFullUrl)
+      }
+    }
+    content.fullUrl = nextUrl
+    image.src = nextUrl
   }
 
   function renderDownloadOnly(content: ViewerContent, item: MediaItem): void {
@@ -223,8 +215,8 @@
 
     // Offline: check cache first, show placeholder if not cached
     if ($isOffline) {
-      const cached = await isCachedLocally(item, 'full')
-      if (!cached) {
+      const cachedFullBlob = await getCachedBlob(item, 'full')
+      if (!cachedFullBlob) {
         renderOfflinePlaceholder(content)
         markLoaded(event)
         return
@@ -259,6 +251,9 @@
       const previewBlob = await getCachedOrDownloadedBlob(item, 'thumb', token)
       if (previewBlob && token === pswpOpenToken) {
         const previewUrl = URL.createObjectURL(previewBlob)
+        if (typeof content.previewUrl === 'string') {
+          URL.revokeObjectURL(content.previewUrl)
+        }
         content.previewUrl = previewUrl
         image.onload = () => updateImageDimensions(content, item, image)
         image.src = previewUrl
@@ -271,9 +266,7 @@
       }
 
       const fullUrl = URL.createObjectURL(fullBlob)
-      content.fullUrl = fullUrl
-      image.onload = () => updateImageDimensions(content, item, image)
-      image.src = fullUrl
+      replaceImageSource(content, item, image, fullUrl, { revokePreviewOnLoad: true })
       loadProgress = 100
       markLoaded(event)
       return

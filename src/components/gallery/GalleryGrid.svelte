@@ -45,6 +45,7 @@
   import { galleryIds, toggleGallery } from '../../stores/dialogs'
   import { settings, updateSettings } from '../../stores/settings'
   import { pushToast } from '../../stores/ui'
+  import { isOffline } from '../../stores/ui'
   import type { GalleryFilterId, MediaItem, UploadMode as UploadModeType } from '../../types/telegram'
 
   let activeFilter: GalleryFilterId = 'all'
@@ -59,6 +60,9 @@
   $: visibleItems = $mediaItems.filter((item) => isVisible(item, activeFilter, hiddenFilters))
   $: gridTemplate = `repeat(${$settings.gridColumns}, minmax(0, 1fr))`
   $: selectedCount = $selectedMediaIds.size
+  $: galleryStatusText = $isOffline
+    ? 'Offline - cached thumbnails remain visible, cached full media still opens, and uncached items fall back to placeholders.'
+    : null
 
   $: if ($currentDialog?.id) {
     showUploadSheet = false
@@ -607,6 +611,10 @@
       {/each}
     </div>
 
+    {#if galleryStatusText}
+      <p class="gallery-status muted" data-testid="gallery-data-status">{galleryStatusText}</p>
+    {/if}
+
     {#if $galleryViewMode === 'grid'}
       <div class="grid" style:grid-template-columns={gridTemplate} data-testid="gallery-grid">
         {#each visibleItems as item (item.id)}
@@ -862,7 +870,8 @@
 
   .empty-state,
   .loading,
-  .pull-refresh-note {
+  .pull-refresh-note,
+  .gallery-status {
     padding: 12px 0 18px;
     text-align: center;
   }

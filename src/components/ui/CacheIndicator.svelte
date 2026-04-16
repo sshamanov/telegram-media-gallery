@@ -91,6 +91,10 @@
           • Full media (IndexedDB): {formatBytes(usage.indexedDbFullMediaBytes)} ({usage.indexedDbFullMediaCount})
         {/if}
       </div>
+
+      <div class="cache-note muted">
+        App shell uses the Service Worker cache. Media thumbnails use IndexedDB, and full media uses OPFS or IndexedDB fallback.
+      </div>
     </div>
   {/if}
   
@@ -177,6 +181,12 @@
   .cache-breakdown {
     font-size: 0.8rem;
     line-height: 1.3;
+  }
+
+  .cache-note {
+    margin-top: 6px;
+    font-size: 0.76rem;
+    line-height: 1.35;
   }
   
   .cache-loading,
