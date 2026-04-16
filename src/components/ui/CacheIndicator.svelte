@@ -80,12 +80,15 @@
       {/if}
       
       <div class="cache-breakdown muted">
-        {#if usage.opfsAvailable}
+        {#if usage.activeFullMediaBackend === 'opfs'}
           Thumbnails: {formatBytes(usage.thumbnailsBytes)} ({usage.thumbnailsCount})
-          • Full media: {formatBytes(usage.opfsBytes || 0)} ({usage.opfsCount || 0})
+          • Full media (OPFS): {formatBytes(usage.opfsBytes)} ({usage.opfsCount})
+          {#if usage.indexedDbFullMediaCount > 0}
+            • Legacy IndexedDB: {formatBytes(usage.indexedDbFullMediaBytes)} ({usage.indexedDbFullMediaCount})
+          {/if}
         {:else}
           Thumbnails: {formatBytes(usage.thumbnailsBytes)} ({usage.thumbnailsCount})
-          • Full media: OPFS not available
+          • Full media (IndexedDB): {formatBytes(usage.indexedDbFullMediaBytes)} ({usage.indexedDbFullMediaCount})
         {/if}
       </div>
     </div>

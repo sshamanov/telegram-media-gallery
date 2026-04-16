@@ -3,7 +3,7 @@
   import { onDestroy } from 'svelte'
   import PhotoSwipe from 'photoswipe'
   import { blobToFile, getCachedOrDownloadBlob } from '../../lib/files'
-  import { isOpfsAvailable, readOpfsBlob } from '../../lib/cache/opfs'
+  import { readFullMediaBlob } from '../../lib/cache/opfs'
   import { readCachedBlob } from '../../lib/cache/indexeddb'
   import { formatSize, isAudioItem, isDownloadOnlyItem, isImageItem, isPdfItem, isTextItem, isTextLikeFileName, isVideoItem, mediaKindLabel } from '../../lib/media'
   import { readTextBlob } from '../../lib/thumbnails'
@@ -48,9 +48,14 @@
   )
 
   async function isCachedLocally(item: MediaItem, kind: 'thumb' | 'full'): Promise<boolean> {
-    if (kind === 'full' && isOpfsAvailable()) {
+    if (kind === 'full') {
       const mimeType = item.mimeType || 'application/octet-stream'
-      const blob = await readOpfsBlob(item.dialogId, item.messageId, mimeType)
+      const blob = await readFullMediaBlob(
+        `${item.dialogId}:${item.messageId}:${kind}`,
+        item.dialogId,
+        item.messageId,
+        mimeType,
+      )
       return blob !== null
     }
     const cacheKey = `${item.dialogId}:${item.messageId}:${kind}`
@@ -61,9 +66,14 @@
   async function getCachedOrDownloadedBlob(item: MediaItem, kind: 'thumb' | 'full', token: number): Promise<Blob | null> {
     // When offline, only return cached blobs — never attempt download
     if ($isOffline) {
-      if (kind === 'full' && isOpfsAvailable()) {
+      if (kind === 'full') {
         const mimeType = item.mimeType || 'application/octet-stream'
-        return readOpfsBlob(item.dialogId, item.messageId, mimeType)
+        return readFullMediaBlob(
+          `${item.dialogId}:${item.messageId}:${kind}`,
+          item.dialogId,
+          item.messageId,
+          mimeType,
+        )
       }
       const cacheKey = `${item.dialogId}:${item.messageId}:${kind}`
       return readCachedBlob(cacheKey, kind)

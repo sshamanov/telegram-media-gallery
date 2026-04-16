@@ -1,43 +1,57 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import { galleryFilters } from '../../lib/media'
-  import { settings, updateSettings, applyTheme } from '../../stores/settings'
+  import {
+    fullMediaStorage,
+    refreshFullMediaStorageState,
+    settings,
+    updateSettings,
+    applyTheme,
+  } from '../../stores/settings'
   import type { AppTheme } from '../../types/telegram'
   import { pushToast } from '../../stores/ui'
-   import { clearAllCachedMedia, getThumbCacheInfo } from '../../lib/cache/indexeddb'
-  import { clearOpfsMedia, getOpfsStorageInfo, isOpfsAvailable } from '../../lib/cache/opfs'
+  import {
+    clearFullMediaCache,
+    clearThumbnailCache,
+  } from '../../lib/cache/indexeddb'
+  import { clearOpfsMedia } from '../../lib/cache/opfs'
+  import { formatBytes, getStorageUsage, type StorageUsage } from '../../lib/cache/storage-usage'
   import type { GalleryFilterId } from '../../types/telegram'
 
   import CacheIndicator from '../ui/CacheIndicator.svelte'
 
-  interface StorageInfo {
-    thumbs: { itemCount: number; totalBytes: number } | null
-    opfs: { itemCount: number; totalBytes: number } | null
-    swCache: number | null   // bytes
-  }
-
   let draft = $settings
-  let storageInfo: StorageInfo = { thumbs: null, opfs: null, swCache: null }
+  let storageInfo: StorageUsage | null = null
+  let swCache = 0
   let loadingStorage = false
 
   $: draft = $settings
 
-  function formatBytes(bytes: number): string {
-    if (bytes < 1024) return `${bytes} B`
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-    if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-    return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`
+  function describeMigrationStatus(): string {
+    switch ($fullMediaStorage.migrationStatus) {
+      case 'running':
+        return `Migrating ${$fullMediaStorage.processedEntries} of ${$fullMediaStorage.totalEntries} cached items into OPFS.`
+      case 'completed':
+        return $fullMediaStorage.detail ?? 'OPFS is active for new full-media downloads.'
+      case 'partial':
+        return $fullMediaStorage.detail ?? 'Some full-media items still remain in IndexedDB and will retry on next launch.'
+      case 'fallback':
+      case 'unsupported':
+        return $fullMediaStorage.detail ?? 'IndexedDB fallback is active because OPFS is unavailable.'
+      default:
+        return 'Checking full-media storage backend.'
+    }
   }
 
   async function loadStorageInfo(): Promise<void> {
     loadingStorage = true
     try {
-      const [thumbs, opfs] = await Promise.all([
-        getThumbCacheInfo(),
-        isOpfsAvailable() ? getOpfsStorageInfo() : Promise.resolve(null),
+      const [usage] = await Promise.all([
+        getStorageUsage(),
+        refreshFullMediaStorageState(),
       ])
 
-      let swCache: number | null = null
+      let nextSwCache = 0
       if ('caches' in window) {
         let total = 0
         const keys = await caches.keys()
@@ -52,10 +66,11 @@
             }
           }
         }
-        swCache = total
+        nextSwCache = total
       }
 
-      storageInfo = { thumbs, opfs, swCache }
+      storageInfo = usage
+      swCache = nextSwCache
     } finally {
       loadingStorage = false
     }
@@ -74,13 +89,16 @@
   }
 
   async function clearThumbs(): Promise<void> {
-    await clearAllCachedMedia()
+    await clearThumbnailCache()
     pushToast({ kind: 'success', text: 'Thumbnail cache cleared', dismissible: true })
     await loadStorageInfo()
   }
 
   async function clearFullMedia(): Promise<void> {
-    await clearOpfsMedia()
+    await Promise.all([
+      clearFullMediaCache(),
+      clearOpfsMedia(),
+    ])
     pushToast({ kind: 'success', text: 'Full media cache cleared', dismissible: true })
     await loadStorageInfo()
   }
@@ -158,34 +176,62 @@
     {#if loadingStorage}
       <div class="muted storage-loading">Loading storage info...</div>
     {:else}
+      <div class="storage-status panel-subtle">
+        <div class="storage-status-label">Active full-media backend</div>
+        <div class="storage-status-value" data-testid="full-media-backend-status">
+          {$fullMediaStorage.activeBackend === 'opfs' ? 'OPFS' : 'IndexedDB fallback'}
+        </div>
+        <div class="muted storage-status-detail" data-testid="full-media-migration-status">
+          {describeMigrationStatus()}
+        </div>
+      </div>
+
       <div class="storage-rows">
         <div class="storage-row">
           <div>
             <div class="storage-label">Thumbnails (IndexedDB)</div>
             <div class="muted storage-meta">
-              {storageInfo.thumbs ? `${storageInfo.thumbs.itemCount} items · ${formatBytes(storageInfo.thumbs.totalBytes)}` : '—'}
+              {storageInfo ? `${storageInfo.thumbnailsCount} items · ${formatBytes(storageInfo.thumbnailsBytes)}` : '—'}
             </div>
           </div>
           <button class="button danger compact-btn" type="button" on:click={clearThumbs}>Clear</button>
         </div>
 
-        <div class="storage-row">
+        <div class="storage-row" data-testid="full-media-primary-row">
           <div>
-            <div class="storage-label">Full media {isOpfsAvailable() ? '(OPFS)' : '(IndexedDB)'}</div>
+            <div class="storage-label">
+              Full media ({$fullMediaStorage.activeBackend === 'opfs' ? 'OPFS' : 'IndexedDB'})
+            </div>
             <div class="muted storage-meta">
-              {storageInfo.opfs
-                ? `${storageInfo.opfs.itemCount} items · ${formatBytes(storageInfo.opfs.totalBytes)}`
-                : isOpfsAvailable() ? '—' : 'OPFS not available'}
+              {#if storageInfo}
+                {$fullMediaStorage.activeBackend === 'opfs'
+                  ? `${storageInfo.opfsCount} items · ${formatBytes(storageInfo.opfsBytes)}`
+                  : `${storageInfo.indexedDbFullMediaCount} items · ${formatBytes(storageInfo.indexedDbFullMediaBytes)}`}
+              {:else}
+                —
+              {/if}
             </div>
           </div>
-          <button class="button danger compact-btn" type="button" on:click={clearFullMedia} disabled={!isOpfsAvailable()}>Clear</button>
+          <button class="button danger compact-btn" type="button" on:click={clearFullMedia}>Clear</button>
         </div>
+
+        {#if storageInfo && $fullMediaStorage.activeBackend === 'opfs'}
+          <div class="storage-row" data-testid="full-media-legacy-row">
+            <div>
+              <div class="storage-label">Legacy full media (IndexedDB)</div>
+              <div class="muted storage-meta">
+                {storageInfo.indexedDbFullMediaCount} items · {formatBytes(storageInfo.indexedDbFullMediaBytes)}
+              </div>
+            </div>
+            <button class="button danger compact-btn" type="button" on:click={clearFullMedia}>Clear</button>
+          </div>
+        {/if}
 
         <div class="storage-row">
           <div>
             <div class="storage-label">App cache (Service Worker)</div>
             <div class="muted storage-meta">
-              {storageInfo.swCache !== null ? formatBytes(storageInfo.swCache) : '—'}
+              {formatBytes(swCache)}
             </div>
           </div>
           <button class="button danger compact-btn" type="button" on:click={clearSwCache}>Clear</button>
@@ -258,6 +304,32 @@
   .storage-rows {
     display: grid;
     gap: 14px;
+  }
+
+  .storage-status {
+    display: grid;
+    gap: 4px;
+    padding: 14px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .storage-status-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+  }
+
+  .storage-status-value {
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  .storage-status-detail {
+    font-size: 0.85rem;
+    line-height: 1.4;
   }
 
   .storage-row {

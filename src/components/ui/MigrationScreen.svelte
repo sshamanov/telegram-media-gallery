@@ -1,16 +1,24 @@
 <script lang="ts">
   export let progress: number = 0
+  export let processedEntries: number = 0
+  export let totalEntries: number = 0
 </script>
 
-<div class="migration-overlay">
+<div class="migration-overlay" data-testid="migration-screen">
   <div class="migration-card panel">
     <h2>Upgrading storage...</h2>
-    <p class="muted">Moving cached media to new storage format.</p>
+    <p class="muted">Moving cached full media from IndexedDB into OPFS.</p>
     <div class="migration-bar">
       <span style="width: {progress}%"></span>
     </div>
     <p class="migration-pct muted">{progress}%</p>
-    <p class="migration-note muted">This happens once only</p>
+    <p class="migration-note muted">
+      {#if totalEntries > 0}
+        {processedEntries} of {totalEntries} items processed
+      {:else}
+        Preparing migration
+      {/if}
+    </p>
   </div>
 </div>
 

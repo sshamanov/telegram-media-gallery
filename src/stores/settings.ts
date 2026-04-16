@@ -1,5 +1,10 @@
-import { get } from 'svelte/store'
+import { get, writable } from 'svelte/store'
 import type { AppSettings, AppTheme } from '../types/telegram'
+import {
+  getFullMediaStorageState,
+  getStoredFullMediaStorageState,
+  type FullMediaStorageState,
+} from '../lib/cache/opfs'
 import { persisted } from './persisted'
 
 const mobile = typeof window !== 'undefined' && window.innerWidth <= 768
@@ -14,9 +19,20 @@ const defaultSettings: AppSettings = {
 }
 
 export const settings = persisted<AppSettings>('settings', defaultSettings)
+export const fullMediaStorage = writable<FullMediaStorageState>(getStoredFullMediaStorageState())
 
 export function updateSettings(next: Partial<AppSettings>): void {
   settings.update((current) => ({ ...current, ...next }))
+}
+
+export function setFullMediaStorageState(next: FullMediaStorageState): void {
+  fullMediaStorage.set(next)
+}
+
+export async function refreshFullMediaStorageState(): Promise<FullMediaStorageState> {
+  const next = await getFullMediaStorageState()
+  fullMediaStorage.set(next)
+  return next
 }
 
 export function getGridColumns(): number {

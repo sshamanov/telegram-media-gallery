@@ -13,39 +13,37 @@
   import { allDialogs, galleries, hydrateDialogsFromSnapshot, setDialogs } from './stores/dialogs'
   import { authState, authStatus, session, getCurrentAdapter, handleDisconnect } from './stores/telegram'
   import { isOffline, pushToast } from './stores/ui'
-  import { migrateIndexedDbToOpfs, isOpfsAvailable } from './lib/cache/opfs'
-  import { applyTheme, settings } from './stores/settings'
+  import { initializeFullMediaStorage, type FullMediaStorageState } from './lib/cache/opfs'
+  import { applyTheme, settings, setFullMediaStorageState } from './stores/settings'
   import { getKeyboardShortcutsManager } from './lib/dom/keyboard-shortcuts'
   import { createRouterStore } from './lib/routing'
   import { routeTransition } from './lib/dom/transitions'
 
-  const MIGRATION_KEY = 'opfs-migration-v1-done'
-
   let dialogsLoaded = false
   let dialogsLoading = false
   let migrating = false
-  let migrationProgress = 0   // 0–100
+  let migrationProgress = 0
+  let fullMediaStorageState: FullMediaStorageState | null = null
   
   // Router store
   const router = createRouterStore()
 
   async function runMigrationIfNeeded(): Promise<void> {
-    if (!isOpfsAvailable()) return
-    if (localStorage.getItem(MIGRATION_KEY)) return
+    const next = await initializeFullMediaStorage((state) => {
+      fullMediaStorageState = state
+      setFullMediaStorageState(state)
+      migrating = state.migrationStatus === 'running'
+      migrationProgress = state.totalEntries > 0
+        ? Math.round((state.processedEntries / state.totalEntries) * 100)
+        : 100
+    })
 
-    migrating = true
-    migrationProgress = 0
-
-    try {
-      await migrateIndexedDbToOpfs((done, total) => {
-        migrationProgress = total > 0 ? Math.round((done / total) * 100) : 100
-      })
-      localStorage.setItem(MIGRATION_KEY, '1')
-    } catch {
-      // Partial migration is fine — missing items re-downloaded on demand
-    } finally {
-      migrating = false
-    }
+    fullMediaStorageState = next
+    setFullMediaStorageState(next)
+    migrating = next.migrationStatus === 'running'
+    migrationProgress = next.totalEntries > 0
+      ? Math.round((next.processedEntries / next.totalEntries) * 100)
+      : 100
   }
 
   async function loadDialogs(): Promise<void> {
@@ -182,8 +180,12 @@
 <ReconnectBanner />
 
 {#if migrating}
-  <MigrationScreen progress={migrationProgress} />
-   {:else}
+  <MigrationScreen
+    progress={migrationProgress}
+    processedEntries={fullMediaStorageState?.processedEntries ?? 0}
+    totalEntries={fullMediaStorageState?.totalEntries ?? 0}
+  />
+    {:else}
     <main class="app-shell">
     <div class="route-container" use:routeTransition>
       {#if $authState !== 'connected'}

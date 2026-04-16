@@ -1,5 +1,5 @@
 import { readCachedBlob, writeCachedBlob } from './cache/indexeddb'
-import { isOpfsAvailable, readOpfsBlob, writeOpfsBlob } from './cache/opfs'
+import { readFullMediaBlob, writeFullMediaBlob } from './cache/opfs'
 import { getTelegramAdapter } from './telegram/adapter'
 import type { MediaItem } from '../types/telegram'
 
@@ -28,9 +28,14 @@ export async function getCachedOrDownloadBlob(
   const mimeType = kind === 'thumb' ? 'image/jpeg' : item.mimeType || 'application/octet-stream'
 
   // --- read from cache ---
-  if (kind === 'full' && isOpfsAvailable()) {
-    const opfsBlob = await readOpfsBlob(item.dialogId, item.messageId, mimeType)
-    if (opfsBlob) return opfsBlob
+  if (kind === 'full') {
+    const cachedFullBlob = await readFullMediaBlob(
+      mediaCacheKey(item, kind),
+      item.dialogId,
+      item.messageId,
+      mimeType,
+    )
+    if (cachedFullBlob) return cachedFullBlob
   } else {
     const idbBlob = await readCachedBlob(mediaCacheKey(item, kind), kind)
     if (idbBlob) return idbBlob
@@ -47,8 +52,14 @@ export async function getCachedOrDownloadBlob(
   const blob = cloneBufferToBlob(buffer, mimeType)
 
   // --- write to cache ---
-  if (kind === 'full' && isOpfsAvailable()) {
-    await writeOpfsBlob(item.dialogId, item.messageId, mimeType, blob)
+  if (kind === 'full') {
+    await writeFullMediaBlob(
+      mediaCacheKey(item, kind),
+      item.dialogId,
+      item.messageId,
+      mimeType,
+      blob,
+    )
   } else {
     await writeCachedBlob(mediaCacheKey(item, kind), blob, kind)
   }

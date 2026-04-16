@@ -1,7 +1,7 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-16 01:50 +02:00
-**Current Phase:** Phase 3 Block 2 complete; Block 3 queued
+**Last Updated:** 2026-04-16 03:13 +02:00
+**Current Phase:** Phase 3 Block 3 complete; Block 4 queued
 **Active Plan:** `.kilo/plans/1776295158000-phase-3-offline-kickoff.md`
 **Branch:** `main`
 **Ahead Of `origin/main`:** 37 commits
@@ -24,7 +24,7 @@
 - **Plan file:** `.kilo/plans/1776295158000-phase-3-offline-kickoff.md`
 - **Goal:** turn roadmap Phase 3 storage/offline scope into an execution-ready implementation order with truthful dependencies, touched files, and validation gates.
 - **Execution strategy:** land the real service-worker precache and production validation path first, then add offline dialog bootstrap, harden OPFS migration/fallback, align offline media behavior with the actual cache stack, and finish offline action guards plus Phase 3 coverage.
-- **Status:** Blocks 1-2 completed; Block 3 is next
+- **Status:** Blocks 1-3 completed; Block 4 is next
 
 - **Plan file:** `.kilo/plans/1776291840732-kind-meadow.md`
 - **Goal:** finalize the canonical execution-ledger migration from `.kilo/status.md` to `STATUS.md` and reconcile authoritative governance references.
@@ -52,7 +52,7 @@
 - `completed` Capture Phase 3 ordered backlog blocks, touched files, dependencies, and validation gates from current readiness findings.
 - `completed` Implement Block 1: real app-shell service-worker precache and production-mode validation path.
 - `completed` Implement Block 2: persisted dialog snapshot for offline bootstrap.
-- `pending` Implement Block 3: OPFS migration and fallback hardening.
+- `completed` Implement Block 3: OPFS migration and fallback hardening.
 - `pending` Implement Block 4: offline media/thumb behavior alignment.
 - `pending` Implement Block 5: offline action guards and final Phase 3 coverage.
 
@@ -65,6 +65,8 @@
 - 2026-04-16 01:42 +02:00 - Started Block 2 implementation for sanitized dialog snapshot persistence, offline dialog bootstrap, and cached-state UI messaging.
 - 2026-04-16 01:47 +02:00 - First Block 2 production offline validation attempt failed because the short-suite `app` container was still bound to host port 5173; the compose stack was torn down before rerunning the offline suite.
 - 2026-04-16 01:50 +02:00 - Completed Block 2 implementation: live dialog loads now persist a sanitized snapshot, offline startup/reload restores the dialog list from cached state when available, logout/session-expiry clears the snapshot, and production offline coverage proves cached dialog rendering after an online sync.
+- 2026-04-16 02:35 +02:00 - Started Block 3 implementation for deterministic OPFS migration state, resumable IndexedDB fallback, and truthful storage/backend reporting in settings.
+- 2026-04-16 03:10 +02:00 - Completed Block 3 implementation: startup now probes OPFS usability before selecting the full-media backend, legacy IndexedDB full-media migration persists resumable progress and partial-failure state, runtime full-media reads/writes use explicit IndexedDB fallback when OPFS is unavailable or fails, and settings/cache UI now reports the active backend plus legacy IndexedDB residue truthfully.
 - 2026-04-16 01:11 +02:00 - Activated `.kilo/plans/1776291840732-kind-meadow.md` to finalize migration of the canonical execution ledger from `.kilo/status.md` to `STATUS.md`.
 - 2026-04-16 01:11 +02:00 - Updated active governance docs so forward-looking workflow references now use `STATUS.md`; preserved old `.kilo/status.md` references only where they remain factual history.
 - 2026-04-16 01:11 +02:00 - Confirmed `.kilo/status.md.js` is already absent and `.gitignore` already allows tracked `STATUS.md`; no further file-removal or ignore cleanup was required.
@@ -96,7 +98,7 @@
 
 ### Product blockers
 - Upload mode selector (Send as media vs Send as file) needs refinement for large files.
-- OPFS migration and fallback semantics remain incomplete, so storage behavior must still be treated as partially prepared groundwork rather than accepted support.
+- Offline gallery/viewer behavior still needs Block 4 alignment so uncached full media and thumbnail offline behavior match the now-truthful backend reporting.
 
 ### Process/documentation blockers
 - No active migration blocker remains; the only intentional stale `.kilo/status.md` mentions are preserved historical facts in old ledger entries, old plans, and old commit descriptions.
@@ -115,9 +117,25 @@
 - ✅ `APPLICATION_SPEC.md` cross-references the new active Phase 3 plan while continuing to treat Phase 3 behavior as planned only.
 - ✅ Production app-shell precache behavior and the dedicated production offline validation path are now reflected in spec and status.
 - ✅ `APPLICATION_SPEC.md` and runtime behavior now align on sanitized offline dialog snapshot bootstrap and cached-state UI wording.
+- ✅ `APPLICATION_SPEC.md`, runtime backend selection, and settings/cache reporting now align on resumable OPFS migration plus explicit IndexedDB fallback semantics.
 - ℹ️ Historical references to `.kilo/status.md` remain in dated records by design and are not treated as active drift.
 
 ## Last Validation
+- 2026-04-16 03:12 +02:00 - `docker-compose -f docker-compose.test.yml down && docker-compose -f docker-compose.test.yml run --rm playwright npx playwright test --config=playwright.config.ts tests/e2e/long/cache.spec.ts --project=desktop-chrome --reporter=line`
+  - Result: passed (`3 passed`)
+  - Main note: final Block 3 cache coverage still passes after normalizing the zero-legacy-entry completed state so settings now keep OPFS active without a stale pending status.
+- 2026-04-16 03:11 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
+  - Result: passed with 0 errors, 6 warnings (same pre-existing DialogPicker and GalleryGrid accessibility warnings)
+  - Main note: the follow-up OPFS state normalization for zero-legacy-entry startups still type-checks cleanly.
+- 2026-04-16 03:09 +02:00 - `docker-compose -f docker-compose.test.yml down && docker-compose -f docker-compose.test.yml run --rm playwright npx playwright test --config=playwright.config.ts tests/e2e/long/cache.spec.ts --project=desktop-chrome --reporter=line`
+  - Result: passed (`3 passed`)
+  - Main note: long cache coverage now proves the settings screen reports IndexedDB fallback when OPFS is unavailable, a later reload resumes migration into OPFS, and malformed legacy entries remain visible as partial migration residue instead of being hidden.
+- 2026-04-16 03:08 +02:00 - `docker-compose -f docker-compose.test.yml down && docker-compose -f docker-compose.test.yml run --rm playwright npx playwright test --config=playwright.config.ts tests/e2e/long/cache.spec.ts --project=desktop-chrome --reporter=line`
+  - Result: failed (`1 failed, 2 passed`)
+  - Main note: the first resumability assertion expected the post-migration settings detail string to say `OPFS is active for new full-media downloads`, but the implemented completed-state copy correctly said `IndexedDB full-media entries migrated to OPFS.`; the test was updated to assert the truthful completed-state wording instead of a stricter string.
+- 2026-04-16 03:07 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
+  - Result: passed with 0 errors, 6 warnings (same pre-existing DialogPicker and GalleryGrid accessibility warnings)
+  - Main note: Block 3 storage-state, fallback, settings, and cache-test changes type-check cleanly.
 - 2026-04-16 01:50 +02:00 - `docker-compose -f docker-compose.test.yml down && docker-compose -f docker-compose.test.yml up --build playwright-prod --abort-on-container-exit --exit-code-from playwright-prod`
   - Result: passed (`2 passed`)
   - Main note: resetting the compose stack before the run kept port 5173 deterministic and production offline coverage now proves both app-shell bootstrap and cached dialog-list bootstrap from the persisted snapshot after one online login.
@@ -249,9 +267,8 @@
 | `71863bf` | 2026-04-14 | Add global status document with project progress tracking |
 
 ## Next Execution Order
-1. Implement Block 3 from `.kilo/plans/1776295158000-phase-3-offline-kickoff.md`: harden OPFS migration and fallback behavior.
-2. Implement Block 4: align offline thumbnail/full-media behavior with the actual cache architecture.
-3. Implement Block 5: finish offline action guards and Phase 3 coverage.
+1. Implement Block 4 from `.kilo/plans/1776295158000-phase-3-offline-kickoff.md`: align offline thumbnail/full-media behavior with the actual cache architecture.
+2. Implement Block 5: finish offline action guards and Phase 3 coverage.
 
 ## Cross References
 - Active implementation plan: `.kilo/plans/1776295158000-phase-3-offline-kickoff.md`

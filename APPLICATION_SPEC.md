@@ -17,7 +17,8 @@ Browser-based photo/video gallery using Telegram as a storage backend. Client-on
 - Phase 2 actions (multi-select, bulk download, forward, share, copy, upload queue) are implemented and available in the UI.
 - Production builds now register a real service worker that precaches the app shell (`/`, `/index.html`, hashed JS/CSS assets) and clears stale shell caches on activate.
 - Dialog bootstrap now persists a sanitized last-known dialog snapshot and can render that cached state while offline after a prior online sync.
-- Offline media/cache behavior beyond the cached app shell plus dialog snapshot remains planned for later Phase 3 blocks.
+- Full-media cache storage now uses OPFS when it is usable, falls back explicitly to IndexedDB when it is not, and keeps one-time IndexedDB-to-OPFS migration state resumable and visible in settings.
+- Offline gallery/viewer behavior beyond truthful cache reporting and storage-backend handling remains planned for later Phase 3 blocks.
 
 ## Core Architecture
 
@@ -26,7 +27,7 @@ Browser-based photo/video gallery using Telegram as a storage backend. Client-on
 - **Build Tool**: Vite
 - **Telegram Client**: `@mtcute/web`
 - **Media Viewer**: PhotoSwipe v5
-- **Caching**: IndexedDB for thumbnails, OPFS for full-media cache in later phases
+- **Caching**: IndexedDB for thumbnails and fallback/legacy full media, OPFS for active full-media cache when usable
 - **PWA**: Manifest is part of the app; broader offline/service-worker behavior remains phase-scoped
 
 ### System Boundaries
@@ -176,6 +177,7 @@ All Telegram API calls go through `src/lib/telegram/adapter.ts`. Feature code mu
 - Settings is a dedicated route-backed screen at `#/settings`
 - Settings opens from the dialogs header and closes via a back button
 - Storage information is shown inline with clear buttons and no confirmation dialog
+- Settings labels the active full-media backend truthfully and reports migration/fallback state for full-media storage
 
 ## Gallery And Viewer Support
 
@@ -194,7 +196,6 @@ The accepted gallery baseline is limited to the currently restored behavior:
 
 ### Advanced Gallery Features Still Planned Or Not Yet Accepted
 Do not claim end-to-end support for these until they are rebuilt and revalidated:
-- OPFS full-media cache
 - service worker offline shell behavior
 - masonry layout
 - desktop layout variants
@@ -204,10 +205,11 @@ Do not claim end-to-end support for these until they are rebuilt and revalidated
 
 ## Caching Strategy
 - **Thumbnails**: IndexedDB
-- **Full media**: OPFS where available in later phases
+- **Full media**: OPFS when the browser exposes a usable implementation; otherwise IndexedDB fallback remains active
+- **Full-media migration**: legacy IndexedDB full-media entries migrate to OPFS on startup when OPFS is usable; successful entries are removed from IndexedDB, failed entries remain visible and retry on later launches
 - **Dialogs**: sanitized last-known dialog snapshot in localStorage for offline bootstrap and reconnect recovery only
 - **Service worker cache**: production app shell precache for `/`, `/index.html`, and hashed JS/CSS assets; broader offline behavior remains phase-scoped
-- **Storage breakdown**: shown in settings with clear actions for each cache area
+- **Storage breakdown**: shown in settings with separate reporting for thumbnails, active full-media backend, legacy IndexedDB full media when present, and service-worker cache
 
 ## Component Layout
 ```text
@@ -327,7 +329,6 @@ Short tests are intended to validate only currently supported baseline behavior:
 - Selection header with Download, Forward, Share, Copy actions
 
 ### Phase 3+ (Advanced) - Planned
-- OPFS full-media cache
 - Broader service-worker/offline media behavior beyond app-shell precache and dialog snapshot bootstrap
 - Masonry layout toggle
 - Desktop layout variants

@@ -100,17 +100,38 @@ export async function getThumbCacheInfo(): Promise<{ itemCount: number; totalByt
   }
 }
 
+export async function getFullMediaCacheInfo(): Promise<{ itemCount: number; totalBytes: number }> {
+  const entries = await withStore<CacheEntry[]>(FULL, 'readonly', (store, resolve) => {
+    const request = store.getAll()
+    request.onsuccess = () => resolve((request.result as CacheEntry[]) ?? [])
+    request.onerror = () => resolve([])
+  })
+
+  return {
+    itemCount: entries.length,
+    totalBytes: entries.reduce((sum, entry) => sum + entry.blob.size, 0),
+  }
+}
+
+export async function clearFullMediaCache(): Promise<void> {
+  await withStore(FULL, 'readwrite', (store, resolve, reject) => {
+    const request = store.clear()
+    request.onsuccess = () => resolve(undefined)
+    request.onerror = () => reject(request.error ?? new Error('Failed to clear full-media cache'))
+  })
+}
+
+export async function clearThumbnailCache(): Promise<void> {
+  await withStore(THUMBS, 'readwrite', (store, resolve, reject) => {
+    const request = store.clear()
+    request.onsuccess = () => resolve(undefined)
+    request.onerror = () => reject(request.error ?? new Error('Failed to clear thumbnail cache'))
+  })
+}
+
 export async function clearAllCachedMedia(): Promise<void> {
   await Promise.all([
-    withStore(THUMBS, 'readwrite', (store, resolve, reject) => {
-      const request = store.clear()
-      request.onsuccess = () => resolve(undefined)
-      request.onerror = () => reject(request.error ?? new Error('Failed to clear thumbnail cache'))
-    }),
-    withStore(FULL, 'readwrite', (store, resolve, reject) => {
-      const request = store.clear()
-      request.onsuccess = () => resolve(undefined)
-      request.onerror = () => reject(request.error ?? new Error('Failed to clear full-media cache'))
-    }),
+    clearThumbnailCache(),
+    clearFullMediaCache(),
   ])
 }
