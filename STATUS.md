@@ -87,7 +87,7 @@
 - `completed` Task 16: Investigate download speed (Block 3.2)
 
 ### Phase 4: Shareable URLs
-- `pending` Task 17: Shareable media URLs (Block 4.1)
+- `in_progress` Task 17: Shareable media URLs (Block 4.1)
 
 ## Next Execution Order
 1. Phase 4 Block 4.1: Shareable URLs (FB004)

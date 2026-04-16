@@ -17,6 +17,7 @@ export type Route =
   | { type: 'dialog-list' }
   | { type: 'gallery'; dialogId: string }
   | { type: 'settings' }
+  | { type: 'viewer'; dialogId: string; messageId: number }
 
 export interface RouterState {
   currentRoute: Route
@@ -75,6 +76,16 @@ class Router {
     
     // Parse route
     if (path.startsWith('/gallery/')) {
+      // Check for viewer pattern: /gallery/:dialogId/view/:messageId
+      const viewerMatch = path.match(/^\/gallery\/([^\/]+)\/view\/(\d+)$/)
+      if (viewerMatch) {
+        const dialogId = viewerMatch[1]
+        const messageId = Number(viewerMatch[2])
+        this.previousRoute = this.currentRoute
+        this.currentRoute = { type: 'viewer', dialogId, messageId }
+        return
+      }
+      // Gallery pattern: /gallery/:dialogId
       const dialogId = path.slice('/gallery/'.length)
       if (dialogId) {
         this.previousRoute = this.currentRoute
@@ -120,6 +131,9 @@ class Router {
     switch (route.type) {
       case 'gallery':
         hash += `/gallery/${route.dialogId}`
+        break
+      case 'viewer':
+        hash += `/gallery/${route.dialogId}/view/${route.messageId}`
         break
       case 'settings':
         hash += '/settings'
@@ -179,6 +193,10 @@ class Router {
       case 'gallery':
         return this.currentRoute.type === 'gallery' && 
                this.currentRoute.dialogId === route.dialogId
+      case 'viewer':
+        return this.currentRoute.type === 'viewer' && 
+               this.currentRoute.dialogId === route.dialogId &&
+               this.currentRoute.messageId === route.messageId
       default:
         return true
     }
@@ -207,6 +225,9 @@ class Router {
     switch (route.type) {
       case 'gallery':
         path += `/gallery/${route.dialogId}`
+        break
+      case 'viewer':
+        path += `/gallery/${route.dialogId}/view/${route.messageId}`
         break
       case 'settings':
         path += '/settings'
@@ -270,6 +291,10 @@ export function navigateToDialogList(options?: RouterOptions): void {
 
 export function navigateToGallery(dialogId: string, options?: RouterOptions): void {
   getRouter().navigate({ type: 'gallery', dialogId }, options)
+}
+
+export function navigateToViewer(dialogId: string, messageId: number, options?: RouterOptions): void {
+  getRouter().navigate({ type: 'viewer', dialogId, messageId }, options)
 }
 
 export function navigateToSettings(options?: RouterOptions): void {

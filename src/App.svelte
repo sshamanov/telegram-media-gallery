@@ -9,10 +9,11 @@
   import MigrationScreen from './components/ui/MigrationScreen.svelte'
   import ReconnectBanner from './components/ui/ReconnectBanner.svelte'
   import SettingsScreen from './components/settings/SettingsScreen.svelte'
-  import { currentDialog, loadInitialMedia, setActiveDialog } from './stores/gallery'
+  import { currentDialog, loadInitialMedia, setActiveDialog, openViewer, mediaItems, viewerIndex, closeViewer } from './stores/gallery'
   import { allDialogs, galleries, hydrateDialogsFromSnapshot, setDialogs } from './stores/dialogs'
   import { authState, authStatus, session, getCurrentAdapter, handleDisconnect } from './stores/telegram'
   import { isOffline, pushToast } from './stores/ui'
+  import { pendingViewerRoute } from './stores/viewer'
   import { initializeFullMediaStorage, type FullMediaStorageState } from './lib/cache/opfs'
   import { applyTheme, settings, setFullMediaStorageState } from './stores/settings'
   import { getKeyboardShortcutsManager } from './lib/dom/keyboard-shortcuts'
@@ -87,6 +88,34 @@
         setActiveDialog(dialog)
       }
     }
+    // When router changes to viewer route, set current dialog and store pending viewer
+    if ($router.type === 'viewer') {
+      const dialog = [...$galleries, ...$allDialogs].find(d => d.id === $router.dialogId)
+      if (dialog && (!$currentDialog || $currentDialog.id !== dialog.id)) {
+        setActiveDialog(dialog)
+      }
+      // Store pending viewer route to be resolved after media loads
+      pendingViewerRoute.set({ dialogId: $router.dialogId, messageId: $router.messageId })
+    }
+    // Clear pending viewer route when we navigate away from viewer
+    if ($router.type !== 'viewer') {
+      pendingViewerRoute.set(null)
+    }
+  }
+
+  // When pending viewer route changes and media items are loaded, open viewer
+  $: if ($pendingViewerRoute && $mediaItems.length > 0) {
+    const { dialogId, messageId } = $pendingViewerRoute
+    // Find media item index
+    const index = $mediaItems.findIndex(item => item.dialogId === dialogId && item.messageId === messageId)
+    if (index >= 0) {
+      openViewer($mediaItems, index, { updateUrl: false })
+    }
+  }
+
+  // Close viewer when pending viewer route is cleared (e.g., back button)
+  $: if ($pendingViewerRoute === null && $viewerIndex !== null) {
+    closeViewer({ updateUrl: false })
   }
 
   // Apply theme immediately and whenever setting changes

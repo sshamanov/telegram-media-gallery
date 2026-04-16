@@ -4,6 +4,7 @@ import { classifyMediaType, isImageItem } from '../lib/media'
 import { getTelegramAdapter, type MessagePage } from '../lib/telegram/adapter'
 import { blobToFile, getCachedBlob, getCachedOrDownloadBlob, parseFloodWaitSeconds, sleep } from '../lib/files'
 import { getSizeLimitForMediaType } from '../lib/telegram/constants'
+import { navigateToViewer, getRouter } from '../lib/routing'
 import { isOffline, pushToast } from './ui'
 import type { Dialog, GalleryViewMode, MediaItem, Message, UploadMode, UploadQueueItem, UploadQueueState, UploadState, DownloadQueueState, DownloadQueueItem, ForwardQueueState, ForwardQueueItem, ShareQueueState, ShareQueueItem, CopyQueueState, CopyQueueItem } from '../types/telegram'
 import { persisted } from './persisted'
@@ -300,14 +301,28 @@ export function setActiveDialog(dialog: Dialog | null): void {
   resetDialogState(dialog)
 }
 
-export function openViewer(items: MediaItem[], index: number): void {
+export function openViewer(items: MediaItem[], index: number, options?: { updateUrl?: boolean }): void {
+  const { updateUrl = true } = options ?? {}
+  
   viewerItems.set(items)
   viewerIndex.set(index)
+  
+  if (updateUrl && items.length > 0 && index >= 0 && index < items.length) {
+    const item = items[index]
+    navigateToViewer(item.dialogId, item.messageId)
+  }
 }
 
-export function closeViewer(): void {
+export function closeViewer(options?: { updateUrl?: boolean }): void {
+  const { updateUrl = true } = options ?? {}
+  
   viewerItems.set([])
   viewerIndex.set(null)
+  
+  if (updateUrl) {
+    // Navigate back to previous route (should be gallery)
+    getRouter().back()
+  }
 }
 
 export function setViewerIndex(index: number | null): void {

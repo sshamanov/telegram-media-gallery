@@ -14,6 +14,8 @@
     viewerItems,
   } from '../../stores/gallery'
   import { isOffline, pushToast } from '../../stores/ui'
+  import { getRouter } from '../../lib/routing'
+  import type { Route } from '../../lib/routing'
   import InfoPanel from './InfoPanel.svelte'
   import type { MediaItem } from '../../types/telegram'
   import type { SlideData } from 'photoswipe'
@@ -459,6 +461,31 @@
     ])
   }
 
+  async function copyLink(): Promise<void> {
+    const item = get(activeItem)
+    if (!item || typeof navigator.clipboard?.writeText !== 'function') {
+      return
+    }
+
+    const route: Route = { type: 'viewer', dialogId: item.dialogId, messageId: item.messageId }
+    const url = getRouter().getUrl(route)
+    const fullUrl = window.location.origin + window.location.pathname + url
+    try {
+      await navigator.clipboard.writeText(fullUrl)
+      pushToast({
+        kind: 'success',
+        text: 'Link copied to clipboard',
+        dismissible: true,
+      })
+    } catch (error) {
+      pushToast({
+        kind: 'error',
+        text: 'Failed to copy link',
+        dismissible: true,
+      })
+    }
+  }
+
   function next(): void {
     pswp?.next()
   }
@@ -529,6 +556,9 @@
       {/if}
       {#if $activeItem && isImageItem($activeItem) && typeof navigator.clipboard?.write === 'function' && typeof ClipboardItem !== 'undefined'}
         <button class="button ghost" type="button" on:click={copyCurrent} title="Copy image" disabled={$isOffline}>⧉</button>
+      {/if}
+      {#if $activeItem && typeof navigator.clipboard?.writeText === 'function'}
+        <button class="button ghost" type="button" on:click={copyLink} title="Copy link to this media" disabled={$isOffline}>🔗</button>
       {/if}
       <button class="button ghost" class:info-active={showInfo} type="button" on:click={() => (showInfo = !showInfo)} title="Toggle info panel — shows filename, size, date, sender" aria-label="Toggle info panel">ⓘ Info</button>
     </div>
