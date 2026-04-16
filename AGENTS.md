@@ -56,6 +56,11 @@ These rules override everything else. No exceptions. No creative interpretations
     to fall back to another port. Before starting dev server, ensure port 5173 is free.
     Example: `lsof -ti:5173 | xargs kill -9 2>/dev/null || true`
 
+ 8. **Backlog file may only be edited during plan creation.**
+    The backlog file (`.kilo/future-backlog.md`) may only be edited during plan creation (Plan mode);
+    never modify it during code implementation (Code workflow). This ensures backlog updates
+    are deliberate and tied to planning, not ad‑hoc during coding.
+
 ## Commit discipline
 
 **Commit after every logical block of work. Do not batch multiple features into one commit.**
@@ -117,6 +122,8 @@ Never use `--no-verify`.
 - Required test suites must contain executable assertions only. Do not satisfy process gates with commented-out, placeholder, or speculative tests.
 - Unsupported behavior must be removed from required test claims and documented as a gap; do not hide it behind weakened completion claims.
 - Documentation-only tasks must update the governing markdown files truthfully without silently claiming unrun validations or restored product behavior.
+- After completing a phase, update `STATUS.md` 'Current Phase' and 'Next Execution Order' before moving to next phase.
+- When creating a new plan that addresses a backlog item, update the item's status in `.kilo/future-backlog.md` (e.g., from 'proposed' to 'planned') as part of plan creation.
 
 ## Architecture
 src/lib/telegram/adapter.ts  <- TelegramAdapter interface (the only import contract)
