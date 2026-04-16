@@ -1,10 +1,10 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-16 23:00 +02:00
+**Last Updated:** 2026-04-16 23:24 +02:00
 **Current Phase:** Phase 4: Shareable URLs (pending)
 **Active Plan:** `.kilo/plans/1776334107170-playful-moon.md`
 **Branch:** `main`
-**Ahead Of `origin/main`:** 12 commits
+**Ahead Of `origin/main`:** 13 commits
 
 ---
 
@@ -93,6 +93,7 @@
 1. Phase 4 Block 4.1: Shareable URLs (FB004)
 
 ## Plan And Todo History
+- 2026-04-16 23:24 +02:00 - Added shareable viewer URLs with route synchronization and pending route store.
 - 2026-04-16 22:27 +02:00 - Completed Task 16: Investigate download speed (Phase 3 Block 3.2).
 - 2026-04-16 22:00 +02:00 - Completed Task 15: Implement DEBUG logging (Phase 3 Block 3.1).
 - 2026-04-16 21:42 +02:00 - Updated backlog file with FB001 completed, FB008 and FB002 planned.
@@ -196,6 +197,12 @@
 - ℹ️ Historical references to `.kilo/status.md` remain in dated records by design and are not treated as active drift.
 
 ## Last Validation
+- 2026-04-16 23:24 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
+  - Result: passed with 0 errors, 0 warnings
+  - Main note: type checking passes cleanly after adding shareable viewer URLs.
+- 2026-04-16 23:24 +02:00 - `docker-compose -f docker-compose.test.yml up --build playwright`
+  - Result: passed (`32 passed`)
+  - Main note: short test suite passes after viewer URL routing changes.
 - 2026-04-16 22:56 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
   - Result: passed with 0 errors, 0 warnings
   - Main note: type checking passes cleanly after documentation updates.
@@ -407,6 +414,7 @@
 ## Recent Commit Log
 | Commit | Date | Description |
 |--------|------|-------------|
+| `de9723f` | 2026-04-16 | feat: add shareable viewer URLs |
 | `1f89401` | 2026-04-16 | docs: update status ledger |
 | `8f2dc5c` | 2026-04-16 | docs: update status ledger with Phase 4 planning commit |
 | `68f0d37` | 2026-04-16 | docs: plan Phase 4 shareable URLs |
