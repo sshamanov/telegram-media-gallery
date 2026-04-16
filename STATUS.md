@@ -1,6 +1,6 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-16 22:27 +02:00
+**Last Updated:** 2026-04-16 22:37 +02:00
 **Current Phase:** Phase 4: Shareable URLs (pending)
 **Active Plan:** `.kilo/plans/1776334107170-playful-moon.md`
 **Branch:** `main`
@@ -162,6 +162,12 @@
 ### Product blockers
 - Upload mode selector (Send as media vs Send as file) now auto‑adjusts for large files with size limits and warning toast. *Implemented.*
 
+### Performance improvements  
+- Phase 3 speed investigation (FB008) identified unnecessary buffer copy in `cloneBufferToBlob` and missing progress throttling. Both optimizations have been implemented:
+  - Removed deep copy in `cloneBufferToBlob` (memory/CPU savings for large files).
+  - Added 100 ms throttling to download progress callbacks (reduces UI jank).
+  - No regression in short test suite (32 passed).
+
 ### Process/documentation blockers
 - No active migration blocker remains; the only intentional stale `.kilo/status.md` mentions are preserved historical facts in old ledger entries, old plans, and old commit descriptions.
 - `kilo.jsonc` already relies on broad `*.md` edit permissions, so no explicit `STATUS.md` permission cleanup was needed in this block.
@@ -187,6 +193,12 @@
 - ℹ️ Historical references to `.kilo/status.md` remain in dated records by design and are not treated as active drift.
 
 ## Last Validation
+- 2026-04-16 22:37 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
+  - Result: passed with 0 errors, 0 warnings
+  - Main note: type checking passes cleanly after backlog updates.
+- 2026-04-16 22:37 +02:00 - `docker-compose -f docker-compose.test.yml run --rm playwright npx playwright test --config=playwright.config.ts --grep "@short" --project=desktop-chrome --reporter=line`
+  - Result: passed (`32 passed`)
+  - Main note: backlog updates do not break existing short test suite functionality.
 - 2026-04-16 22:27 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
   - Result: passed with 0 errors, 0 warnings
   - Main note: type checking passes cleanly after buffer copy removal and throttle changes.

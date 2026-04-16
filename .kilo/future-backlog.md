@@ -6,7 +6,7 @@
 | ID | Title | Description | Priority | Complexity | Dependencies | Status |
 |----|-------|-------------|----------|------------|--------------|--------|
 | FB001 | Fix thumbnail download inefficiency | Thumbnails download full-size media when `getThumbnail('s')` returns null, wasting bandwidth and slowing loading | P0 | M | None | completed |
-| FB008 | Investigate download speed regression | Check if recent changes affected Telegram API download performance; compare with earlier git versions | P0 | M | None | planned |
+| FB008 | Investigate download speed regression | Check if recent changes affected Telegram API download performance; compare with earlier git versions | P0 | M | None | completed |
 
 ### P1 - High Priority Improvements  
 | ID | Title | Description | Priority | Complexity | Dependencies | Status |
