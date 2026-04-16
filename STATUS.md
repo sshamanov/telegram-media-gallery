@@ -88,6 +88,7 @@
 
 ## Plan And Todo History
 - 2026-04-16 21:42 +02:00 - Updated backlog file with FB001 completed, FB008 and FB002 planned.
+- 2026-04-16 21:43 +02:00 - Updated STATUS.md with commit hash.
 - 2026-04-16 21:20 +02:00 - Completed Task 14: Improved placeholder UI and verified glyph fallback (Phase 2 Block 2.2).
 - 2026-04-16 21:15 +02:00 - Completed Task 13: Fixed downloadThumbnail logic in mtcute.ts and thumbnails.ts (Phase 2 Block 2.1).
 - 2026-04-16 20:45 +02:00 - Completed Task 11 & Task 12: backlog system and workflow improvements (commit d5f2593).
@@ -186,6 +187,9 @@
 - 2026-04-16 21:42 +02:00 - validation deferred for backlog file update
   - Result: deferred
   - Reason: backlog file update is documentation-only; no executable product behavior, test selectors, or test files changed.
+- 2026-04-16 21:43 +02:00 - validation deferred for STATUS.md commit hash update
+  - Result: deferred
+  - Reason: STATUS.md update is documentation-only; no executable product behavior, test selectors, or test files changed.
 - 2026-04-16 21:20 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
   - Result: passed with 0 errors, 0 warnings
   - Main note: type checking passes cleanly after mock adapter modifications for glyph fallback testing.
@@ -355,6 +359,7 @@
 ## Recent Commit Log
 | Commit | Date | Description |
 |--------|------|-------------|
+| `9a297ec` | 2026-04-16 | docs: update backlog file with FB001 completion and FB008/FB002 planned |
 | `51fb128` | 2026-04-16 | docs: update plan file with Phase 2 completion |
 | `c3cd542` | 2026-04-16 | feat: fix thumbnail download inefficiency (FB001) |
 | `e5ab447` | 2026-04-16 | chore: cleanup orphaned files, update gitignore, simplify kilo config; activate backlog plan |
