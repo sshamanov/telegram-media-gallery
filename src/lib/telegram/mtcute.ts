@@ -1,5 +1,6 @@
 import { TelegramClient, type Chat, type Message as MtcuteMessage, type Photo, type Video, type Document, type Audio, type Voice } from '@mtcute/web'
 import { debugLog, debugWarn, DEBUG_MEDIA_SIZES } from '../debug'
+import { throttle } from '../files'
 import { getSizeLimitForMediaType } from './constants'
 import type { Dialog, Message, TgMedia, UploadMode } from '../../types/telegram'
 import type { MessagePage, TelegramAdapter } from './adapter'
@@ -443,17 +444,19 @@ class MtcuteTelegramAdapter implements TelegramAdapter {
       throw new Error('Media handle not found')
     }
 
+    const throttledProgress = onProgress ? throttle(onProgress, 100) : undefined
+
     const downloadOptions = {
       abortSignal,
       fileSize: media.size ?? undefined,
       progressCallback: (downloaded: number, total: number) => {
-        if (!onProgress) {
+        if (!throttledProgress) {
           return
         }
 
         const max = Number.isFinite(total) ? total : media.size ?? 0
         if (max > 0) {
-          onProgress(Math.round((downloaded / max) * 100))
+          throttledProgress(Math.round((downloaded / max) * 100))
         }
       },
     }

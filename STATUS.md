@@ -1,10 +1,10 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-16 22:13 +02:00
-**Current Phase:** Phase 3: DEBUG Flag & Speed Investigation (pending)
+**Last Updated:** 2026-04-16 22:27 +02:00
+**Current Phase:** Phase 4: Shareable URLs (pending)
 **Active Plan:** `.kilo/plans/1776334107170-playful-moon.md`
 **Branch:** `main`
-**Ahead Of `origin/main`:** 4 commits
+**Ahead Of `origin/main`:** 5 commits
 
 ---
 
@@ -84,12 +84,13 @@
 
 ### Phase 3: DEBUG Flag & Speed Investigation
 - `completed` Task 15: Implement DEBUG logging (Block 3.1)
-- `pending` Task 16: Investigate download speed (Block 3.2)
+- `completed` Task 16: Investigate download speed (Block 3.2)
 
 ## Next Execution Order
-1. Phase 3 Block 3.2: Investigate download speed (FB008)
+1. Phase 4 Block 4.1: Shareable URLs (FB004)
 
 ## Plan And Todo History
+- 2026-04-16 22:27 +02:00 - Completed Task 16: Investigate download speed (Phase 3 Block 3.2).
 - 2026-04-16 22:00 +02:00 - Completed Task 15: Implement DEBUG logging (Phase 3 Block 3.1).
 - 2026-04-16 21:42 +02:00 - Updated backlog file with FB001 completed, FB008 and FB002 planned.
 - 2026-04-16 21:43 +02:00 - Updated STATUS.md with commit hash.
@@ -186,6 +187,12 @@
 - ℹ️ Historical references to `.kilo/status.md` remain in dated records by design and are not treated as active drift.
 
 ## Last Validation
+- 2026-04-16 22:27 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
+  - Result: passed with 0 errors, 0 warnings
+  - Main note: type checking passes cleanly after buffer copy removal and throttle changes.
+- 2026-04-16 22:27 +02:00 - `docker-compose -f docker-compose.test.yml run --rm playwright npx playwright test --config=playwright.config.ts --grep "@short" --project=desktop-chrome --reporter=line`
+  - Result: passed (`32 passed`)
+  - Main note: buffer copy removal and throttle changes do not break existing short test suite functionality.
 - 2026-04-16 22:10 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
   - Result: passed with 0 errors, 0 warnings
   - Main note: type checking passes cleanly before committing DEBUG flag implementation.
@@ -414,10 +421,6 @@
 | `24400ff` | 2026-04-14 | Complete UI/UX improvements with swipe gestures, transitions, and cache indicator |
 | `71863bf` | 2026-04-14 | Add global status document with project progress tracking |
 
-## Next Execution Order
-1. Phase 0 cleanup tasks (Task 5–Task 10) from `.kilo/plans/1776334107170-playful-moon.md`.
-2. Phase 1 backlog foundation (create backlog file, update agent rules).
-3. Phase 2 thumbnail efficiency fix (FB001).
 
 ## Cross References
 - Active implementation plan: `.kilo/plans/1776334107170-playful-moon.md`

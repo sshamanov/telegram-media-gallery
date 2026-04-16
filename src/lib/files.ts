@@ -10,9 +10,25 @@ function isOfflineRuntime(): boolean {
 }
 
 function cloneBufferToBlob(buffer: Uint8Array, type: string): Blob {
-  const cloned = new Uint8Array(buffer.byteLength)
-  cloned.set(buffer)
-  return new Blob([cloned], { type })
+  return new Blob([buffer as BlobPart], { type })
+}
+
+export function throttle<T extends (...args: any[]) => any>(fn: T, interval: number): T {
+  let lastCall = 0
+  let timeout: number | undefined
+  return ((...args: Parameters<T>) => {
+    const now = Date.now()
+    if (now - lastCall >= interval) {
+      lastCall = now
+      fn(...args)
+    } else {
+      if (timeout) window.clearTimeout(timeout)
+      timeout = window.setTimeout(() => {
+        lastCall = Date.now()
+        fn(...args)
+      }, interval - (now - lastCall))
+    }
+  }) as T
 }
 
 export function mediaCacheKey(item: MediaItem, kind: CachedMediaKind): string {
