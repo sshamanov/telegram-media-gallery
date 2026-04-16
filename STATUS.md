@@ -1,6 +1,6 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-16 21:20 +02:00
+**Last Updated:** 2026-04-16 21:42 +02:00
 **Current Phase:** Phase 3: DEBUG Flag & Speed Investigation (pending)
 **Active Plan:** `.kilo/plans/1776334107170-playful-moon.md`
 **Branch:** `main`
@@ -87,6 +87,7 @@
 2. Phase 3 Block 3.2: Investigate download speed (FB008)
 
 ## Plan And Todo History
+- 2026-04-16 21:42 +02:00 - Updated backlog file with FB001 completed, FB008 and FB002 planned.
 - 2026-04-16 21:20 +02:00 - Completed Task 14: Improved placeholder UI and verified glyph fallback (Phase 2 Block 2.2).
 - 2026-04-16 21:15 +02:00 - Completed Task 13: Fixed downloadThumbnail logic in mtcute.ts and thumbnails.ts (Phase 2 Block 2.1).
 - 2026-04-16 20:45 +02:00 - Completed Task 11 & Task 12: backlog system and workflow improvements (commit d5f2593).
@@ -179,6 +180,12 @@
 - ℹ️ Historical references to `.kilo/status.md` remain in dated records by design and are not treated as active drift.
 
 ## Last Validation
+- 2026-04-16 21:42 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
+  - Result: passed with 0 errors, 0 warnings
+  - Main note: type checking passes cleanly before backlog file commit.
+- 2026-04-16 21:42 +02:00 - validation deferred for backlog file update
+  - Result: deferred
+  - Reason: backlog file update is documentation-only; no executable product behavior, test selectors, or test files changed.
 - 2026-04-16 21:20 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
   - Result: passed with 0 errors, 0 warnings
   - Main note: type checking passes cleanly after mock adapter modifications for glyph fallback testing.
