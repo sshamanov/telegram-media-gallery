@@ -1,4 +1,4 @@
-import { getCachedOrDownloadBlob, writeMediaBlobToCache } from './files'
+import { getCachedOrDownloadBlob, getCachedBlob, writeMediaBlobToCache } from './files'
 import { isImageItem, isVideoItem } from './media'
 import type { MediaItem } from '../types/telegram'
 
@@ -88,21 +88,18 @@ export async function loadThumbnailBlob(item: MediaItem): Promise<Blob | null> {
     return null
   }
 
-  const fullBlob = await getCachedOrDownloadBlob(item, 'full')
-  if (!fullBlob) {
-    return null
+  const cachedFull = await getCachedBlob(item, 'full')
+  if (cachedFull) {
+    const generatedThumb = isImageItem(item)
+      ? await createImageThumbnail(cachedFull)
+      : await createVideoThumbnail(cachedFull)
+    if (generatedThumb) {
+      await writeMediaBlobToCache(item, 'thumb', generatedThumb)
+      return generatedThumb
+    }
   }
 
-  const generatedThumb = isImageItem(item)
-    ? await createImageThumbnail(fullBlob)
-    : await createVideoThumbnail(fullBlob)
-
-  if (!generatedThumb) {
-    return null
-  }
-
-  await writeMediaBlobToCache(item, 'thumb', generatedThumb)
-  return generatedThumb
+  return null
 }
 
 export async function readTextBlob(blob: Blob): Promise<string> {

@@ -19,6 +19,7 @@ Browser-based photo/video gallery using Telegram as a storage backend. Client-on
 - Dialog bootstrap now persists a sanitized last-known dialog snapshot and can render that cached state while offline after a prior online sync.
 - Full-media cache storage now uses OPFS when it is usable, falls back explicitly to IndexedDB when it is not, and keeps one-time IndexedDB-to-OPFS migration state resumable and visible in settings.
 - Offline gallery/viewer behavior is limited to the current cache stack: already-loaded gallery items can reuse cached thumbnails in-session, offline viewer playback/rendering works only for full media already cached in OPFS or IndexedDB fallback, and uncached full media shows an explicit offline placeholder instead of a broken load.
+- Thumbnail loading is bandwidth-efficient: thumbnails are only downloaded when available from Telegram (trying 's', 'm', 'x' sizes); if no thumbnail is available, the UI shows a file-type glyph instead of downloading full media.
 - While offline, download, forward, and share affordances are intentionally disabled so the UI does not imply unavailable export or Telegram relay behavior.
 
 ## Core Architecture

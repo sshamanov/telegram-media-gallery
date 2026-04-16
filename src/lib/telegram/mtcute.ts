@@ -411,13 +411,15 @@ class MtcuteTelegramAdapter implements TelegramAdapter {
       return null
     }
 
-    if (stored.type === 'photo') {
-      const thumb = stored.getThumbnail('s')
-      return thumb ? client.downloadAsBuffer(thumb) : client.downloadAsBuffer(stored)
+    const sizes = ['s', 'm', 'x'] as const
+    for (const size of sizes) {
+      const thumb = stored.getThumbnail(size)
+      if (thumb) {
+        return client.downloadAsBuffer(thumb)
+      }
     }
 
-    const thumb = stored.getThumbnail('s')
-    return thumb ? client.downloadAsBuffer(thumb) : null
+    return null
   }
 
   async downloadFull(media: TgMedia, onProgress?: (pct: number) => void, abortSignal?: AbortSignal): Promise<Uint8Array> {

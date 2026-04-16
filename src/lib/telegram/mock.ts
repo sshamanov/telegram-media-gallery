@@ -252,6 +252,12 @@ export class MockTelegramAdapter implements TelegramAdapter {
       return this.fileCache.get(cacheKey)!
     }
     
+    // Simulate missing thumbnails for some media IDs to test glyph fallback
+    // Return null for media IDs ending with '3' or '7' to test the fallback behavior
+    if (media.id.endsWith('3') || media.id.endsWith('7')) {
+      return null
+    }
+    
     // For photos, we can use the actual file as thumbnail
     if (media.kind === 'photo' && media.fileName) {
       try {

@@ -1,7 +1,7 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-16 20:45 +02:00
-**Current Phase:** Phase 1: Backlog & Workflow Foundation (in progress)
+**Last Updated:** 2026-04-16 21:20 +02:00
+**Current Phase:** Phase 3: DEBUG Flag & Speed Investigation (pending)
 **Active Plan:** `.kilo/plans/1776334107170-playful-moon.md`
 **Branch:** `main`
 **Ahead Of `origin/main`:** 0 commits
@@ -75,14 +75,22 @@
 - `completed` Task 10: Phase 0 cleanup - push commits to remote
 
 ### Phase 1: Backlog & Workflow Foundation
-- `pending` Task 11: Create backlog system (Block 1.1)
-- `pending` Task 12: Implement workflow improvements (Block 1.2)
+- `completed` Task 11: Create backlog system (Block 1.1)
+- `completed` Task 12: Implement workflow improvements (Block 1.2)
+
+### Phase 2: Thumbnail Efficiency Fix
+- `completed` Task 13: Fix downloadThumbnail logic (Block 2.1)
+- `completed` Task 14: Improve placeholder UI (Block 2.2)
 
 ## Next Execution Order
-1. Phase 1 Block 1.1: Create backlog system
-2. Phase 1 Block 1.2: Implement workflow improvements
+1. Phase 3 Block 3.1: Implement DEBUG logging (FB002)
+2. Phase 3 Block 3.2: Investigate download speed (FB008)
 
 ## Plan And Todo History
+- 2026-04-16 21:20 +02:00 - Completed Task 14: Improved placeholder UI and verified glyph fallback (Phase 2 Block 2.2).
+- 2026-04-16 21:15 +02:00 - Completed Task 13: Fixed downloadThumbnail logic in mtcute.ts and thumbnails.ts (Phase 2 Block 2.1).
+- 2026-04-16 20:45 +02:00 - Completed Task 11 & Task 12: backlog system and workflow improvements (commit d5f2593).
+- 2026-04-16 20:51 +02:00 - Pushed commits to remote.
 - 2026-04-16 13:59 +02:00 - Activated `.kilo/plans/1776334107170-playful-moon.md` to establish backlog system and implement thumbnail efficiency fix.
 - 2026-04-16 14:03 +02:00 - Completed Task 5: deleted orphaned files/directories (debug-auth.png, dist/, playwright-report/, test-results/, tsconfig.tsbuildinfo).
 - 2026-04-16 14:03 +02:00 - Completed Task 6: removed legacy tracked files main.js, style.css from git (kept in working tree).
@@ -171,6 +179,18 @@
 - ℹ️ Historical references to `.kilo/status.md` remain in dated records by design and are not treated as active drift.
 
 ## Last Validation
+- 2026-04-16 21:20 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
+  - Result: passed with 0 errors, 0 warnings
+  - Main note: type checking passes cleanly after mock adapter modifications for glyph fallback testing.
+- 2026-04-16 21:20 +02:00 - `docker-compose -f docker-compose.test.yml run --rm playwright npx playwright test --config=playwright.config.ts --grep "@short" --project=desktop-chrome --reporter=line`
+  - Result: passed (`32 passed`)
+  - Main note: all short tests pass with glyph fallback simulation; thumbnail efficiency fix complete.
+- 2026-04-16 21:15 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
+  - Result: passed with 0 errors, 0 warnings
+  - Main note: type checking passes cleanly after thumbnail efficiency fix modifications.
+- 2026-04-16 21:16 +02:00 - `docker-compose -f docker-compose.test.yml run --rm playwright npx playwright test --config=playwright.config.ts --grep "@short" --project=desktop-chrome --reporter=line`
+  - Result: passed (`32 passed`)
+  - Main note: all short tests pass after thumbnail efficiency fix; no regressions detected.
 - 2026-04-16 11:46 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
   - Result: passed with 0 errors, 0 warnings
   - Main note: type checking passes cleanly after accessibility fixes; all DialogPicker and GalleryGrid warnings resolved.
