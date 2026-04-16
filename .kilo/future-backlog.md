@@ -11,7 +11,7 @@
 ### P1 - High Priority Improvements  
 | ID | Title | Description | Priority | Complexity | Dependencies | Status |
 |----|-------|-------------|----------|------------|--------------|--------|
-| FB002 | DEBUG flag for development | Add environment flag (`VITE_DEBUG_MEDIA_SIZES`) to log available thumbnail/image sizes | P1 | S | None | planned |
+| FB002 | DEBUG flag for development | Add environment flag (`VITE_DEBUG_MEDIA_SIZES`) to log available thumbnail/image sizes | P1 | S | None | completed |
 | FB004 | Shareable media URLs | Opened media in preview should appear in URL (`#/gallery/:dialogId/view/:messageId`) for direct sharing | P1 | M | None | proposed |
 
 ### P2 - Medium Priority Features

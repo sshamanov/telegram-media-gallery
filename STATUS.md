@@ -1,10 +1,10 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-16 21:42 +02:00
+**Last Updated:** 2026-04-16 22:10 +02:00
 **Current Phase:** Phase 3: DEBUG Flag & Speed Investigation (pending)
 **Active Plan:** `.kilo/plans/1776334107170-playful-moon.md`
 **Branch:** `main`
-**Ahead Of `origin/main`:** 0 commits
+**Ahead Of `origin/main`:** 3 commits
 
 ---
 
@@ -82,11 +82,15 @@
 - `completed` Task 13: Fix downloadThumbnail logic (Block 2.1)
 - `completed` Task 14: Improve placeholder UI (Block 2.2)
 
+### Phase 3: DEBUG Flag & Speed Investigation
+- `completed` Task 15: Implement DEBUG logging (Block 3.1)
+- `pending` Task 16: Investigate download speed (Block 3.2)
+
 ## Next Execution Order
-1. Phase 3 Block 3.1: Implement DEBUG logging (FB002)
-2. Phase 3 Block 3.2: Investigate download speed (FB008)
+1. Phase 3 Block 3.2: Investigate download speed (FB008)
 
 ## Plan And Todo History
+- 2026-04-16 22:00 +02:00 - Completed Task 15: Implement DEBUG logging (Phase 3 Block 3.1).
 - 2026-04-16 21:42 +02:00 - Updated backlog file with FB001 completed, FB008 and FB002 planned.
 - 2026-04-16 21:43 +02:00 - Updated STATUS.md with commit hash.
 - 2026-04-16 21:44 +02:00 - Updated STATUS.md Recent Commit Log.
@@ -182,6 +186,18 @@
 - ℹ️ Historical references to `.kilo/status.md` remain in dated records by design and are not treated as active drift.
 
 ## Last Validation
+- 2026-04-16 22:10 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
+  - Result: passed with 0 errors, 0 warnings
+  - Main note: type checking passes cleanly before committing DEBUG flag implementation.
+- 2026-04-16 22:10 +02:00 - `docker-compose -f docker-compose.test.yml run --rm playwright npx playwright test --config=playwright.config.ts --grep "@short" --project=desktop-chrome --reporter=line`
+  - Result: passed (`32 passed`)
+  - Main note: all short tests pass; DEBUG flag changes do not break existing functionality.
+- 2026-04-16 22:00 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
+  - Result: passed with 0 errors, 0 warnings
+  - Main note: type checking passes cleanly before short test suite validation.
+- 2026-04-16 22:00 +02:00 - `docker-compose -f docker-compose.test.yml run --rm playwright npx playwright test --config=playwright.config.ts --grep "@short" --project=desktop-chrome --reporter=line`
+  - Result: passed (`32 passed`)
+  - Main note: all short tests pass; DEBUG flag changes do not break existing functionality.
 - 2026-04-16 21:42 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
   - Result: passed with 0 errors, 0 warnings
   - Main note: type checking passes cleanly before backlog file commit.

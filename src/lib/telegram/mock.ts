@@ -1,6 +1,6 @@
 import type { Dialog, Message, TgMedia, UploadMode } from '../../types/telegram'
 import type { MessagePage, TelegramAdapter } from './adapter'
-import { debugWarn } from '../debug'
+import { debugLog, debugWarn, DEBUG_MEDIA_SIZES } from '../debug'
 
 // Load dialogs from JSON
 let DIALOGS: Dialog[] = []
@@ -247,14 +247,24 @@ export class MockTelegramAdapter implements TelegramAdapter {
   async downloadThumbnail(media: TgMedia): Promise<Uint8Array | null> {
     await this.delay(300)
     
+    if (DEBUG_MEDIA_SIZES) {
+      debugLog('Mock thumbnail debug:', { id: media.id, kind: media.kind, width: media.width, height: media.height })
+    }
+    
     const cacheKey = `thumb_${media.id}`
     if (this.fileCache.has(cacheKey)) {
+      if (DEBUG_MEDIA_SIZES) {
+        debugLog('Mock thumbnail: returning cached thumbnail for', media.id)
+      }
       return this.fileCache.get(cacheKey)!
     }
     
     // Simulate missing thumbnails for some media IDs to test glyph fallback
     // Return null for media IDs ending with '3' or '7' to test the fallback behavior
     if (media.id.endsWith('3') || media.id.endsWith('7')) {
+      if (DEBUG_MEDIA_SIZES) {
+        debugLog('Mock thumbnail: simulated missing thumbnail for', media.id)
+      }
       return null
     }
     
@@ -264,6 +274,9 @@ export class MockTelegramAdapter implements TelegramAdapter {
         const fileData = await loadFileFromSamples(media.fileName)
         if (fileData.length > 0) {
           this.fileCache.set(cacheKey, fileData)
+          if (DEBUG_MEDIA_SIZES) {
+            debugLog('Mock thumbnail: returning actual photo file for', media.id)
+          }
           return fileData
         }
       } catch (error) {
@@ -315,6 +328,9 @@ export class MockTelegramAdapter implements TelegramAdapter {
         ctx.fillText(ext, 50, 70)
         
         // Convert canvas to PNG
+        if (DEBUG_MEDIA_SIZES) {
+          debugLog('Mock thumbnail: generating colored placeholder for', media.id, media.kind)
+        }
         return new Promise((resolve) => {
           canvas.toBlob((blob) => {
             if (blob) {
@@ -332,11 +348,18 @@ export class MockTelegramAdapter implements TelegramAdapter {
     }
     
     // Fallback to 1x1 transparent PNG
+    if (DEBUG_MEDIA_SIZES) {
+      debugLog('Mock thumbnail: fallback to 1x1 PNG for', media.id)
+    }
     return this.createFallbackPng()
   }
 
   async downloadFull(media: TgMedia, onProgress?: (pct: number) => void, abortSignal?: AbortSignal): Promise<Uint8Array> {
     await this.delay(100)
+    
+    if (DEBUG_MEDIA_SIZES) {
+      debugLog('Mock downloadFull start:', { id: media.id, size: media.size, width: media.width, height: media.height })
+    }
     
     if (abortSignal?.aborted) {
       throw new DOMException('Download aborted', 'AbortError')
@@ -344,6 +367,9 @@ export class MockTelegramAdapter implements TelegramAdapter {
     
     const cacheKey = `full_${media.id}`
     if (this.fileCache.has(cacheKey)) {
+      if (DEBUG_MEDIA_SIZES) {
+        debugLog('Mock downloadFull: returning cached full media for', media.id)
+      }
       return this.fileCache.get(cacheKey)!
     }
     
@@ -364,6 +390,9 @@ export class MockTelegramAdapter implements TelegramAdapter {
         const fileData = await loadFileFromSamples(media.fileName)
         if (fileData.length > 0) {
           this.fileCache.set(cacheKey, fileData)
+          if (DEBUG_MEDIA_SIZES) {
+            debugLog('Mock downloadFull: returning actual file for', media.id)
+          }
           return fileData
         }
       } catch (error) {
@@ -375,6 +404,9 @@ export class MockTelegramAdapter implements TelegramAdapter {
     const fileData = new Uint8Array(0)
     this.fileCache.set(cacheKey, fileData)
     
+    if (DEBUG_MEDIA_SIZES) {
+      debugLog('Mock downloadFull: returning empty fallback for', media.id)
+    }
     return fileData
   }
 

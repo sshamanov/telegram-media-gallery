@@ -1,5 +1,5 @@
 import { TelegramClient, type Chat, type Message as MtcuteMessage, type Photo, type Video, type Document, type Audio, type Voice } from '@mtcute/web'
-import { debugLog, debugWarn } from '../debug'
+import { debugLog, debugWarn, DEBUG_MEDIA_SIZES } from '../debug'
 import { getSizeLimitForMediaType } from './constants'
 import type { Dialog, Message, TgMedia, UploadMode } from '../../types/telegram'
 import type { MessagePage, TelegramAdapter } from './adapter'
@@ -411,14 +411,27 @@ class MtcuteTelegramAdapter implements TelegramAdapter {
       return null
     }
 
+    if (DEBUG_MEDIA_SIZES) {
+      debugLog('Media sizes debug:', { id: media.id, kind: media.kind, width: media.width, height: media.height })
+    }
+
     const sizes = ['s', 'm', 'x'] as const
     for (const size of sizes) {
       const thumb = stored.getThumbnail(size)
+      if (DEBUG_MEDIA_SIZES) {
+        debugLog(`  ${size}:`, thumb ? { width: thumb.width, height: thumb.height, fileSize: thumb.fileSize } : 'no thumbnail')
+      }
       if (thumb) {
+        if (DEBUG_MEDIA_SIZES) {
+          debugLog(`  selected ${size} thumbnail`)
+        }
         return client.downloadAsBuffer(thumb)
       }
     }
 
+    if (DEBUG_MEDIA_SIZES) {
+      debugLog('  no thumbnail available')
+    }
     return null
   }
 
@@ -430,10 +443,10 @@ class MtcuteTelegramAdapter implements TelegramAdapter {
       throw new Error('Media handle not found')
     }
 
-    return client.downloadAsBuffer(stored, {
+    const downloadOptions = {
       abortSignal,
       fileSize: media.size ?? undefined,
-      progressCallback: (downloaded, total) => {
+      progressCallback: (downloaded: number, total: number) => {
         if (!onProgress) {
           return
         }
@@ -443,7 +456,19 @@ class MtcuteTelegramAdapter implements TelegramAdapter {
           onProgress(Math.round((downloaded / max) * 100))
         }
       },
-    })
+    }
+
+    if (DEBUG_MEDIA_SIZES) {
+      const start = performance.now()
+      debugLog('downloadFull start:', { id: media.id, size: media.size, width: media.width, height: media.height })
+      return client.downloadAsBuffer(stored, downloadOptions).then(buffer => {
+        const end = performance.now()
+        debugLog('downloadFull completed:', { id: media.id, duration: `${Math.round(end - start)}ms` })
+        return buffer
+      })
+    }
+
+    return client.downloadAsBuffer(stored, downloadOptions)
   }
 
   async uploadAndSend(dialogId: string, file: File, mode: UploadMode, onProgress?: (pct: number) => void, abortSignal?: AbortSignal): Promise<void> {
