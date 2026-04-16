@@ -8,5 +8,8 @@ temp/
 .kilo/node_modules/
 .kilo/bun.lock
 tsconfig.tsbuildinfo
+playwright-report/
+test-results/
+debug-*.png
 
 samples/

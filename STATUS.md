@@ -1,10 +1,10 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-16 08:57 +02:00
-**Current Phase:** Phase 3 complete
-**Active Plan:** `.kilo/plans/1776295158000-phase-3-offline-kickoff.md`
+**Last Updated:** 2026-04-16 13:59 +02:00
+**Current Phase:** Phase 0 (Cleanup & Git Housekeeping)
+**Active Plan:** `.kilo/plans/1776334107170-playful-moon.md`
 **Branch:** `main`
-**Ahead Of `origin/main`:** 37 commits
+**Ahead Of `origin/main`:** 68 commits
 
 ---
 
@@ -21,10 +21,15 @@
 - This ledger must stay stricter than historical claims and must not overstate completion.
 
 ## Active Plan
+- **Plan file:** `.kilo/plans/1776334107170-playful-moon.md`
+- **Goal:** establish a future backlog system for Telegram Gallery and implement the highest-priority items in an iterative loop, starting with fixing thumbnail download inefficiency.
+- **Execution strategy:** Phase 0 cleanup & git housekeeping, Phase 1 backlog foundation, Phase 2 thumbnail efficiency fix, Phase 3 DEBUG flag & speed investigation, Phase 4 shareable URLs, Phase 5 author features, Phase 6 cosmetic improvements.
+- **Status:** pending
+
 - **Plan file:** `.kilo/plans/1776323125899-stellar-panda.md`
 - **Goal:** address remaining product blocker (upload mode selector refinement for large files) and fix accessibility warnings in DialogPicker and GalleryGrid.
 - **Execution strategy:** fix import error, implement upload size limits with auto‑fallback, add keyboard/ARIA fixes for dialog picker, resolve a11y warnings for gallery section, run validation.
-- **Status:** pending
+- **Status:** completed
 
 - **Plan file:** `.kilo/plans/1776295158000-phase-3-offline-kickoff.md`
 - **Goal:** turn roadmap Phase 3 storage/offline scope into an execution-ready implementation order with truthful dependencies, touched files, and validation gates.
@@ -57,8 +62,19 @@
 - `completed` Task 2: Fix DialogPicker accessibility warnings
 - `completed` Task 3: Fix GalleryGrid accessibility warnings
 - `completed` Task 4: Run comprehensive validation
+- `completed` Task 5: Phase 0 cleanup - delete orphaned files/directories
+- `completed` Task 6: Phase 0 cleanup - remove legacy tracked files from git
+- `completed` Task 7: Phase 0 cleanup - update .gitignore with Playwright outputs
+- `completed` Task 8: Phase 0 cleanup - update STATUS.md with plan registration
+- `pending` Task 9: Phase 0 cleanup - commit kilo.jsonc and STATUS.md changes
+- `pending` Task 10: Phase 0 cleanup - push commits to remote
 
 ## Plan And Todo History
+- 2026-04-16 13:59 +02:00 - Activated `.kilo/plans/1776334107170-playful-moon.md` to establish backlog system and implement thumbnail efficiency fix.
+- 2026-04-16 14:03 +02:00 - Completed Task 5: deleted orphaned files/directories (debug-auth.png, dist/, playwright-report/, test-results/, tsconfig.tsbuildinfo).
+- 2026-04-16 14:03 +02:00 - Completed Task 6: removed legacy tracked files main.js, style.css from git (kept in working tree).
+- 2026-04-16 14:03 +02:00 - Completed Task 7: updated .gitignore with Playwright outputs (playwright-report/, test-results/, debug-*.png).
+- 2026-04-16 14:03 +02:00 - Completed Task 8: updated STATUS.md with plan registration and current commit count.
 - 2026-04-16 11:46 +02:00 - Completed Task 4: ran comprehensive validation (type check, short tests, long tests) with all passes.
 - 2026-04-16 11:45 +02:00 - Committed Task 3 (`8a8bc75`), Task 2 (`38d7a85`), and Task 1 (`c61b6dc`) with conventional commit messages.
 - 2026-04-16 09:10 +02:00 - Activated `.kilo/plans/1776323125899-stellar-panda.md` to address remaining product blocker and accessibility warnings.
@@ -327,10 +343,12 @@
 | `71863bf` | 2026-04-14 | Add global status document with project progress tracking |
 
 ## Next Execution Order
-1. No remaining backlog blocks from `.kilo/plans/1776323125899-stellar-panda.md`.
+1. Phase 0 cleanup tasks (Task 5–Task 10) from `.kilo/plans/1776334107170-playful-moon.md`.
+2. Phase 1 backlog foundation (create backlog file, update agent rules).
+3. Phase 2 thumbnail efficiency fix (FB001).
 
 ## Cross References
-- Active implementation plan: `.kilo/plans/1776323125899-stellar-panda.md`
+- Active implementation plan: `.kilo/plans/1776334107170-playful-moon.md`
 - Previous implementation plan: `.kilo/plans/1776295158000-phase-3-offline-kickoff.md`
 - Previous implementation plan: `.kilo/plans/1776291840732-kind-meadow.md`
 - Previous implementation plan: `.kilo/plans/1776287315253-happy-moon.md`
