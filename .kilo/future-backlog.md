@@ -17,8 +17,8 @@
 ### P2 - Medium Priority Features
 | ID | Title | Description | Priority | Complexity | Dependencies | Status |
 |----|-------|-------------|----------|------------|--------------|--------|
-| FB003 | Author-based filtering | Filter gallery by message authors with checklist of all known participants | P2 | M | FB005 (author data) | proposed |
-| FB005 | Improved media overlay | Show author name instead of meaningless Telegram auto-filenames; keep filenames for uploaded documents | P2 | S | None | proposed |
+| FB003 | Author-based filtering | Filter gallery by message authors with checklist of all known participants | P2 | M | FB005 (author data) | planned |
+| FB005 | Improved media overlay | Show author name instead of meaningless Telegram auto-filenames; keep filenames for uploaded documents | P2 | S | None | planned |
 
 ### P3 - Low Priority / Cosmetic
 | ID | Title | Description | Priority | Complexity | Dependencies | Status |

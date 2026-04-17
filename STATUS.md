@@ -1,10 +1,10 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-17 02:17 +02:00
-**Current Phase:** Phase 5: Author Features (pending)
+**Last Updated:** 2026-04-17 06:36 +02:00
+**Current Phase:** Phase 5: Author Features (in_progress)
 **Active Plan:** `.kilo/plans/1776334107170-playful-moon.md`
 **Branch:** `main`
-**Ahead Of `origin/main`:** 18 commits
+**Ahead Of `origin/main`:** 19 commits
 
 ---
 
@@ -88,6 +88,9 @@
 
 ### Phase 4: Shareable URLs
 - `completed` Task 17: Shareable media URLs (Block 4.1)
+
+### Phase 5: Author Features
+- `pending` Task 18: Extract and display author data (Block 5.1)
 
 ## Next Execution Order
 1. Phase 5 Block 5.1: Extract and display author data (FB003, FB005)
