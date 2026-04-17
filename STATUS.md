@@ -1,6 +1,6 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-17 18:50 +02:00
+**Last Updated:** 2026-04-17 20:39 +02:00
 **Current Phase:** Clever Island - Stale plan cleanup & priority execution
 **Active Plan:** `.kilo/plans/1776410435637-clever-island.md`
 **Branch:** `main`
@@ -24,7 +24,7 @@
 - **Plan file:** `.kilo/plans/1776410435637-clever-island.md`
 - **Goal:** Execute a prioritized sequence of work to: 1. Clean up stale plans and maintain project hygiene; 2. Fix remaining accessibility warnings in DialogPicker and GalleryGrid; 3. Implement high-impact UI/UX improvements from the witty-panda analysis; 4. Deliver Phase 3+ advanced features (masonry layout, desktop variants, light theme); 5. Optimize performance where measurable gains are possible.
 - **Execution strategy:** 5 blocks: 1. Archive stale plans; 2. Accessibility foundation & TypeScript health; 3. Core interaction improvements; 4. Phase 3+ advanced features; 5. Performance optimization.
-- **Status:** planning needed for Block 4 (Phase 3+ advanced features require detailed implementation plan)
+- **Status:** Block 4 completed; Block 5 detailed implementation plan created in `.kilo/plans/1776410435637-block5-performance-optimization.md` and ready for execution
 
 ## Completed Plans
 - **Plan file:** `.kilo/plans/1776372881960-jolly-planet.md`
@@ -87,8 +87,8 @@
 - `completed` Task 63: Block 4.3 - Light theme support
 - `completed` Task 64: Block 4.4 - Enhanced offline media behavior
 - `completed` Task 65: Block 4.5 - Validation
-- `pending` Task 66: Block 5.1 - Analyze bottlenecks
-- `pending` Task 67: Block 5.2 - Bundle size reduction
+- `completed` Task 66: Block 5.1 - Analyze bottlenecks
+- `in_progress` Task 67: Block 5.2 - Bundle size reduction
 - `pending` Task 68: Block 5.3 - Download optimizations
 - `pending` Task 69: Block 5.4 - Memory efficiency
 - `pending` Task 70: Block 5.5 - Validation
@@ -165,9 +165,11 @@
 - **COMPLETED**: Task 64 (Enhanced offline media behavior) - added UI control for showCacheBadges setting, fixed TypeScript errors in cache-status.ts, improved offline action guards with better tooltips, validated all offline action guards
 - **COMPLETED**: Task 65 (Block 4 validation) - final testing and verification of all Block 4 features
 - **Block 4**: ✓ COMPLETED - Phase 3+ features: masonry layout toggle, desktop layout variants, light theme support, enhanced offline media behavior.
-- **Block 5**: Performance optimization: bundle size reduction, download optimizations, memory efficiency.
+- **Block 5**: Performance optimization: execute `.kilo/plans/1776410435637-block5-performance-optimization.md` (baseline analysis, bundle reduction, download optimizations, memory efficiency, final validation).
 
 ## Plan And Todo History
+- 2026-04-17 20:46 +02:00 - Completed Task 66 (Analyze bottlenecks) of clever-island plan: established baseline metrics - bundle size 1,437.26 kB (363.93 kB gzipped), CSS 44.44 kB (8.86 kB gzipped). Critical finding: main chunk >500 kB (actual 1.4 MB). Identified optimization backlog: 1) code splitting (high), 2) CSS syntax fixes (high), 3) parallel downloads (medium), 4) memory cleanup audit (low). Type check passes with 0 errors, 0 warnings.
+- 2026-04-17 20:39 +02:00 - Created `.kilo/plans/1776410435637-block5-performance-optimization.md`, a detailed implementation plan for Clever Island Block 5 (Tasks 66-70). Recorded execution order, candidate files, success criteria, validation requirements, and estimated effort. Validation intentionally deferred because this was a documentation/planning-only update.
 - 2026-04-17 20:25 +02:00 - Completed Task 65 (Block 4 validation) of clever-island plan: ran comprehensive type check (0 errors, 0 warnings) and short test suite (32/32 passed) for all Block 4 Phase 3+ features. All features validated: masonry layout toggle, desktop layout variants, light theme support, enhanced offline media behavior. Block 4 is now complete.
 - 2026-04-17 20:12 +02:00 - Completed Task 64 (Enhanced offline media behavior) of clever-island plan: added UI control for showCacheBadges setting in SettingsPanel, fixed TypeScript errors in cache-status.ts (corrected readOpfsBlob import and usage), improved offline action guards with better tooltips for copy button in viewer, validated all offline action guards are properly implemented. Type check passes with 0 errors, 0 warnings. Short test suite passes 32/32. Committed as `2538cec`.
 - 2026-04-17 20:00 +02:00 - Completed Task 62 (Desktop layout variants) of clever-island plan: implemented three desktop layout variants (wide grid, sidebar, dual pane) with screen width detection (>1024px). Added DesktopLayoutMode type and desktopLayout setting, created desktop-detection utility with responsive store, added settings panel controls for layout selection, created DesktopSidebar component for metadata display, added comprehensive CSS for all layout variants with improved typography and spacing. Type check passes with 0 errors, 0 warnings. Short test suite passes 32/32. Committed as `0c15efa`.
@@ -320,6 +322,9 @@
 - ℹ️ Historical references to `.kilo/status.md` remain in dated records by design and are not treated as active drift.
 
 ## Last Validation
+- 2026-04-17 20:45 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run build`
+  - Result: built successfully with warnings
+  - Main note: Block 5 baseline analysis - bundle size: 1,437.26 kB (363.93 kB gzipped), CSS: 44.44 kB (8.86 kB gzipped). Critical finding: main chunk >500 kB (actual 1.4 MB). CSS syntax errors detected. Optimization backlog documented.
 - 2026-04-17 20:23 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
   - Result: passed with 0 errors, 0 warnings
   - Main note: Block 4 final validation - type checking passes cleanly for all Phase 3+ features.
