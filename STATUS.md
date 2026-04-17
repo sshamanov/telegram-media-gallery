@@ -1,7 +1,7 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-17 07:27 +02:00
-**Current Phase:** Phase 6: Cosmetic improvements (pending)
+**Last Updated:** 2026-04-17 07:43 +02:00
+**Current Phase:** Phase 6: Cosmetic improvements (completed)
 **Active Plan:** `.kilo/plans/1776334107170-playful-moon.md`
 **Branch:** `main`
 **Ahead Of `origin/main`:** 30 commits
@@ -93,10 +93,14 @@
 - `completed` Task 18: Extract and display author data (Block 5.1)
 - `completed` Task 19: Author filtering UI (Block 5.2) (commit c23e51f)
 
+### Phase 6: Cosmetic Improvements
+- `completed` Task 20: UI refinements (Block 6.1) (FB006, FB007)
+
 ## Next Execution Order
-1. Phase 6 Block 6.1: UI refinements (FB006, FB007)
+- All phases completed; backlog system operational.
 
 ## Plan And Todo History
+- 2026-04-17 07:43 +02:00 - Completed Task 20: UI refinements (Phase 6 Block 6.1); thumbnail refresh callback implemented, viewer background opacity set to 1.
 - 2026-04-17 07:00 +02:00 - Started Task 19: Author filtering UI (Phase 5 Block 5.2).
 - 2026-04-17 07:26 +02:00 - Fixed TypeScript error (unused import) and misplaced AuthorFilter component; type check passes; short tests pass.
 - 2026-04-17 06:55 +02:00 - Completed Task 18: Extract and display author data (Phase 5 Block 5.1) (commit 1f3ff4f).

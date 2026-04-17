@@ -1,5 +1,7 @@
 import { getCachedOrDownloadBlob, getCachedBlob, writeMediaBlobToCache } from './files'
 import { isImageItem, isVideoItem } from './media'
+import { deleteCachedBlobById } from './cache/indexeddb'
+import { subscribe } from './events'
 import type { MediaItem } from '../types/telegram'
 
 export async function createImageThumbnail(blob: Blob, maxEdge = 512): Promise<Blob | null> {
@@ -104,4 +106,15 @@ export async function loadThumbnailBlob(item: MediaItem): Promise<Blob | null> {
 
 export async function readTextBlob(blob: Blob): Promise<string> {
   return blob.text()
+}
+
+// Clear thumbnail cache when full media downloads
+if (typeof window !== 'undefined') {
+  subscribe('media:full-downloaded', (mediaId) => {
+    if (typeof mediaId === 'string') {
+      deleteCachedBlobById(mediaId, 'thumb').catch(() => {
+        // ignore errors (e.g., entry not found)
+      })
+    }
+  })
 }

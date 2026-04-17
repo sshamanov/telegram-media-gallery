@@ -331,7 +331,7 @@
     pswp = new PhotoSwipe({
       dataSource: createDataSource(items),
       index,
-      bgOpacity: 0.92,
+      bgOpacity: 1,
       close: false,
       zoom: false,
       counter: false,

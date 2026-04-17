@@ -1,6 +1,7 @@
 import { readCachedBlob, writeCachedBlob } from './cache/indexeddb'
 import { readFullMediaBlob, writeFullMediaBlob } from './cache/opfs'
 import { getTelegramAdapter } from './telegram/adapter'
+import { emit } from './events'
 import type { MediaItem } from '../types/telegram'
 
 export type CachedMediaKind = 'thumb' | 'full'
@@ -90,6 +91,9 @@ export async function getCachedOrDownloadBlob(
 
   // --- write to cache ---
   await writeMediaBlobToCache(item, kind, blob)
+  if (kind === 'full') {
+    emit('media:full-downloaded', item.media.id)
+  }
 
   return blob
 }

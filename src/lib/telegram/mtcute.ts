@@ -1,6 +1,7 @@
 import { TelegramClient, type Chat, type Message as MtcuteMessage, type Photo, type Video, type Document, type Audio, type Voice } from '@mtcute/web'
 import { debugLog, debugWarn, DEBUG_MEDIA_SIZES } from '../debug'
 import { throttle } from '../files'
+import { emit } from '../events'
 import { getSizeLimitForMediaType } from './constants'
 import type { Dialog, Message, TgMedia, UploadMode } from '../../types/telegram'
 import type { MessagePage, TelegramAdapter } from './adapter'
@@ -464,14 +465,16 @@ class MtcuteTelegramAdapter implements TelegramAdapter {
     if (DEBUG_MEDIA_SIZES) {
       const start = performance.now()
       debugLog('downloadFull start:', { id: media.id, size: media.size, width: media.width, height: media.height })
-      return client.downloadAsBuffer(stored, downloadOptions).then(buffer => {
-        const end = performance.now()
-        debugLog('downloadFull completed:', { id: media.id, duration: `${Math.round(end - start)}ms` })
-        return buffer
-      })
+      const buffer = await client.downloadAsBuffer(stored, downloadOptions)
+      const end = performance.now()
+      debugLog('downloadFull completed:', { id: media.id, duration: `${Math.round(end - start)}ms` })
+      emit('media:full-downloaded', media.id)
+      return buffer
     }
 
-    return client.downloadAsBuffer(stored, downloadOptions)
+    const buffer = await client.downloadAsBuffer(stored, downloadOptions)
+    emit('media:full-downloaded', media.id)
+    return buffer
   }
 
   async uploadAndSend(dialogId: string, file: File, mode: UploadMode, onProgress?: (pct: number) => void, abortSignal?: AbortSignal): Promise<void> {

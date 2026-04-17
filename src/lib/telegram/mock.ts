@@ -1,6 +1,7 @@
 import type { Dialog, Message, TgMedia, UploadMode } from '../../types/telegram'
 import type { MessagePage, TelegramAdapter } from './adapter'
 import { debugLog, debugWarn, DEBUG_MEDIA_SIZES } from '../debug'
+import { emit } from '../events'
 
 // Load dialogs from JSON
 let DIALOGS: Dialog[] = []
@@ -370,6 +371,7 @@ export class MockTelegramAdapter implements TelegramAdapter {
       if (DEBUG_MEDIA_SIZES) {
         debugLog('Mock downloadFull: returning cached full media for', media.id)
       }
+      emit('media:full-downloaded', media.id)
       return this.fileCache.get(cacheKey)!
     }
     
@@ -393,6 +395,7 @@ export class MockTelegramAdapter implements TelegramAdapter {
           if (DEBUG_MEDIA_SIZES) {
             debugLog('Mock downloadFull: returning actual file for', media.id)
           }
+          emit('media:full-downloaded', media.id)
           return fileData
         }
       } catch (error) {
@@ -407,6 +410,7 @@ export class MockTelegramAdapter implements TelegramAdapter {
     if (DEBUG_MEDIA_SIZES) {
       debugLog('Mock downloadFull: returning empty fallback for', media.id)
     }
+    emit('media:full-downloaded', media.id)
     return fileData
   }
 
