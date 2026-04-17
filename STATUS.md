@@ -1,10 +1,10 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-17 17:55 +02:00
+**Last Updated:** 2026-04-17 18:05 +02:00
 **Current Phase:** Clever Island - Stale plan cleanup & priority execution
 **Active Plan:** `.kilo/plans/1776410435637-clever-island.md`
 **Branch:** `main`
-**Ahead Of `origin/main`:** 50 commits
+**Ahead Of `origin/main`:** 52 commits
 
 ---
 
@@ -78,8 +78,8 @@
 - `pending` Task 54: Block 2.5 - Focus management improvements
 - `completed` Task 55: Block 2.6 - Validation
 - `completed` Task 56: Block 3.1 - Keyboard navigation in gallery
-- `in_progress` Task 57: Block 3.2 - Restore pull-to-refresh
-- `pending` Task 58: Block 3.3 - Selection mode discoverability
+- `completed` Task 57: Block 3.2 - Restore pull-to-refresh
+- `in_progress` Task 58: Block 3.3 - Selection mode discoverability
 - `pending` Task 59: Block 3.4 - Icon button labels
 - `pending` Task 60: Block 3.5 - Validation
 - `pending` Task 61: Block 4.1 - Masonry layout toggle
@@ -163,6 +163,7 @@
 - **Block 5**: Performance optimization: bundle size reduction, download optimizations, memory efficiency.
 
 ## Plan And Todo History
+- 2026-04-17 18:05 +02:00 - Completed Task 57 (Block 3.2) of clever-island plan: restored pull-to-refresh for mobile (touch gesture detection, visual feedback with pull indicator and spinner, triggers loadInitialMedia). Committed as `673e6a2`.
 - 2026-04-17 17:55 +02:00 - Completed Task 56 (Block 3.1) of clever-island plan: implemented keyboard navigation in gallery (arrow keys, Enter to open, Space to toggle selection, visual focus indicator). Committed as `cdbaba6`.
 - 2026-04-17 17:45 +02:00 - Completed Block 2 of clever-island plan: fixed TypeScript/LSP errors (installed @types/node), fixed DialogPicker accessibility warnings (added role, tabindex, keyboard handler), fixed GalleryGrid accessibility warnings (restored role="application" with svelte-ignore comments), validated with type check (0 errors, 0 warnings) and short test suite (32/32). Committed as `9a5b5c5`.
 - 2026-04-17 17:25 +02:00 - Committed Block 1 changes (`7c198d7`).
@@ -552,6 +553,7 @@
 ## Recent Commit Log
 | Commit | Date | Description |
 |--------|------|-------------|
+| `673e6a2` | 2026-04-17 | feat: restore pull-to-refresh for mobile (Block 3.2) |
 | `cdbaba6` | 2026-04-17 | feat: add keyboard navigation to gallery (Block 3.1) |
 | `9a5b5c5` | 2026-04-17 | fix: accessibility warnings in DialogPicker and GalleryGrid (Block 2) |
 | `7c198d7` | 2026-04-17 | chore: archive stale plans and update STATUS.md (Block 1) |
