@@ -162,7 +162,8 @@
 - **COMPLETED**: Task 61 (Masonry layout toggle) - implemented masonry layout with auto-detection and manual override, added CSS masonry styles with browser fallback, added settings panel controls for layout mode and auto-detection, added toast notification for auto-detection suggestions
 - **COMPLETED**: Task 62 (Desktop layout variants) - implemented three desktop layout variants (wide grid, sidebar, dual pane) with screen width detection (>1024px), added desktop layout settings panel, created DesktopSidebar component for metadata display, added responsive CSS for all layout variants
 - **COMPLETED**: Task 63 (Light theme support) - added comprehensive CSS variables with light theme equivalents, replaced hardcoded rgba colors in GalleryGrid, ViewerWrapper, MediaItem, MediaListRow components
-- **IN PROGRESS**: Task 64 (Enhanced offline media behavior) - implementing improved cache management and user feedback
+- **COMPLETED**: Task 64 (Enhanced offline media behavior) - added UI control for showCacheBadges setting, fixed TypeScript errors in cache-status.ts, improved offline action guards with better tooltips, validated all offline action guards
+- **PENDING**: Task 65 (Block 4 validation) - final testing and verification of all Block 4 features
 - **Block 4**: Phase 3+ features: masonry layout toggle, desktop layout variants, light theme support, enhanced offline media behavior.
 - **Block 5**: Performance optimization: bundle size reduction, download optimizations, memory efficiency.
 
