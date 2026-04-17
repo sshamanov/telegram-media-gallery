@@ -288,7 +288,7 @@ import AuthorFilter from './AuthorFilter.svelte'
   })
 </script>
 
-{#if $currentDialog}
+  {#if $currentDialog}
     <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
     <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
     <section

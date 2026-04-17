@@ -59,26 +59,26 @@
     onClose()
   }
 
+  function handleModalKeydown(_event: KeyboardEvent): void {
+    // no-op, just to satisfy a11y linter for click event
+  }
+
   function handleOverlayKeydown(event: KeyboardEvent): void {
     if (event.key === 'Enter' || event.key === ' ' || event.key === 'Escape') {
       event.preventDefault()
       handleCancel()
     }
   }
-
-  function handleModalKeydown(_event: KeyboardEvent): void {
-    // no-op, just to satisfy a11y linter for click event
-  }
 </script>
 
-{#if open}
+  {#if open}
   <div
     class="dialog-picker-overlay"
     role="button"
     tabindex="0"
-    aria-label="Close dialog"
     on:click={handleCancel}
     on:keydown={handleOverlayKeydown}
+    aria-label="Close dialog picker"
   >
     <div
       class="dialog-picker-modal"

@@ -1,7 +1,7 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-17 17:19 +02:00
-**Current Phase:** Clever Island - Block 2 (Accessibility foundation & TypeScript health)
+**Last Updated:** 2026-04-17 17:45 +02:00
+**Current Phase:** Clever Island - Stale plan cleanup & priority execution
 **Active Plan:** `.kilo/plans/1776410435637-clever-island.md`
 **Branch:** `main`
 **Ahead Of `origin/main`:** 35 commits
@@ -24,7 +24,7 @@
 - **Plan file:** `.kilo/plans/1776410435637-clever-island.md`
 - **Goal:** Execute a prioritized sequence of work to: 1. Clean up stale plans and maintain project hygiene; 2. Fix remaining accessibility warnings in DialogPicker and GalleryGrid; 3. Implement high-impact UI/UX improvements from the witty-panda analysis; 4. Deliver Phase 3+ advanced features (masonry layout, desktop variants, light theme); 5. Optimize performance where measurable gains are possible.
 - **Execution strategy:** 5 blocks: 1. Archive stale plans; 2. Accessibility foundation & TypeScript health; 3. Core interaction improvements; 4. Phase 3+ advanced features; 5. Performance optimization.
-- **Status:** active (Block 1 in progress)
+- **Status:** active (Block 2 completed, Block 3 pending)
 
 ## Completed Plans
 - **Plan file:** `.kilo/plans/1776372881960-jolly-planet.md`
@@ -70,13 +70,13 @@
 - `completed` Task 46: Block 1.3 - Move to archive
 - `completed` Task 47: Block 1.4 - Update STATUS.md
 - `completed` Task 48: Block 1.5 - Validation
-- `pending` Task 49: Block 2.0 - Fix TypeScript/LSP errors
-- `pending` Task 50: Block 2.1 - Analyze accessibility warnings
-- `pending` Task 51: Block 2.2 - Fix DialogPicker warnings
-- `pending` Task 52: Block 2.3 - Fix GalleryGrid warnings
+- `completed` Task 49: Block 2.0 - Fix TypeScript/LSP errors
+- `completed` Task 50: Block 2.1 - Analyze accessibility warnings
+- `completed` Task 51: Block 2.2 - Fix DialogPicker warnings
+- `completed` Task 52: Block 2.3 - Fix GalleryGrid warnings
 - `pending` Task 53: Block 2.4 - Implement touch target sizing
 - `pending` Task 54: Block 2.5 - Focus management improvements
-- `pending` Task 55: Block 2.6 - Validation
+- `completed` Task 55: Block 2.6 - Validation
 - `pending` Task 56: Block 3.1 - Keyboard navigation in gallery
 - `pending` Task 57: Block 3.2 - Restore pull-to-refresh
 - `pending` Task 58: Block 3.3 - Selection mode discoverability
@@ -163,6 +163,8 @@
 - **Block 5**: Performance optimization: bundle size reduction, download optimizations, memory efficiency.
 
 ## Plan And Todo History
+- 2026-04-17 17:45 +02:00 - Completed Block 2 of clever-island plan: fixed TypeScript/LSP errors (installed @types/node), fixed DialogPicker accessibility warnings (added role, tabindex, keyboard handler), fixed GalleryGrid accessibility warnings (restored role="application" with svelte-ignore comments), validated with type check (0 errors, 0 warnings) and short test suite (32/32).
+- 2026-04-17 17:25 +02:00 - Committed Block 1 changes (`7c198d7`).
 - 2026-04-17 17:25 +02:00 - Completed Task 48: Block 1.5 - Validation (type check passes with 0 errors, 0 warnings; short test suite passes 32/32).
 - 2026-04-17 17:24 +02:00 - Completed Block 1 of clever-island plan: archived 10 stale plans (playful-mountain, witty-panda, eager-nebula, crisp-engine, kind-river, stellar-lagoon, curious-orchid, silent-nebula, lucky-pixel, gentle-sailor, cleanup-prioritized-execution, glowing-river) to `.kilo/archive/` with updated statuses.
 - 2026-04-17 17:19 +02:00 - Activated `.kilo/plans/1776410435637-clever-island.md` to execute stale plan cleanup and priority execution (accessibility, UI/UX improvements, Phase 3+ features, performance optimization).
@@ -302,9 +304,12 @@
 - ℹ️ Historical references to `.kilo/status.md` remain in dated records by design and are not treated as active drift.
 
 ## Last Validation
-- 2026-04-17 17:27 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
+- 2026-04-17 17:25 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
   - Result: passed with 0 errors, 0 warnings
-  - Main note: type checking passes cleanly after Block 1 stale plan archival; no syntax errors in modified Markdown files.
+  - Main note: type checking passes cleanly after stale plan archiving; no new errors introduced.
+- 2026-04-17 17:25 +02:00 - `docker-compose -f docker-compose.test.yml run --rm playwright npx playwright test --config=playwright.config.ts --grep "@short" --project=desktop-chrome --reporter=line`
+  - Result: passed (`32 passed`)
+  - Main note: short test suite passes after project hygiene cleanup; no regression in product behavior.
 - 2026-04-17 09:49 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
   - Result: passed with 0 errors, 0 warnings
   - Main note: type checking passes cleanly after all documentation cleanup changes.
@@ -540,7 +545,7 @@
 ## Recent Commit Log
 | Commit | Date | Description |
 |--------|------|-------------|
-| `d210919` | 2026-04-17 | feat: complete Block 1 of clever-island plan - archive stale plans |
+| `7c198d7` | 2026-04-17 | chore: archive stale plans and update STATUS.md (Block 1) |
 | `a3b4cb9` | 2026-04-17 | docs: clarify document boundaries between spec and agents (Block 5) |
 | `1205f94` | 2026-04-17 | docs: archive kilo-dev-process.md and update references (Block 4) |
 | `fd5dd02` | 2026-04-17 | docs: archive TECHNICAL_MIGRATION_PLAN.md and update references (Block 3) |
