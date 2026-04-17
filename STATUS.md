@@ -166,7 +166,7 @@
 - **Block 5**: Performance optimization: bundle size reduction, download optimizations, memory efficiency.
 
 ## Plan And Todo History
-- 2026-04-17 19:40 +02:00 - Completed Task 61 (Masonry layout toggle) of clever-island plan: implemented masonry layout with auto-detection and manual override. Added CSS masonry styles with browser fallback (grid-template-rows: masonry with column-count fallback), added settings panel controls for layout mode (grid/masonry) and auto-detection toggle, added toast notification for auto-detection suggestions when visual content ≥90%, fixed duplicate imports in GalleryGrid component.
+- 2026-04-17 19:40 +02:00 - Completed Task 61 (Masonry layout toggle) of clever-island plan: implemented masonry layout with auto-detection and manual override. Added CSS masonry styles with browser fallback (grid-template-rows: masonry with column-count fallback), added settings panel controls for layout mode (grid/masonry) and auto-detection toggle, added toast notification for auto-detection suggestions when visual content ≥90%, fixed duplicate imports in GalleryGrid component. Type check passes with 0 errors, 0 warnings. Short test suite passes 32/32. Committed as `078e16a`.
 - 2026-04-17 19:30 +02:00 - Completed Task 63 (Light theme support) of clever-island plan: added comprehensive CSS variables for translucent colors with complete light theme equivalents, replaced hardcoded rgba colors in GalleryGrid, ViewerWrapper, MediaItem, and MediaListRow components. Type check passes with 0 errors, 0 warnings. Committed as `9ec709a`.
 - 2026-04-17 19:15 +02:00 - Started Block 4 of clever-island plan: implementing light theme support (Task 63). Added comprehensive CSS variables for translucent colors with light theme equivalents, began replacing hardcoded rgba colors in components.
 - 2026-04-17 18:50 +02:00 - Completed Block 3 of clever-island plan: implemented core interaction improvements (keyboard navigation, pull-to-refresh, selection mode discoverability, icon button labels). Validated with type check (0 errors, 0 warnings) and short test suite (32/32).
@@ -315,6 +315,12 @@
 - ℹ️ Historical references to `.kilo/status.md` remain in dated records by design and are not treated as active drift.
 
 ## Last Validation
+- 2026-04-17 19:45 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
+  - Result: passed with 0 errors, 0 warnings
+  - Main note: type checking passes cleanly after masonry layout implementation.
+- 2026-04-17 19:45 +02:00 - `docker-compose -f docker-compose.test.yml up --build playwright`
+  - Result: passed (`32 passed`)
+  - Main note: short test suite passes after masonry layout implementation; no regression in product behavior.
 - 2026-04-17 18:50 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
   - Result: passed with 0 errors, 0 warnings
   - Main note: type checking passes cleanly after Block 3 core interaction improvements.
