@@ -1,5 +1,4 @@
 import { mount } from 'svelte'
-import 'photoswipe/style.css'
 import App from './App.svelte'
 import './app.css'
 import { debugWarn } from './lib/debug'

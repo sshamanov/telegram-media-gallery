@@ -1,6 +1,6 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-17 20:39 +02:00
+**Last Updated:** 2026-04-17 20:55 +02:00
 **Current Phase:** Clever Island - Stale plan cleanup & priority execution
 **Active Plan:** `.kilo/plans/1776410435637-clever-island.md`
 **Branch:** `main`
@@ -88,8 +88,8 @@
 - `completed` Task 64: Block 4.4 - Enhanced offline media behavior
 - `completed` Task 65: Block 4.5 - Validation
 - `completed` Task 66: Block 5.1 - Analyze bottlenecks
-- `in_progress` Task 67: Block 5.2 - Bundle size reduction
-- `pending` Task 68: Block 5.3 - Download optimizations
+- `completed` Task 67: Block 5.2 - Bundle size reduction
+- `in_progress` Task 68: Block 5.3 - Download optimizations
 - `pending` Task 69: Block 5.4 - Memory efficiency
 - `pending` Task 70: Block 5.5 - Validation
 
@@ -169,6 +169,7 @@
 
 ## Plan And Todo History
 - 2026-04-17 20:46 +02:00 - Completed Task 66 (Analyze bottlenecks) of clever-island plan: established baseline metrics - bundle size 1,437.26 kB (363.93 kB gzipped), CSS 44.44 kB (8.86 kB gzipped). Critical finding: main chunk >500 kB (actual 1.4 MB). Identified optimization backlog: 1) code splitting (high), 2) CSS syntax fixes (high), 3) parallel downloads (medium), 4) memory cleanup audit (low). Type check passes with 0 errors, 0 warnings.
+- 2026-04-17 20:55 +02:00 - Completed Task 67 (Bundle size reduction) of clever-island plan: implemented code splitting with dynamic imports for AuthScreen, DialogList, GalleryGrid, and SettingsScreen components. Lazy-loaded PhotoSwipe library (60.45 kB) and its CSS (4.62 kB). Fixed Svelte 5 syntax issues (converted `$:` to `$effect`, `$state` declarations, replaced deprecated `<svelte:component>` with `@render`). Bundle size reduced from 1,333.17 kB to 1,272.76 kB (60.41 kB reduction). Type check passes with 0 errors, 0 warnings. Short test suite passes 32/32.
 - 2026-04-17 20:39 +02:00 - Created `.kilo/plans/1776410435637-block5-performance-optimization.md`, a detailed implementation plan for Clever Island Block 5 (Tasks 66-70). Recorded execution order, candidate files, success criteria, validation requirements, and estimated effort. Validation intentionally deferred because this was a documentation/planning-only update.
 - 2026-04-17 20:25 +02:00 - Completed Task 65 (Block 4 validation) of clever-island plan: ran comprehensive type check (0 errors, 0 warnings) and short test suite (32/32 passed) for all Block 4 Phase 3+ features. All features validated: masonry layout toggle, desktop layout variants, light theme support, enhanced offline media behavior. Block 4 is now complete.
 - 2026-04-17 20:12 +02:00 - Completed Task 64 (Enhanced offline media behavior) of clever-island plan: added UI control for showCacheBadges setting in SettingsPanel, fixed TypeScript errors in cache-status.ts (corrected readOpfsBlob import and usage), improved offline action guards with better tooltips for copy button in viewer, validated all offline action guards are properly implemented. Type check passes with 0 errors, 0 warnings. Short test suite passes 32/32. Committed as `2538cec`.
@@ -322,9 +323,15 @@
 - ℹ️ Historical references to `.kilo/status.md` remain in dated records by design and are not treated as active drift.
 
 ## Last Validation
-- 2026-04-17 20:45 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run build`
+- 2026-04-17 20:55 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run build`
   - Result: built successfully with warnings
-  - Main note: Block 5 baseline analysis - bundle size: 1,437.26 kB (363.93 kB gzipped), CSS: 44.44 kB (8.86 kB gzipped). Critical finding: main chunk >500 kB (actual 1.4 MB). CSS syntax errors detected. Optimization backlog documented.
+  - Main note: Block 5 Task 67 bundle size reduction - successfully implemented code splitting with dynamic imports. Bundle size reduced from 1,333.17 kB to 1,272.76 kB (60.41 kB reduction). PhotoSwipe lazy-loaded (60.45 kB JS + 4.62 kB CSS). CSS syntax errors fixed.
+- 2026-04-17 20:55 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
+  - Result: passed with 0 errors, 0 warnings
+  - Main note: Block 5 Task 67 type checking passes cleanly after code splitting implementation.
+- 2026-04-17 20:55 +02:00 - `docker-compose -f docker-compose.test.yml up --build playwright`
+  - Result: passed (`32 passed`)
+  - Main note: Block 5 Task 67 short test suite passes after code splitting implementation; no regression in product behavior.
 - 2026-04-17 20:23 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
   - Result: passed with 0 errors, 0 warnings
   - Main note: Block 4 final validation - type checking passes cleanly for all Phase 3+ features.

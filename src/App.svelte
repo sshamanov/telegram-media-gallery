@@ -1,14 +1,47 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import AuthScreen from './components/auth/AuthScreen.svelte'
-  import DialogList from './components/dialogs/DialogList.svelte'
-  import GalleryGrid from './components/gallery/GalleryGrid.svelte'
   import ViewerWrapper from './components/gallery/ViewerWrapper.svelte'
   import OfflineBanner from './components/ui/OfflineBanner.svelte'
   import Toast from './components/ui/Toast.svelte'
   import MigrationScreen from './components/ui/MigrationScreen.svelte'
   import ReconnectBanner from './components/ui/ReconnectBanner.svelte'
-  import SettingsScreen from './components/settings/SettingsScreen.svelte'
+  
+  // Lazy-loaded components for code splitting
+  let AuthScreen = $state<any>(null)
+  let DialogList = $state<any>(null)
+  let GalleryGrid = $state<any>(null)
+  let SettingsScreen = $state<any>(null)
+  
+  // Load components based on route
+  $effect(() => {
+    // Load auth screen if needed
+    if ($authState !== 'connected' && !AuthScreen) {
+      import('./components/auth/AuthScreen.svelte').then(module => {
+        AuthScreen = module.default
+      })
+    }
+    
+    // Load dialog list if needed (default screen)
+    if ($authState === 'connected' && $router.type !== 'settings' && $router.type !== 'gallery' && !DialogList) {
+      import('./components/dialogs/DialogList.svelte').then(module => {
+        DialogList = module.default
+      })
+    }
+    
+    // Load gallery if needed
+    if ($authState === 'connected' && $router.type === 'gallery' && $currentDialog && $router.dialogId === $currentDialog.id && !GalleryGrid) {
+      import('./components/gallery/GalleryGrid.svelte').then(module => {
+        GalleryGrid = module.default
+      })
+    }
+    
+    // Load settings if needed
+    if ($authState === 'connected' && $router.type === 'settings' && !SettingsScreen) {
+      import('./components/settings/SettingsScreen.svelte').then(module => {
+        SettingsScreen = module.default
+      })
+    }
+  })
   import { currentDialog, loadInitialMedia, setActiveDialog, openViewer, mediaItems, viewerIndex, closeViewer } from './stores/gallery'
   import { allDialogs, galleries, hydrateDialogsFromSnapshot, setDialogs } from './stores/dialogs'
   import { authState, authStatus, session, getCurrentAdapter, handleDisconnect } from './stores/telegram'
@@ -20,11 +53,11 @@
   import { createRouterStore } from './lib/routing'
   import { routeTransition } from './lib/dom/transitions'
 
-  let dialogsLoaded = false
-  let dialogsLoading = false
-  let migrating = false
-  let migrationProgress = 0
-  let fullMediaStorageState: FullMediaStorageState | null = null
+  let dialogsLoaded = $state(false)
+  let dialogsLoading = $state(false)
+  let migrating = $state(false)
+  let migrationProgress = $state(0)
+  let fullMediaStorageState = $state<FullMediaStorageState | null>(null)
   
   // Router store
   const router = createRouterStore()
@@ -71,55 +104,67 @@
     }
   }
 
-  $: if ($authState === 'connected' && !dialogsLoaded && !dialogsLoading && !$isOffline) {
-    void loadDialogs()
-  }
+  $effect(() => {
+    if ($authState === 'connected' && !dialogsLoaded && !dialogsLoading && !$isOffline) {
+      void loadDialogs()
+    }
+  })
 
-  $: if ($authState === 'connected' && $currentDialog) {
-    void loadInitialMedia()
-  }
+  $effect(() => {
+    if ($authState === 'connected' && $currentDialog) {
+      void loadInitialMedia()
+    }
+  })
 
   // Sync router with app state
-  $: if ($authState === 'connected') {
-    // When router changes to gallery route, set current dialog
-    if ($router.type === 'gallery') {
-      const dialog = [...$galleries, ...$allDialogs].find(d => d.id === $router.dialogId)
-      if (dialog && (!$currentDialog || $currentDialog.id !== dialog.id)) {
-        setActiveDialog(dialog)
+  $effect(() => {
+    if ($authState === 'connected') {
+      // When router changes to gallery route, set current dialog
+      if ($router.type === 'gallery') {
+        const dialog = [...$galleries, ...$allDialogs].find(d => d.id === $router.dialogId)
+        if (dialog && (!$currentDialog || $currentDialog.id !== dialog.id)) {
+          setActiveDialog(dialog)
+        }
+      }
+      // When router changes to viewer route, set current dialog and store pending viewer
+      if ($router.type === 'viewer') {
+        const dialog = [...$galleries, ...$allDialogs].find(d => d.id === $router.dialogId)
+        if (dialog && (!$currentDialog || $currentDialog.id !== dialog.id)) {
+          setActiveDialog(dialog)
+        }
+        // Store pending viewer route to be resolved after media loads
+        pendingViewerRoute.set({ dialogId: $router.dialogId, messageId: $router.messageId })
+      }
+      // Clear pending viewer route when we navigate away from viewer
+      if ($router.type !== 'viewer') {
+        pendingViewerRoute.set(null)
       }
     }
-    // When router changes to viewer route, set current dialog and store pending viewer
-    if ($router.type === 'viewer') {
-      const dialog = [...$galleries, ...$allDialogs].find(d => d.id === $router.dialogId)
-      if (dialog && (!$currentDialog || $currentDialog.id !== dialog.id)) {
-        setActiveDialog(dialog)
-      }
-      // Store pending viewer route to be resolved after media loads
-      pendingViewerRoute.set({ dialogId: $router.dialogId, messageId: $router.messageId })
-    }
-    // Clear pending viewer route when we navigate away from viewer
-    if ($router.type !== 'viewer') {
-      pendingViewerRoute.set(null)
-    }
-  }
+  })
 
   // When pending viewer route changes and media items are loaded, open viewer
-  $: if ($pendingViewerRoute && $mediaItems.length > 0) {
-    const { dialogId, messageId } = $pendingViewerRoute
-    // Find media item index
-    const index = $mediaItems.findIndex(item => item.dialogId === dialogId && item.messageId === messageId)
-    if (index >= 0) {
-      openViewer($mediaItems, index, { updateUrl: false })
+  $effect(() => {
+    if ($pendingViewerRoute && $mediaItems.length > 0) {
+      const { dialogId, messageId } = $pendingViewerRoute
+      // Find media item index
+      const index = $mediaItems.findIndex(item => item.dialogId === dialogId && item.messageId === messageId)
+      if (index >= 0) {
+        openViewer($mediaItems, index, { updateUrl: false })
+      }
     }
-  }
+  })
 
   // Close viewer when pending viewer route is cleared (e.g., back button)
-  $: if ($pendingViewerRoute === null && $viewerIndex !== null) {
-    closeViewer({ updateUrl: false })
-  }
+  $effect(() => {
+    if ($pendingViewerRoute === null && $viewerIndex !== null) {
+      closeViewer({ updateUrl: false })
+    }
+  })
 
   // Apply theme immediately and whenever setting changes
-  $: applyTheme($settings.theme)
+  $effect(() => {
+    applyTheme($settings.theme)
+  })
 
   onMount(() => {
     // Initialize keyboard shortcuts manager
@@ -218,21 +263,37 @@
     <main class="app-shell">
     <div class="route-container" use:routeTransition>
       {#if $authState !== 'connected'}
-        <div data-testid="auth-screen">
-          <AuthScreen />
-        </div>
+        {#if AuthScreen}
+          <div data-testid="auth-screen">
+            {@render AuthScreen()}
+          </div>
+        {:else}
+          <div class="loading-placeholder">Loading auth...</div>
+        {/if}
       {:else if $router.type === 'settings'}
-        <div data-testid="settings-screen">
-          <SettingsScreen />
-        </div>
+        {#if SettingsScreen}
+          <div data-testid="settings-screen">
+            {@render SettingsScreen()}
+          </div>
+        {:else}
+          <div class="loading-placeholder">Loading settings...</div>
+        {/if}
       {:else if $currentDialog && $router.type === 'gallery' && $router.dialogId === $currentDialog.id}
-        <div data-testid="gallery-screen">
-          <GalleryGrid />
-        </div>
+        {#if GalleryGrid}
+          <div data-testid="gallery-screen">
+            {@render GalleryGrid()}
+          </div>
+        {:else}
+          <div class="loading-placeholder">Loading gallery...</div>
+        {/if}
       {:else}
-        <div data-testid="dialogs-screen">
-          <DialogList />
-        </div>
+        {#if DialogList}
+          <div data-testid="dialogs-screen">
+            {@render DialogList()}
+          </div>
+        {:else}
+          <div class="loading-placeholder">Loading dialogs...</div>
+        {/if}
       {/if}
     </div>
   </main>

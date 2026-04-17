@@ -1,7 +1,6 @@
 <script lang="ts">
   import { derived, get, type Readable } from 'svelte/store'
   import { onDestroy } from 'svelte'
-  import PhotoSwipe from 'photoswipe'
   import { blobToFile, getCachedBlob, getCachedOrDownloadBlob } from '../../lib/files'
   import { formatSize, isAudioItem, isDownloadOnlyItem, isImageItem, isPdfItem, isTextItem, isTextLikeFileName, isVideoItem, mediaKindLabel } from '../../lib/media'
   import { readTextBlob } from '../../lib/thumbnails'
@@ -18,6 +17,7 @@
   import type { Route } from '../../lib/routing'
   import InfoPanel from './InfoPanel.svelte'
   import type { MediaItem } from '../../types/telegram'
+  import type PhotoSwipe from 'photoswipe'
   import type { SlideData } from 'photoswipe'
 
   type ViewerContent = Record<string, unknown> & {
@@ -315,7 +315,7 @@
     markLoaded(event)
   }
 
-  function attachPhotoSwipe(): void {
+  async function attachPhotoSwipe(): Promise<void> {
     const items = get(viewerItems).length > 0 ? get(viewerItems) : get(mediaItems)
     const index = get(viewerIndex)
     if (index === null || items.length === 0) {
@@ -326,6 +326,12 @@
     const token = pswpOpenToken
     showInfo = false
     loadProgress = 0
+
+    // Dynamically import PhotoSwipe only when needed
+    const PhotoSwipeModule = await import('photoswipe')
+    const PhotoSwipe = PhotoSwipeModule.default
+    // Also dynamically import PhotoSwipe CSS
+    await import('photoswipe/style.css')
 
     pswp?.destroy()
     pswp = new PhotoSwipe({
@@ -500,7 +506,7 @@
   }
 
   $: if ($viewerIndex !== null && !pswp) {
-    attachPhotoSwipe()
+    void attachPhotoSwipe()
   }
 
   $: if (pswp && $viewerIndex !== null && pswp.currIndex !== $viewerIndex) {
