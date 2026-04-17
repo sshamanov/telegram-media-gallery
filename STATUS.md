@@ -1,10 +1,10 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-17 18:05 +02:00
+**Last Updated:** 2026-04-17 18:38 +02:00
 **Current Phase:** Clever Island - Stale plan cleanup & priority execution
 **Active Plan:** `.kilo/plans/1776410435637-clever-island.md`
 **Branch:** `main`
-**Ahead Of `origin/main`:** 52 commits
+**Ahead Of `origin/main`:** 54 commits
 
 ---
 
@@ -79,8 +79,8 @@
 - `completed` Task 55: Block 2.6 - Validation
 - `completed` Task 56: Block 3.1 - Keyboard navigation in gallery
 - `completed` Task 57: Block 3.2 - Restore pull-to-refresh
-- `in_progress` Task 58: Block 3.3 - Selection mode discoverability
-- `pending` Task 59: Block 3.4 - Icon button labels
+- `completed` Task 58: Block 3.3 - Selection mode discoverability
+- `in_progress` Task 59: Block 3.4 - Icon button labels
 - `pending` Task 60: Block 3.5 - Validation
 - `pending` Task 61: Block 4.1 - Masonry layout toggle
 - `pending` Task 62: Block 4.2 - Desktop layout variants
@@ -163,6 +163,7 @@
 - **Block 5**: Performance optimization: bundle size reduction, download optimizations, memory efficiency.
 
 ## Plan And Todo History
+- 2026-04-17 18:38 +02:00 - Completed Task 58 (Block 3.3) of clever-island plan: added visual feedback for selection mode discoverability (scale animation during long-press, persistent store for hint dismissal). Committed as `7f1cb06`.
 - 2026-04-17 18:05 +02:00 - Completed Task 57 (Block 3.2) of clever-island plan: restored pull-to-refresh for mobile (touch gesture detection, visual feedback with pull indicator and spinner, triggers loadInitialMedia). Committed as `673e6a2`.
 - 2026-04-17 17:55 +02:00 - Completed Task 56 (Block 3.1) of clever-island plan: implemented keyboard navigation in gallery (arrow keys, Enter to open, Space to toggle selection, visual focus indicator). Committed as `cdbaba6`.
 - 2026-04-17 17:45 +02:00 - Completed Block 2 of clever-island plan: fixed TypeScript/LSP errors (installed @types/node), fixed DialogPicker accessibility warnings (added role, tabindex, keyboard handler), fixed GalleryGrid accessibility warnings (restored role="application" with svelte-ignore comments), validated with type check (0 errors, 0 warnings) and short test suite (32/32). Committed as `9a5b5c5`.
@@ -553,6 +554,7 @@
 ## Recent Commit Log
 | Commit | Date | Description |
 |--------|------|-------------|
+| `7f1cb06` | 2026-04-17 | feat: add visual feedback for selection mode discoverability (Block 3.3) |
 | `673e6a2` | 2026-04-17 | feat: restore pull-to-refresh for mobile (Block 3.2) |
 | `cdbaba6` | 2026-04-17 | feat: add keyboard navigation to gallery (Block 3.1) |
 | `9a5b5c5` | 2026-04-17 | fix: accessibility warnings in DialogPicker and GalleryGrid (Block 2) |
