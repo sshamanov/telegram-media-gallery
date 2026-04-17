@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onDestroy, onMount } from 'svelte'
-  import { formatShortDate, formatSize, hasThumbnail, mediaGlyph } from '../../lib/media'
+  import { formatShortDate, formatSize, hasThumbnail, mediaGlyph, displayNameForMedia } from '../../lib/media'
   import { loadThumbnailBlob } from '../../lib/thumbnails'
   import type { MediaItem } from '../../types/telegram'
 
@@ -113,7 +113,10 @@
   </div>
 
   <div class="copy">
-    <div class="name">{item.filename}</div>
+    <div class="name">{displayNameForMedia(item)}</div>
+    {#if item.sender}
+      <div class="author muted">{item.sender}</div>
+    {/if}
     <div class="meta muted">{formatShortDate(item.date)}</div>
   </div>
 
@@ -187,6 +190,12 @@
   .meta {
     margin-top: 4px;
     font-size: 0.86rem;
+  }
+
+  .author {
+    margin-top: 2px;
+    font-size: 0.82rem;
+    color: var(--text-secondary);
   }
 
   .size {

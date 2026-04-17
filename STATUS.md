@@ -1,6 +1,6 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-17 06:36 +02:00
+**Last Updated:** 2026-04-17 06:55 +02:00
 **Current Phase:** Phase 5: Author Features (in_progress)
 **Active Plan:** `.kilo/plans/1776334107170-playful-moon.md`
 **Branch:** `main`
@@ -90,12 +90,14 @@
 - `completed` Task 17: Shareable media URLs (Block 4.1)
 
 ### Phase 5: Author Features
-- `pending` Task 18: Extract and display author data (Block 5.1)
+- `completed` Task 18: Extract and display author data (Block 5.1)
+- `pending` Task 19: Author filtering UI (Block 5.2)
 
 ## Next Execution Order
-1. Phase 5 Block 5.1: Extract and display author data (FB003, FB005)
+1. Phase 5 Block 5.2: Author filtering UI (FB003, FB005)
 
 ## Plan And Todo History
+- 2026-04-17 06:55 +02:00 - Completed Task 18: Extract and display author data (Phase 5 Block 5.1).
 - 2026-04-16 23:24 +02:00 - Added shareable viewer URLs with route synchronization and pending route store.
 - 2026-04-16 22:27 +02:00 - Completed Task 16: Investigate download speed (Phase 3 Block 3.2).
 - 2026-04-16 22:00 +02:00 - Completed Task 15: Implement DEBUG logging (Phase 3 Block 3.1).
@@ -200,6 +202,12 @@
 - ℹ️ Historical references to `.kilo/status.md` remain in dated records by design and are not treated as active drift.
 
 ## Last Validation
+- 2026-04-17 06:55 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
+  - Result: passed with 0 errors, 0 warnings
+  - Main note: type checking passes cleanly after Phase 5 author data extraction and display.
+- 2026-04-17 06:55 +02:00 - `docker-compose -f docker-compose.test.yml run --rm playwright npx playwright test --config=playwright.config.ts --grep "@short" --project=desktop-chrome --reporter=line`
+  - Result: 31 passed, 1 failed (auth.spec.ts phone input field exists)
+  - Main note: short test suite passes for gallery/viewer features; one unrelated authentication test failure appears flaky (passes when run alone).
 - 2026-04-17 02:17 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
   - Result: passed with 0 errors, 0 warnings
   - Main note: type checking passes cleanly after Phase 4 shareable viewer URL implementation.

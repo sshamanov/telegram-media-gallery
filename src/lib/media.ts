@@ -221,6 +221,26 @@ export function mediaKindLabel(item: MediaItem): string {
   }
 }
 
+export function isTelegramAutoFilename(fileName: string): boolean {
+  const normalized = fileName.trim()
+  // photo_YYYY-MM-DD_HH-MM-SS.*
+  if (/^photo_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\./.test(normalized)) return true
+  // VID_YYYYMMDD_HHMMSS.*
+  if (/^VID_\d{8}_\d{6}\./.test(normalized)) return true
+  // audio_YYYYMMDD_HHMMSS.*
+  if (/^audio_\d{8}_\d{6}\./.test(normalized)) return true
+  // document_YYYYMMDD_HHMMSS.*
+  if (/^document_\d{8}_\d{6}\./.test(normalized)) return true
+  return false
+}
+
+export function displayNameForMedia(item: MediaItem): string {
+  if (isTelegramAutoFilename(item.filename) && item.sender) {
+    return item.sender
+  }
+  return item.filename
+}
+
 export function mediaGlyph(item: MediaItem): string {
   switch (item.type) {
     case 'video':

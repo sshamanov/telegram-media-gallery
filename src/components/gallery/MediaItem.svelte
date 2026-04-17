@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onDestroy, onMount } from 'svelte'
-  import { formatDuration, hasThumbnail, mediaGlyph } from '../../lib/media'
+  import { hasThumbnail, mediaGlyph, displayNameForMedia } from '../../lib/media'
   import { loadThumbnailBlob } from '../../lib/thumbnails'
   import type { MediaItem as GalleryMediaItem } from '../../types/telegram'
 
@@ -17,21 +17,7 @@
   let longPressTriggered = false
   let thumbLoadToken = 0
 
-  function showVideoBadge(value: GalleryMediaItem): boolean {
-    return ['video', 'document-video', 'large-video'].includes(value.type)
-  }
 
-  function showAudioBadge(value: GalleryMediaItem): boolean {
-    return ['document-audio'].includes(value.type)
-  }
-
-  function showFileBadge(value: GalleryMediaItem): boolean {
-    return ['document-pdf', 'document-text', 'document-other', 'large-file'].includes(value.type)
-  }
-
-  function audioDurationLabel(value: GalleryMediaItem): string {
-    return formatDuration(value.media.durationSeconds ?? null)
-  }
 
   function setThumbUrl(nextUrl: string | null): void {
     if (thumbUrl) {
@@ -92,7 +78,11 @@
         void loadThumb()
         observer?.disconnect()
         observer = null
-      }
+  }
+
+
+
+
     }, { rootMargin: '200px' })
 
     observer.observe(element)
@@ -125,20 +115,17 @@
   {:else}
     <div class="fallback">
       <span class="glyph">{mediaGlyph(item)}</span>
-      <span class="fallback-name">{item.filename}</span>
+       <span class="fallback-name">{displayNameForMedia(item)}</span>
     </div>
   {/if}
 
-  {#if showVideoBadge(item)}
-    <span class="badge">▶</span>
-  {:else if showAudioBadge(item)}
-    <span class="badge wide">{audioDurationLabel(item)}</span>
-  {:else if showFileBadge(item)}
-    <span class="badge wide">{mediaGlyph(item)}</span>
+  {#if item.sender}
+    <span class="badge author">{item.sender}</span>
   {/if}
 
+
   <div class="meta-strip">
-    <span class="meta-name">{item.filename}</span>
+     <span class="meta-name">{displayNameForMedia(item)}</span>
   </div>
 
   {#if selectionMode}
@@ -222,11 +209,22 @@
     backdrop-filter: blur(8px);
   }
 
-  .badge.wide {
+
+
+  .badge.author {
+    right: auto;
+    left: 10px;
+    top: 10px;
+    bottom: auto;
     width: auto;
     min-width: 44px;
-    padding: 0 10px;
+    max-width: 120px;
+    height: auto;
+    padding: 4px 8px;
     font-size: 0.72rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .meta-strip {
