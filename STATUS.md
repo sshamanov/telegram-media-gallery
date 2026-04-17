@@ -4,7 +4,7 @@
 **Current Phase:** Phase 5: Author Features (in_progress)
 **Active Plan:** `.kilo/plans/1776334107170-playful-moon.md`
 **Branch:** `main`
-**Ahead Of `origin/main`:** 22 commits
+**Ahead Of `origin/main`:** 23 commits
 
 ---
 
@@ -431,6 +431,7 @@
 ## Recent Commit Log
 | Commit | Date | Description |
 |--------|------|-------------|
+| `1ad0844` | 2026-04-17 | docs: update status ledger with Phase 5 Block 5.1 completion |
 | `1f3ff4f` | 2026-04-17 | feat: add author badges and display names for Telegram auto-filenames |
 | `680badf` | 2026-04-17 | docs: update backlog and plan for Phase 5 |
 | `f1a0e4e` | 2026-04-17 | docs: update backlog and plan for Phase 4 completion |
