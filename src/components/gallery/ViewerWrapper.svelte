@@ -548,17 +548,17 @@
 
  {#if $viewerIndex !== null}
   <div class="viewer-ui" bind:this={viewerUiElement}>
-    <div class="topbar">
-      <button class="button ghost" type="button" on:click={closeOverlay}>✕</button>
-      <button class="button ghost" type="button" on:click={downloadCurrent} title={$isOffline ? 'Downloads are unavailable offline unless the file is already open in the viewer cache.' : 'Download'} disabled={$isOffline}>⬇</button>
+     <div class="topbar">
+      <button class="button ghost" type="button" on:click={closeOverlay} aria-label="Close viewer">✕</button>
+      <button class="button ghost" type="button" on:click={downloadCurrent} title={$isOffline ? 'Downloads are unavailable offline unless the file is already open in the viewer cache.' : 'Download'} aria-label="Download" disabled={$isOffline}>⬇</button>
       {#if $activeItem && typeof navigator.share === 'function' && typeof navigator.canShare === 'function'}
         <button class="button ghost" type="button" on:click={shareCurrent} title={$isOffline ? 'Sharing is unavailable offline because uncached media cannot be fetched.' : 'Share'} disabled={$isOffline || $activeItem.size > shareLimitBytes}>↑</button>
       {/if}
       {#if $activeItem && isImageItem($activeItem) && typeof navigator.clipboard?.write === 'function' && typeof ClipboardItem !== 'undefined'}
         <button class="button ghost" type="button" on:click={copyCurrent} title="Copy image" disabled={$isOffline}>⧉</button>
       {/if}
-      {#if $activeItem && typeof navigator.clipboard?.writeText === 'function'}
-        <button class="button ghost" type="button" on:click={copyLink} title="Copy link to this media" disabled={$isOffline}>🔗</button>
+       {#if $activeItem && typeof navigator.clipboard?.writeText === 'function'}
+        <button class="button ghost" type="button" on:click={copyLink} title="Copy link to this media" aria-label="Copy link to this media" disabled={$isOffline}>🔗</button>
       {/if}
       <button class="button ghost" class:info-active={showInfo} type="button" on:click={() => (showInfo = !showInfo)} title="Toggle info panel — shows filename, size, date, sender" aria-label="Toggle info panel">ⓘ Info</button>
     </div>

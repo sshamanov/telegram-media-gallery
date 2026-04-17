@@ -772,7 +772,7 @@ import AuthorFilter from './AuthorFilter.svelte'
             {/if}
       {:else}
       <header class="panel gallery-header">
-        <button class="button ghost" type="button" on:click={back} data-testid="gallery-back-button">← Back</button>
+         <button class="button ghost" type="button" on:click={back} aria-label="Back to dialog list" data-testid="gallery-back-button">← Back</button>
 
         <div class="title-block">
           <h2>{$currentDialog.title}</h2>
