@@ -4,7 +4,7 @@
 **Current Phase:** Clever Island - Stale plan cleanup & priority execution
 **Active Plan:** `.kilo/plans/1776410435637-clever-island.md`
 **Branch:** `main`
-**Ahead Of `origin/main`:** 35 commits
+**Ahead Of `origin/main`:** 48 commits
 
 ---
 
@@ -163,7 +163,7 @@
 - **Block 5**: Performance optimization: bundle size reduction, download optimizations, memory efficiency.
 
 ## Plan And Todo History
-- 2026-04-17 17:45 +02:00 - Completed Block 2 of clever-island plan: fixed TypeScript/LSP errors (installed @types/node), fixed DialogPicker accessibility warnings (added role, tabindex, keyboard handler), fixed GalleryGrid accessibility warnings (restored role="application" with svelte-ignore comments), validated with type check (0 errors, 0 warnings) and short test suite (32/32).
+- 2026-04-17 17:45 +02:00 - Completed Block 2 of clever-island plan: fixed TypeScript/LSP errors (installed @types/node), fixed DialogPicker accessibility warnings (added role, tabindex, keyboard handler), fixed GalleryGrid accessibility warnings (restored role="application" with svelte-ignore comments), validated with type check (0 errors, 0 warnings) and short test suite (32/32). Committed as `9a5b5c5`.
 - 2026-04-17 17:25 +02:00 - Committed Block 1 changes (`7c198d7`).
 - 2026-04-17 17:25 +02:00 - Completed Task 48: Block 1.5 - Validation (type check passes with 0 errors, 0 warnings; short test suite passes 32/32).
 - 2026-04-17 17:24 +02:00 - Completed Block 1 of clever-island plan: archived 10 stale plans (playful-mountain, witty-panda, eager-nebula, crisp-engine, kind-river, stellar-lagoon, curious-orchid, silent-nebula, lucky-pixel, gentle-sailor, cleanup-prioritized-execution, glowing-river) to `.kilo/archive/` with updated statuses.
@@ -304,6 +304,12 @@
 - ℹ️ Historical references to `.kilo/status.md` remain in dated records by design and are not treated as active drift.
 
 ## Last Validation
+- 2026-04-17 17:45 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
+  - Result: passed with 0 errors, 0 warnings
+  - Main note: type checking passes cleanly after accessibility fixes; DialogPicker and GalleryGrid warnings resolved.
+- 2026-04-17 17:45 +02:00 - `docker-compose -f docker-compose.test.yml up --build playwright`
+  - Result: passed (`32 passed`)
+  - Main note: short test suite passes after accessibility improvements; no regression in product behavior.
 - 2026-04-17 17:25 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
   - Result: passed with 0 errors, 0 warnings
   - Main note: type checking passes cleanly after stale plan archiving; no new errors introduced.
@@ -545,6 +551,7 @@
 ## Recent Commit Log
 | Commit | Date | Description |
 |--------|------|-------------|
+| `9a5b5c5` | 2026-04-17 | fix: accessibility warnings in DialogPicker and GalleryGrid (Block 2) |
 | `7c198d7` | 2026-04-17 | chore: archive stale plans and update STATUS.md (Block 1) |
 | `a3b4cb9` | 2026-04-17 | docs: clarify document boundaries between spec and agents (Block 5) |
 | `1205f94` | 2026-04-17 | docs: archive kilo-dev-process.md and update references (Block 4) |
