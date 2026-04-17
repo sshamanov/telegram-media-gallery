@@ -590,8 +590,163 @@ button:focus:not(:focus-visible) {
       column-gap: 16px;
     }
     
-    .masonry-grid .media-card {
-      margin-bottom: 16px;
+     .masonry-grid .media-card {
+       margin-bottom: 16px;
+     }
+   }
+ }
+}
+
+/* ── Desktop layout variants ───────────────────────────────────── */
+@media (min-width: 1024px) {
+  /* Wide grid layout (6+ columns) */
+  .desktop-wide .grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 12px;
+  }
+  
+  .desktop-wide .masonry-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+  }
+  
+  @supports not (grid-template-rows: masonry) {
+    .desktop-wide .masonry-grid {
+      column-count: 6;
+      column-gap: 12px;
     }
+  }
+  
+  /* Sidebar layout */
+  .desktop-sidebar {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 24px;
+    align-items: start;
+  }
+  
+  .desktop-sidebar .grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 12px;
+  }
+  
+  .desktop-sidebar .masonry-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+  }
+  
+  @supports not (grid-template-rows: masonry) {
+    .desktop-sidebar .masonry-grid {
+      column-count: 5;
+      column-gap: 12px;
+    }
+  }
+  
+  /* Dual pane layout */
+  .desktop-dual {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+  
+  .desktop-dual .grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+  }
+  
+  .desktop-dual .masonry-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+  }
+  
+  @supports not (grid-template-rows: masonry) {
+    .desktop-dual .masonry-grid {
+      column-count: 4;
+      column-gap: 12px;
+    }
+  }
+  
+  /* Desktop sidebar component */
+  .desktop-sidebar-panel {
+    position: sticky;
+    top: 80px;
+    background: var(--bg-surface);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    border: 1px solid var(--border);
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+  }
+  
+  .desktop-sidebar-panel h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    font-size: 1.1rem;
+  }
+  
+  .desktop-sidebar-panel .metadata-item {
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  
+  .desktop-sidebar-panel .metadata-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+  }
+  
+  .desktop-sidebar-panel .metadata-value {
+    font-size: 1rem;
+    color: var(--text-primary);
+  }
+  
+  /* Desktop layout header adjustments */
+  .desktop-sidebar .gallery-header,
+  .desktop-dual .gallery-header {
+    grid-column: 1 / -1;
+  }
+  
+  /* Improved typography for desktop */
+  .desktop-wide h2,
+  .desktop-sidebar h2,
+  .desktop-dual h2 {
+    font-size: 1.5rem;
+  }
+  
+  .desktop-wide .count-label,
+  .desktop-sidebar .count-label,
+  .desktop-dual .count-label {
+    font-size: 1rem;
+  }
+  
+  /* Better spacing for desktop */
+  .desktop-wide .gallery-shell,
+  .desktop-sidebar .gallery-shell,
+  .desktop-dual .gallery-shell {
+    gap: 24px;
+    max-height: calc(100vh - 96px);
+  }
+  
+  .desktop-wide .gallery-header,
+  .desktop-sidebar .gallery-header,
+  .desktop-dual .gallery-header {
+    padding: 18px 24px;
+  }
+  
+  .desktop-wide .filter-bar,
+  .desktop-sidebar .filter-bar,
+  .desktop-dual .filter-bar {
+    gap: 12px;
+  }
+  
+  .desktop-wide .filter-pill,
+  .desktop-sidebar .filter-pill,
+  .desktop-dual .filter-pill {
+    padding: 12px 18px;
+    font-size: 1rem;
+  }
+}
   }
 }

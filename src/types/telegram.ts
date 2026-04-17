@@ -40,6 +40,8 @@ export type GalleryViewMode = 'grid' | 'list'
 
 export type GalleryLayoutMode = 'grid' | 'masonry'
 
+export type DesktopLayoutMode = 'wide' | 'sidebar' | 'dual'
+
 export type UploadMode = 'media' | 'file'
 
 export interface Message {
@@ -81,6 +83,7 @@ export interface AppSettings {
   theme: AppTheme
   layoutMode: GalleryLayoutMode
   autoDetectMasonry: boolean
+  desktopLayout: DesktopLayoutMode
 }
 
 export interface ToastMessage {

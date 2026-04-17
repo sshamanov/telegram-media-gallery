@@ -3,12 +3,14 @@
    import { galleryFilters, mediaTypeToFilter } from '../../lib/media'
    import { settings, updateSettings } from '../../stores/settings'
    import type { GalleryLayoutMode } from '../../types/telegram'
-   import MediaItemCard from './MediaItem.svelte'
-   import MediaListRow from './MediaListRow.svelte'
+ import MediaItemCard from './MediaItem.svelte'
+ import MediaListRow from './MediaListRow.svelte'
  import AuthorFilter from './AuthorFilter.svelte'
    import DialogPicker from './DialogPicker.svelte'
    import { tooltip } from '../../lib/dom/tooltips'
    import { navigateToDialogList } from '../../lib/routing'
+   import { isDesktop, effectiveDesktopLayout, getDesktopGridColumns } from '../../lib/dom/desktop-detection'
+   import DesktopSidebar from '../layout/DesktopSidebar.svelte'
     import {
      canDownloadMediaSelectionOffline,
      currentDialog,
@@ -55,12 +57,13 @@
 
 
    let showUploadSheet = false
-  let fileInput: HTMLInputElement | null = null
-  let pendingUploadMode: UploadModeType = 'media'
-  let scroller: HTMLElement | null = null
-  let showDialogPicker = false
-  let offlineDownloadReady = false
-  let focusedItemIndex: number | null = null
+   let fileInput: HTMLInputElement | null = null
+   let pendingUploadMode: UploadModeType = 'media'
+   let scroller: HTMLElement | null = null
+   let showDialogPicker = false
+   let offlineDownloadReady = false
+   let focusedItemIndex: number | null = null
+   let selectedMediaItem: MediaItem | null = null
 
   // Pull-to-refresh state
   let pullStartY: number | null = null
@@ -72,10 +75,14 @@
   $: counts = countFilters($mediaItems)
   $: visibleItems = $filteredMediaItems
   $: selectedItems = visibleItems.filter((item) => $selectedMediaIds.has(item.id))
-  $: gridTemplate = `repeat(${$settings.gridColumns}, minmax(0, 1fr))`
-  $: layoutMode = $settings.layoutMode
-  $: shouldUseMasonry = layoutMode === 'masonry' && $galleryViewMode === 'grid'
-  $: gridClass = shouldUseMasonry ? 'masonry-grid' : 'grid'
+   $: effectiveColumns = $isDesktop && $effectiveDesktopLayout 
+     ? getDesktopGridColumns($effectiveDesktopLayout)
+     : $settings.gridColumns
+   $: gridTemplate = `repeat(${effectiveColumns}, minmax(0, 1fr))`
+   $: layoutMode = $settings.layoutMode
+   $: shouldUseMasonry = layoutMode === 'masonry' && $galleryViewMode === 'grid'
+   $: gridClass = shouldUseMasonry ? 'masonry-grid' : 'grid'
+   $: desktopLayoutClass = $effectiveDesktopLayout ? `desktop-${$effectiveDesktopLayout}` : ''
   
   // Auto-detection for masonry layout
    $: shouldSuggestMasonry = $settings.autoDetectMasonry && analyzeMediaForMasonry(visibleItems)
@@ -161,12 +168,14 @@
     navigateToDialogList()
   }
 
-  function openById(itemId: string): void {
-    const index = visibleItems.findIndex((item) => item.id === itemId)
-    if (index >= 0) {
-      openViewer(visibleItems, index)
-    }
-  }
+   function openById(itemId: string): void {
+     const index = visibleItems.findIndex((item) => item.id === itemId)
+     if (index >= 0) {
+       const item = visibleItems[index]
+       selectedMediaItem = item
+       openViewer(visibleItems, index)
+     }
+   }
 
   function handleItemActivate(itemId: string, event: MouseEvent): void {
     if ($selectionMode) {
@@ -919,33 +928,129 @@
       <p class="gallery-status muted" data-testid="gallery-data-status">{galleryStatusText}</p>
     {/if}
 
-    {#if $galleryViewMode === 'grid'}
-      <div class={gridClass} style:grid-template-columns={shouldUseMasonry ? undefined : gridTemplate} data-testid="gallery-grid">
-         {#each visibleItems as item, i (item.id)}
-            <MediaItemCard
-            item={item}
-            onActivate={handleItemActivate}
-            onLongPress={handleItemLongPress}
-            selectionMode={$selectionMode}
-            selected={$selectedMediaIds.has(item.id)}
-            focused={focusedItemIndex === i}
-          />
-        {/each}
-      </div>
-    {:else}
-      <div class="list-view" data-testid="gallery-list">
-         {#each visibleItems as item, i (item.id)}
-          <MediaListRow
-            item={item}
-            onActivate={handleItemActivate}
-            onLongPress={handleItemLongPress}
-            selectionMode={$selectionMode}
-            selected={$selectedMediaIds.has(item.id)}
-            focused={focusedItemIndex === i}
-          />
-        {/each}
-      </div>
-    {/if}
+     {#if $galleryViewMode === 'grid'}
+       {#if $effectiveDesktopLayout === 'sidebar'}
+         <div class="desktop-sidebar">
+           <div class="{gridClass}" style:grid-template-columns={shouldUseMasonry ? undefined : gridTemplate} data-testid="gallery-grid">
+             {#each visibleItems as item, i (item.id)}
+               <MediaItemCard
+                 item={item}
+                 onActivate={handleItemActivate}
+                 onLongPress={handleItemLongPress}
+                 selectionMode={$selectionMode}
+                 selected={$selectedMediaIds.has(item.id)}
+                 focused={focusedItemIndex === i}
+               />
+             {/each}
+           </div>
+           <DesktopSidebar currentMediaItem={selectedMediaItem} />
+         </div>
+       {:else if $effectiveDesktopLayout === 'dual'}
+         <div class="desktop-dual">
+           <div class="{gridClass}" style:grid-template-columns={shouldUseMasonry ? undefined : gridTemplate} data-testid="gallery-grid">
+             {#each visibleItems as item, i (item.id)}
+               <MediaItemCard
+                 item={item}
+                 onActivate={handleItemActivate}
+                 onLongPress={handleItemLongPress}
+                 selectionMode={$selectionMode}
+                 selected={$selectedMediaIds.has(item.id)}
+                 focused={focusedItemIndex === i}
+               />
+             {/each}
+           </div>
+           <div class="desktop-sidebar-panel">
+             <h3>Dual Pane View</h3>
+             <p class="muted">This pane could show previews, metadata, or additional controls.</p>
+             {#if selectedMediaItem}
+               <div class="metadata-item">
+                 <div class="metadata-label">Selected Item</div>
+                 <div class="metadata-value">{selectedMediaItem.filename}</div>
+               </div>
+             {:else}
+               <div class="metadata-item">
+                 <div class="metadata-label">No item selected</div>
+                 <div class="metadata-value">Click on a media item to see details here</div>
+               </div>
+             {/if}
+           </div>
+         </div>
+       {:else}
+         <div class="{gridClass} {desktopLayoutClass}" style:grid-template-columns={shouldUseMasonry ? undefined : gridTemplate} data-testid="gallery-grid">
+           {#each visibleItems as item, i (item.id)}
+             <MediaItemCard
+               item={item}
+               onActivate={handleItemActivate}
+               onLongPress={handleItemLongPress}
+               selectionMode={$selectionMode}
+               selected={$selectedMediaIds.has(item.id)}
+               focused={focusedItemIndex === i}
+             />
+           {/each}
+         </div>
+       {/if}
+      {:else}
+       {#if $effectiveDesktopLayout === 'sidebar'}
+         <div class="desktop-sidebar">
+           <div class="list-view" data-testid="gallery-list">
+             {#each visibleItems as item, i (item.id)}
+               <MediaListRow
+                 item={item}
+                 onActivate={handleItemActivate}
+                 onLongPress={handleItemLongPress}
+                 selectionMode={$selectionMode}
+                 selected={$selectedMediaIds.has(item.id)}
+                 focused={focusedItemIndex === i}
+               />
+             {/each}
+           </div>
+           <DesktopSidebar currentMediaItem={selectedMediaItem} />
+         </div>
+       {:else if $effectiveDesktopLayout === 'dual'}
+         <div class="desktop-dual">
+           <div class="list-view" data-testid="gallery-list">
+             {#each visibleItems as item, i (item.id)}
+               <MediaListRow
+                 item={item}
+                 onActivate={handleItemActivate}
+                 onLongPress={handleItemLongPress}
+                 selectionMode={$selectionMode}
+                 selected={$selectedMediaIds.has(item.id)}
+                 focused={focusedItemIndex === i}
+               />
+             {/each}
+           </div>
+           <div class="desktop-sidebar-panel">
+             <h3>Dual Pane View</h3>
+             <p class="muted">This pane could show previews, metadata, or additional controls.</p>
+             {#if selectedMediaItem}
+               <div class="metadata-item">
+                 <div class="metadata-label">Selected Item</div>
+                 <div class="metadata-value">{selectedMediaItem.filename}</div>
+               </div>
+             {:else}
+               <div class="metadata-item">
+                 <div class="metadata-label">No item selected</div>
+                 <div class="metadata-value">Click on a media item to see details here</div>
+               </div>
+             {/if}
+           </div>
+         </div>
+       {:else}
+         <div class="list-view {desktopLayoutClass}" data-testid="gallery-list">
+           {#each visibleItems as item, i (item.id)}
+             <MediaListRow
+               item={item}
+               onActivate={handleItemActivate}
+               onLongPress={handleItemLongPress}
+               selectionMode={$selectionMode}
+               selected={$selectedMediaIds.has(item.id)}
+               focused={focusedItemIndex === i}
+             />
+           {/each}
+         </div>
+       {/if}
+     {/if}
 
     {#if visibleItems.length === 0 && $mediaItems.length > 0}
       <div class="empty-state muted" data-testid="gallery-empty-filtered">No items match the current filter.</div>

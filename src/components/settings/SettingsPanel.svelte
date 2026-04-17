@@ -154,23 +154,41 @@
      </div>
    </fieldset>
 
-   <fieldset class="theme-section">
-     <legend>Gallery Layout</legend>
-     <div class="theme-options">
-       <label class="checkbox-row">
-         <input type="radio" name="layoutMode" value="grid" bind:group={draft.layoutMode} />
-         <span>Grid layout</span>
-       </label>
-       <label class="checkbox-row">
-         <input type="radio" name="layoutMode" value="masonry" bind:group={draft.layoutMode} />
-         <span>Masonry layout</span>
-       </label>
-     </div>
-     <label class="checkbox-row" style="margin-top: 12px;">
-       <input type="checkbox" bind:checked={draft.autoDetectMasonry} />
-       <span>Auto-detect masonry for visual content</span>
-     </label>
-   </fieldset>
+    <fieldset class="theme-section">
+      <legend>Gallery Layout</legend>
+      <div class="theme-options">
+        <label class="checkbox-row">
+          <input type="radio" name="layoutMode" value="grid" bind:group={draft.layoutMode} />
+          <span>Grid layout</span>
+        </label>
+        <label class="checkbox-row">
+          <input type="radio" name="layoutMode" value="masonry" bind:group={draft.layoutMode} />
+          <span>Masonry layout</span>
+        </label>
+      </div>
+      <label class="checkbox-row" style="margin-top: 12px;">
+        <input type="checkbox" bind:checked={draft.autoDetectMasonry} />
+        <span>Auto-detect masonry for visual content</span>
+      </label>
+    </fieldset>
+
+    <fieldset class="theme-section">
+      <legend>Desktop Layout (screen width > 1024px)</legend>
+      <div class="theme-options">
+        <label class="checkbox-row">
+          <input type="radio" name="desktopLayout" value="wide" bind:group={draft.desktopLayout} />
+          <span>Wide grid (6+ columns)</span>
+        </label>
+        <label class="checkbox-row">
+          <input type="radio" name="desktopLayout" value="sidebar" bind:group={draft.desktopLayout} />
+          <span>Sidebar layout</span>
+        </label>
+        <label class="checkbox-row">
+          <input type="radio" name="desktopLayout" value="dual" bind:group={draft.desktopLayout} />
+          <span>Dual pane</span>
+        </label>
+      </div>
+    </fieldset>
 
   <fieldset class="filter-defaults">
     <legend>Default hidden types</legend>

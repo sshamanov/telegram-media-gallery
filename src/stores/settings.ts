@@ -18,6 +18,7 @@ const defaultSettings: AppSettings = {
   theme: 'dark',
   layoutMode: 'grid',
   autoDetectMasonry: true,
+  desktopLayout: 'wide',
 }
 
 export const settings = persisted<AppSettings>('settings', defaultSettings)
