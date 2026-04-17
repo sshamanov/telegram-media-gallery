@@ -38,6 +38,8 @@ export type GalleryFilterId = 'all' | 'photos' | 'videos' | 'audio' | 'docs'
 
 export type GalleryViewMode = 'grid' | 'list'
 
+export type GalleryLayoutMode = 'grid' | 'masonry'
+
 export type UploadMode = 'media' | 'file'
 
 export interface Message {
@@ -77,6 +79,8 @@ export interface AppSettings {
   gridColumns: number
   defaultHiddenFilters: GalleryFilterId[]
   theme: AppTheme
+  layoutMode: GalleryLayoutMode
+  autoDetectMasonry: boolean
 }
 
 export interface ToastMessage {

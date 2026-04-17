@@ -1,56 +1,57 @@
 <script lang="ts">
    import { onMount, onDestroy } from 'svelte'
-  import { galleryFilters, mediaTypeToFilter } from '../../lib/media'
-  import MediaItemCard from './MediaItem.svelte'
-  import MediaListRow from './MediaListRow.svelte'
-import AuthorFilter from './AuthorFilter.svelte'
-  import DialogPicker from './DialogPicker.svelte'
-  import { tooltip } from '../../lib/dom/tooltips'
-  import { navigateToDialogList } from '../../lib/routing'
-   import {
-    canDownloadMediaSelectionOffline,
-    currentDialog,
-    galleryViewMode,
-    hasMoreMedia,
-    isLoadingMore,
-    loadInitialMedia,
-    loadMoreMedia,
-    loadState,
-    mediaItems,
-    selectedFilter,
-    filteredMediaItems,
-    openViewer,
-    setGalleryViewMode,
-    totalMessageCount,
-    selectionMode,
-    selectedMediaIds,
-    selectionAnchorId,
-    enterSelectionMode,
-    exitSelectionMode,
-    toggleSelectedMedia,
-    selectMediaRange,
-    selectAllVisibleMedia,
-    downloadQueueState,
-    enqueueDownloads,
-    cancelDownloads,
-    forwardQueueState,
-    enqueueForwards,
-    cancelForwards,
-    shareQueueState,
-    enqueueShares,
-    cancelShares,
-    copyQueueState,
-    enqueueCopies,
-    cancelCopies,
-    uploadQueueState,
-    cancelUploadQueue,
-    cancelUploadQueueItem,
-    retryUploadQueueItem,
-  } from '../../stores/gallery'
-  import { galleryIds, toggleGallery } from '../../stores/dialogs'
-  import { settings, updateSettings } from '../../stores/settings'
-  import { isOffline, pushToast } from '../../stores/ui'
-  import type { GalleryFilterId, MediaItem, UploadMode as UploadModeType } from '../../types/telegram'
+   import { galleryFilters, mediaTypeToFilter } from '../../lib/media'
+   import { settings, updateSettings } from '../../stores/settings'
+   import type { GalleryLayoutMode } from '../../types/telegram'
+   import MediaItemCard from './MediaItem.svelte'
+   import MediaListRow from './MediaListRow.svelte'
+ import AuthorFilter from './AuthorFilter.svelte'
+   import DialogPicker from './DialogPicker.svelte'
+   import { tooltip } from '../../lib/dom/tooltips'
+   import { navigateToDialogList } from '../../lib/routing'
+    import {
+     canDownloadMediaSelectionOffline,
+     currentDialog,
+     galleryViewMode,
+     hasMoreMedia,
+     isLoadingMore,
+     loadInitialMedia,
+     loadMoreMedia,
+     loadState,
+     mediaItems,
+     selectedFilter,
+     filteredMediaItems,
+     openViewer,
+     setGalleryViewMode,
+     totalMessageCount,
+     selectionMode,
+     selectedMediaIds,
+     selectionAnchorId,
+     enterSelectionMode,
+     exitSelectionMode,
+     toggleSelectedMedia,
+     selectMediaRange,
+     selectAllVisibleMedia,
+     downloadQueueState,
+     enqueueDownloads,
+     cancelDownloads,
+     forwardQueueState,
+     enqueueForwards,
+     cancelForwards,
+     shareQueueState,
+     enqueueShares,
+     cancelShares,
+     copyQueueState,
+     enqueueCopies,
+     cancelCopies,
+     uploadQueueState,
+     cancelUploadQueue,
+     cancelUploadQueueItem,
+     retryUploadQueueItem,
+   } from '../../stores/gallery'
+   import { galleryIds, toggleGallery } from '../../stores/dialogs'
+   import { isOffline, pushToast } from '../../stores/ui'
+   import type { GalleryFilterId, MediaItem, UploadMode as UploadModeType } from '../../types/telegram'
 
 
    let showUploadSheet = false
@@ -72,6 +73,47 @@ import AuthorFilter from './AuthorFilter.svelte'
   $: visibleItems = $filteredMediaItems
   $: selectedItems = visibleItems.filter((item) => $selectedMediaIds.has(item.id))
   $: gridTemplate = `repeat(${$settings.gridColumns}, minmax(0, 1fr))`
+  $: layoutMode = $settings.layoutMode
+  $: shouldUseMasonry = layoutMode === 'masonry' && $galleryViewMode === 'grid'
+  $: gridClass = shouldUseMasonry ? 'masonry-grid' : 'grid'
+  
+  // Auto-detection for masonry layout
+   $: shouldSuggestMasonry = $settings.autoDetectMasonry && analyzeMediaForMasonry(visibleItems)
+   $: showMasonrySuggestion = shouldSuggestMasonry && layoutMode === 'grid' && $galleryViewMode === 'grid'
+   
+   // Show toast when masonry is suggested
+   $: if (showMasonrySuggestion && !hasShownMasonrySuggestion) {
+     pushToast({
+       kind: 'info',
+       text: 'Masonry layout suggested for visual content. Click the Masonry button to switch.',
+       dismissible: true,
+     })
+     hasShownMasonrySuggestion = true
+   }
+   
+   // Reset suggestion flag when conditions change
+   $: if (!showMasonrySuggestion) {
+     hasShownMasonrySuggestion = false
+   }
+   
+   let hasShownMasonrySuggestion = false
+  
+  function analyzeMediaForMasonry(items: MediaItem[]): boolean {
+    if (items.length === 0) return false
+    
+    // Analyze first 100 items
+    const sample = items.slice(0, Math.min(100, items.length))
+    let visualCount = 0
+    
+    for (const item of sample) {
+      if (item.type === 'photo' || item.type === 'video' || item.type === 'document-image') {
+        visualCount++
+      }
+    }
+    
+    // Suggest masonry if ≥90% visual content
+    return visualCount / sample.length >= 0.9
+  }
   $: selectedCount = $selectedMediaIds.size
   $: galleryStatusText = $isOffline
     ? 'Offline - cached thumbnails remain visible, cached full media still opens, and uncached items fall back to placeholders.'
@@ -795,6 +837,22 @@ import AuthorFilter from './AuthorFilter.svelte'
             {$galleryViewMode === 'grid' ? 'List' : 'Grid'}
           </button>
 
+          {#if $galleryViewMode === 'grid'}
+            <button
+              class="button secondary"
+              type="button"
+              on:click={() => {
+                const nextMode: GalleryLayoutMode = layoutMode === 'grid' ? 'masonry' : 'grid'
+                $settings = { ...$settings, layoutMode: nextMode }
+              }}
+              aria-label="Toggle layout mode"
+              use:tooltip={{ text: layoutMode === 'grid' ? 'Switch to masonry layout' : 'Switch to grid layout' }}
+              data-testid="gallery-layout-toggle"
+            >
+              {layoutMode === 'grid' ? 'Masonry' : 'Grid'}
+            </button>
+          {/if}
+
           <button
             class="button secondary"
             type="button"
@@ -862,7 +920,7 @@ import AuthorFilter from './AuthorFilter.svelte'
     {/if}
 
     {#if $galleryViewMode === 'grid'}
-      <div class="grid" style:grid-template-columns={gridTemplate} data-testid="gallery-grid">
+      <div class={gridClass} style:grid-template-columns={shouldUseMasonry ? undefined : gridTemplate} data-testid="gallery-grid">
          {#each visibleItems as item, i (item.id)}
             <MediaItemCard
             item={item}

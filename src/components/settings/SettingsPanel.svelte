@@ -142,17 +142,35 @@
     <input class="field" bind:value={draft.gridColumns} type="number" min="1" max="8" />
   </label>
 
-  <fieldset class="theme-section">
-    <legend>Theme</legend>
-    <div class="theme-options">
-      {#each themes as t}
-        <label class="checkbox-row">
-          <input type="radio" name="theme" value={t.value} bind:group={draft.theme} />
-          <span>{t.label}</span>
-        </label>
-      {/each}
-    </div>
-  </fieldset>
+   <fieldset class="theme-section">
+     <legend>Theme</legend>
+     <div class="theme-options">
+       {#each themes as t}
+         <label class="checkbox-row">
+           <input type="radio" name="theme" value={t.value} bind:group={draft.theme} />
+           <span>{t.label}</span>
+         </label>
+       {/each}
+     </div>
+   </fieldset>
+
+   <fieldset class="theme-section">
+     <legend>Gallery Layout</legend>
+     <div class="theme-options">
+       <label class="checkbox-row">
+         <input type="radio" name="layoutMode" value="grid" bind:group={draft.layoutMode} />
+         <span>Grid layout</span>
+       </label>
+       <label class="checkbox-row">
+         <input type="radio" name="layoutMode" value="masonry" bind:group={draft.layoutMode} />
+         <span>Masonry layout</span>
+       </label>
+     </div>
+     <label class="checkbox-row" style="margin-top: 12px;">
+       <input type="checkbox" bind:checked={draft.autoDetectMasonry} />
+       <span>Auto-detect masonry for visual content</span>
+     </label>
+   </fieldset>
 
   <fieldset class="filter-defaults">
     <legend>Default hidden types</legend>

@@ -534,3 +534,64 @@ button:focus:not(:focus-visible) {
     transition: none;
   }
 }
+
+/* ── Masonry layout ─────────────────────────────────────────── */
+.masonry-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-auto-rows: 0;
+  grid-template-rows: masonry;
+  gap: 12px;
+}
+
+/* Fallback for browsers that don't support masonry */
+@supports not (grid-template-rows: masonry) {
+  .masonry-grid {
+    display: block;
+    column-count: 4;
+    column-gap: 12px;
+  }
+  
+  .masonry-grid .media-card {
+    break-inside: avoid;
+    margin-bottom: 12px;
+  }
+}
+
+/* Mobile adjustments for masonry */
+@media (max-width: 768px) {
+  .masonry-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 8px;
+  }
+  
+  @supports not (grid-template-rows: masonry) {
+    .masonry-grid {
+      column-count: 2;
+      column-gap: 8px;
+    }
+    
+    .masonry-grid .media-card {
+      margin-bottom: 8px;
+    }
+  }
+}
+
+/* Desktop adjustments for masonry */
+@media (min-width: 1024px) {
+  .masonry-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
+  }
+  
+  @supports not (grid-template-rows: masonry) {
+    .masonry-grid {
+      column-count: 6;
+      column-gap: 16px;
+    }
+    
+    .masonry-grid .media-card {
+      margin-bottom: 16px;
+    }
+  }
+}

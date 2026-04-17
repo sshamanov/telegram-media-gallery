@@ -16,6 +16,8 @@ const defaultSettings: AppSettings = {
   gridColumns: mobile ? 2 : 4,
   defaultHiddenFilters: [],
   theme: 'dark',
+  layoutMode: 'grid',
+  autoDetectMasonry: true,
 }
 
 export const settings = persisted<AppSettings>('settings', defaultSettings)

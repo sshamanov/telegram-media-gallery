@@ -82,7 +82,7 @@
 - `completed` Task 58: Block 3.3 - Selection mode discoverability
 - `completed` Task 59: Block 3.4 - Icon button labels
 - `completed` Task 60: Block 3.5 - Validation
-- `pending` Task 61: Block 4.1 - Masonry layout toggle
+- `completed` Task 61: Block 4.1 - Masonry layout toggle
 - `pending` Task 62: Block 4.2 - Desktop layout variants
 - `completed` Task 63: Block 4.3 - Light theme support
 - `pending` Task 64: Block 4.4 - Enhanced offline media behavior
@@ -159,12 +159,15 @@
 - **Block 1**: Archive stale plans (14 files with timestamps before 2026-04-15, not referenced in STATUS.md). ✓ COMPLETED
 - **Block 2**: Fix TypeScript/LSP errors (missing exports, type mismatches) and accessibility warnings (DialogPicker, GalleryGrid). ✓ COMPLETED
 - **Block 3**: Implement UI/UX improvements: keyboard navigation, pull-to-refresh, selection mode discoverability, icon button labels. ✓ COMPLETED
+- **COMPLETED**: Task 61 (Masonry layout toggle) - implemented masonry layout with auto-detection and manual override, added CSS masonry styles with browser fallback, added settings panel controls for layout mode and auto-detection, added toast notification for auto-detection suggestions
 - **COMPLETED**: Task 63 (Light theme support) - added comprehensive CSS variables with light theme equivalents, replaced hardcoded rgba colors in GalleryGrid, ViewerWrapper, MediaItem, MediaListRow components
+- **IN PROGRESS**: Task 62 (Desktop layout variants) - implementing desktop-optimized layout variants
 - **Block 4**: Phase 3+ features: masonry layout toggle, desktop layout variants, light theme support, enhanced offline media behavior.
 - **Block 5**: Performance optimization: bundle size reduction, download optimizations, memory efficiency.
 
 ## Plan And Todo History
-- 2026-04-17 19:30 +02:00 - Completed Task 63 (Light theme support) of clever-island plan: added comprehensive CSS variables for translucent colors with complete light theme equivalents, replaced hardcoded rgba colors in GalleryGrid, ViewerWrapper, MediaItem, and MediaListRow components. Type check passes with 0 errors, 0 warnings.
+- 2026-04-17 19:40 +02:00 - Completed Task 61 (Masonry layout toggle) of clever-island plan: implemented masonry layout with auto-detection and manual override. Added CSS masonry styles with browser fallback (grid-template-rows: masonry with column-count fallback), added settings panel controls for layout mode (grid/masonry) and auto-detection toggle, added toast notification for auto-detection suggestions when visual content ≥90%, fixed duplicate imports in GalleryGrid component.
+- 2026-04-17 19:30 +02:00 - Completed Task 63 (Light theme support) of clever-island plan: added comprehensive CSS variables for translucent colors with complete light theme equivalents, replaced hardcoded rgba colors in GalleryGrid, ViewerWrapper, MediaItem, and MediaListRow components. Type check passes with 0 errors, 0 warnings. Committed as `9ec709a`.
 - 2026-04-17 19:15 +02:00 - Started Block 4 of clever-island plan: implementing light theme support (Task 63). Added comprehensive CSS variables for translucent colors with light theme equivalents, began replacing hardcoded rgba colors in components.
 - 2026-04-17 18:50 +02:00 - Completed Block 3 of clever-island plan: implemented core interaction improvements (keyboard navigation, pull-to-refresh, selection mode discoverability, icon button labels). Validated with type check (0 errors, 0 warnings) and short test suite (32/32).
 - 2026-04-17 18:45 +02:00 - Completed Task 59 (Block 3.4) of clever-island plan: added ARIA labels to icon-only buttons (viewer close, download, copy link, gallery back buttons) for accessibility. Committed as `8adeb17`.
