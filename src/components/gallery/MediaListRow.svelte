@@ -11,12 +11,13 @@
   export let onActivate: (itemId: string, event: MouseEvent) => void
   export let onLongPress: (itemId: string) => void
 
-  let element: HTMLButtonElement | null = null
+   let element: HTMLButtonElement | null = null
   let thumbUrl: string | null = null
   let observer: IntersectionObserver | null = null
   let longPressTimer: ReturnType<typeof setTimeout> | null = null
   let longPressTriggered = false
   let thumbLoadToken = 0
+  let isLongPressing = false
 
   function setThumbUrl(nextUrl: string | null): void {
     if (thumbUrl) {
@@ -38,22 +39,26 @@
     }
   }
 
-  function clearLongPress(): void {
+   function clearLongPress(): void {
     if (longPressTimer) {
       clearTimeout(longPressTimer)
       longPressTimer = null
     }
+    isLongPressing = false
   }
 
-  function handlePointerDown(event: PointerEvent): void {
+   function handlePointerDown(event: PointerEvent): void {
     if (event.pointerType === 'mouse') {
       return
     }
 
     longPressTriggered = false
     clearLongPress()
+    isLongPressing = true
+    
     longPressTimer = setTimeout(() => {
       longPressTriggered = true
+      isLongPressing = false
       onLongPress(item.id)
     }, 500)
   }
@@ -96,6 +101,7 @@
   class:selected
   class:selection-mode={selectionMode}
   class:focused={focused}
+  class:long-pressing={isLongPressing}
   class="list-row panel"
   type="button"
   data-testid="media-item"
@@ -208,6 +214,11 @@
    .list-row.focused {
     outline: 3px solid var(--accent);
     outline-offset: 2px;
+  }
+
+  .list-row.long-pressing {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
   }
 
   .selection-mark {
