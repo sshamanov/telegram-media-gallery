@@ -12,7 +12,9 @@ test.describe('Authentication @short', () => {
   });
 
   test('phone input field exists', async ({ authPage }) => {
-    await authPage.getByRole('tab', { name: /phone/i }).click();
+    const phoneTab = authPage.getByRole('tab', { name: /phone/i });
+    await phoneTab.waitFor({ state: 'visible' });
+    await phoneTab.click();
     await expect(authPage.getByTestId('phone-input')).toBeVisible();
     await expect(authPage.getByTestId('send-code-button')).toBeVisible();
   });
