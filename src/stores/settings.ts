@@ -19,6 +19,7 @@ const defaultSettings: AppSettings = {
   layoutMode: 'grid',
   autoDetectMasonry: true,
   desktopLayout: 'wide',
+  showCacheBadges: true,
 }
 
 export const settings = persisted<AppSettings>('settings', defaultSettings)

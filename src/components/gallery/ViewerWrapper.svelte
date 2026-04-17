@@ -554,9 +554,9 @@
       {#if $activeItem && typeof navigator.share === 'function' && typeof navigator.canShare === 'function'}
         <button class="button ghost" type="button" on:click={shareCurrent} title={$isOffline ? 'Sharing is unavailable offline because uncached media cannot be fetched.' : 'Share'} disabled={$isOffline || $activeItem.size > shareLimitBytes}>↑</button>
       {/if}
-      {#if $activeItem && isImageItem($activeItem) && typeof navigator.clipboard?.write === 'function' && typeof ClipboardItem !== 'undefined'}
-        <button class="button ghost" type="button" on:click={copyCurrent} title="Copy image" disabled={$isOffline}>⧉</button>
-      {/if}
+       {#if $activeItem && isImageItem($activeItem) && typeof navigator.clipboard?.write === 'function' && typeof ClipboardItem !== 'undefined'}
+         <button class="button ghost" type="button" on:click={copyCurrent} title={$isOffline ? 'Copy is unavailable offline because uncached images cannot be fetched.' : 'Copy image'} disabled={$isOffline}>⧉</button>
+       {/if}
        {#if $activeItem && typeof navigator.clipboard?.writeText === 'function'}
         <button class="button ghost" type="button" on:click={copyLink} title="Copy link to this media" aria-label="Copy link to this media" disabled={$isOffline}>🔗</button>
       {/if}

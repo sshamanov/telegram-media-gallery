@@ -284,6 +284,15 @@
     <CacheIndicator />
   </div>
 
+  <!-- Cache display settings -->
+  <fieldset class="theme-section">
+    <legend>Cache Display</legend>
+    <label class="checkbox-row">
+      <input type="checkbox" bind:checked={draft.showCacheBadges} />
+      <span>Show cache status badges on media items</span>
+    </label>
+  </fieldset>
+
 
 
   <div class="actions">

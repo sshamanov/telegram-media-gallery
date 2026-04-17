@@ -85,7 +85,7 @@
 - `completed` Task 61: Block 4.1 - Masonry layout toggle
 - `completed` Task 62: Block 4.2 - Desktop layout variants
 - `completed` Task 63: Block 4.3 - Light theme support
-- `pending` Task 64: Block 4.4 - Enhanced offline media behavior
+- `completed` Task 64: Block 4.4 - Enhanced offline media behavior
 - `pending` Task 65: Block 4.5 - Validation
 - `pending` Task 66: Block 5.1 - Analyze bottlenecks
 - `pending` Task 67: Block 5.2 - Bundle size reduction
@@ -167,6 +167,7 @@
 - **Block 5**: Performance optimization: bundle size reduction, download optimizations, memory efficiency.
 
 ## Plan And Todo History
+- 2026-04-17 20:12 +02:00 - Completed Task 64 (Enhanced offline media behavior) of clever-island plan: added UI control for showCacheBadges setting in SettingsPanel, fixed TypeScript errors in cache-status.ts (corrected readOpfsBlob import and usage), improved offline action guards with better tooltips for copy button in viewer, validated all offline action guards are properly implemented. Type check passes with 0 errors, 0 warnings. Short test suite passes 32/32.
 - 2026-04-17 20:00 +02:00 - Completed Task 62 (Desktop layout variants) of clever-island plan: implemented three desktop layout variants (wide grid, sidebar, dual pane) with screen width detection (>1024px). Added DesktopLayoutMode type and desktopLayout setting, created desktop-detection utility with responsive store, added settings panel controls for layout selection, created DesktopSidebar component for metadata display, added comprehensive CSS for all layout variants with improved typography and spacing. Type check passes with 0 errors, 0 warnings. Short test suite passes 32/32. Committed as `0c15efa`.
 - 2026-04-17 19:40 +02:00 - Completed Task 61 (Masonry layout toggle) of clever-island plan: implemented masonry layout with auto-detection and manual override. Added CSS masonry styles with browser fallback (grid-template-rows: masonry with column-count fallback), added settings panel controls for layout mode (grid/masonry) and auto-detection toggle, added toast notification for auto-detection suggestions when visual content ≥90%, fixed duplicate imports in GalleryGrid component. Type check passes with 0 errors, 0 warnings. Short test suite passes 32/32. Committed as `078e16a`.
 - 2026-04-17 19:30 +02:00 - Completed Task 63 (Light theme support) of clever-island plan: added comprehensive CSS variables for translucent colors with complete light theme equivalents, replaced hardcoded rgba colors in GalleryGrid, ViewerWrapper, MediaItem, and MediaListRow components. Type check passes with 0 errors, 0 warnings. Committed as `9ec709a`.
@@ -317,6 +318,12 @@
 - ℹ️ Historical references to `.kilo/status.md` remain in dated records by design and are not treated as active drift.
 
 ## Last Validation
+- 2026-04-17 20:11 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
+  - Result: passed with 0 errors, 0 warnings
+  - Main note: type checking passes cleanly after enhanced offline media behavior implementation.
+- 2026-04-17 20:12 +02:00 - `docker-compose -f docker-compose.test.yml up --build playwright`
+  - Result: passed (`32 passed`)
+  - Main note: short test suite passes after enhanced offline media behavior implementation; no regression in product behavior.
 - 2026-04-17 20:05 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
   - Result: passed with 0 errors, 0 warnings
   - Main note: type checking passes cleanly after desktop layout implementation.

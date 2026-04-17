@@ -84,6 +84,7 @@ export interface AppSettings {
   layoutMode: GalleryLayoutMode
   autoDetectMasonry: boolean
   desktopLayout: DesktopLayoutMode
+  showCacheBadges: boolean
 }
 
 export interface ToastMessage {

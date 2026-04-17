@@ -1,8 +1,10 @@
 <script lang="ts">
-  import { onDestroy, onMount } from 'svelte'
-  import { hasThumbnail, mediaGlyph, displayNameForMedia } from '../../lib/media'
-  import { loadThumbnailBlob } from '../../lib/thumbnails'
-  import type { MediaItem as GalleryMediaItem } from '../../types/telegram'
+   import { onDestroy, onMount } from 'svelte'
+   import { hasThumbnail, mediaGlyph, displayNameForMedia } from '../../lib/media'
+   import { loadThumbnailBlob } from '../../lib/thumbnails'
+   import { getItemCacheStatusStore } from '../../lib/cache/cache-status'
+   import type { MediaItem as GalleryMediaItem } from '../../types/telegram'
+   import { settings } from '../../stores/settings'
 
    export let item: GalleryMediaItem
   export let selected = false
@@ -11,13 +13,20 @@
   export let onActivate: (itemId: string, event: MouseEvent) => void
   export let onLongPress: (itemId: string) => void
 
-   let element: HTMLButtonElement | null = null
-  let thumbUrl: string | null = null
-  let observer: IntersectionObserver | null = null
-  let longPressTimer: ReturnType<typeof setTimeout> | null = null
-  let longPressTriggered = false
-  let thumbLoadToken = 0
-  let isLongPressing = false
+    let element: HTMLButtonElement | null = null
+   let thumbUrl: string | null = null
+   let observer: IntersectionObserver | null = null
+   let longPressTimer: ReturnType<typeof setTimeout> | null = null
+   let longPressTriggered = false
+   let thumbLoadToken = 0
+   let isLongPressing = false
+   
+   // Cache status
+   const cacheStatus = getItemCacheStatusStore(item.id)
+   $: showCacheBadge = $settings.showCacheBadges ?? true
+   $: cacheBadgeText = getCacheBadgeText($cacheStatus)
+   $: cacheBadgeTitle = getCacheBadgeTitle($cacheStatus)
+   $: cacheBadgeClass = getCacheBadgeClass($cacheStatus)
 
 
 
@@ -42,12 +51,41 @@
   }
 
    function clearLongPress(): void {
-    if (longPressTimer) {
-      clearTimeout(longPressTimer)
-      longPressTimer = null
-    }
-    isLongPressing = false
-  }
+     if (longPressTimer) {
+       clearTimeout(longPressTimer)
+       longPressTimer = null
+     }
+     isLongPressing = false
+   }
+   
+   // Cache badge helpers
+   function getCacheBadgeText(status: any): string {
+     if (!status) return ''
+     
+     if (status.fullMedia === 'cached') return '✓'
+     if (status.fullMedia === 'downloading') return '↓'
+     if (status.thumbnail === 'cached' && status.fullMedia === 'remote') return '⏳'
+     return ''
+   }
+   
+   function getCacheBadgeTitle(status: any): string {
+     if (!status) return 'Cache status unknown'
+     
+     if (status.fullMedia === 'cached') return 'Full media cached'
+     if (status.fullMedia === 'downloading') return 'Downloading...'
+     if (status.thumbnail === 'cached' && status.fullMedia === 'remote') return 'Thumbnail cached, full media remote'
+     if (status.thumbnail === 'remote' && status.fullMedia === 'remote') return 'Remote only'
+     return 'Cache status unknown'
+   }
+   
+   function getCacheBadgeClass(status: any): string {
+     if (!status) return 'cache-badge unknown'
+     
+     if (status.fullMedia === 'cached') return 'cache-badge cached'
+     if (status.fullMedia === 'downloading') return 'cache-badge downloading'
+     if (status.thumbnail === 'cached' && status.fullMedia === 'remote') return 'cache-badge partial'
+     return 'cache-badge remote'
+   }
 
    function handlePointerDown(event: PointerEvent): void {
     if (event.pointerType === 'mouse') {
@@ -128,14 +166,19 @@
     </div>
   {/if}
 
-  {#if item.sender}
-    <span class="badge author">{item.sender}</span>
-  {/if}
+   {#if item.sender}
+     <span class="badge author">{item.sender}</span>
+   {/if}
 
+   {#if showCacheBadge && cacheBadgeText}
+     <span class="badge cache-badge {cacheBadgeClass}" title={cacheBadgeTitle}>
+       {cacheBadgeText}
+     </span>
+   {/if}
 
-  <div class="meta-strip">
-     <span class="meta-name">{displayNameForMedia(item)}</span>
-  </div>
+   <div class="meta-strip">
+      <span class="meta-name">{displayNameForMedia(item)}</span>
+   </div>
 
   {#if selectionMode}
     <div class="selection-mark">{selected ? '✓' : ''}</div>
@@ -220,21 +263,61 @@
 
 
 
-  .badge.author {
-    right: auto;
-    left: 10px;
-    top: 10px;
-    bottom: auto;
-    width: auto;
-    min-width: 44px;
-    max-width: 120px;
-    height: auto;
-    padding: 4px 8px;
-    font-size: 0.72rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
+   .badge.author {
+     right: auto;
+     left: 10px;
+     top: 10px;
+     bottom: auto;
+     width: auto;
+     min-width: 44px;
+     max-width: 120px;
+     height: auto;
+     padding: 4px 8px;
+     font-size: 0.72rem;
+     overflow: hidden;
+     text-overflow: ellipsis;
+     white-space: nowrap;
+   }
+   
+   .badge.cache-badge {
+     right: 10px;
+     top: 10px;
+     bottom: auto;
+     width: 28px;
+     height: 28px;
+     font-size: 0.8rem;
+   }
+   
+   .badge.cache-badge.cached {
+     background: var(--bg-success-translucent);
+     color: var(--color-success);
+   }
+   
+   .badge.cache-badge.downloading {
+     background: var(--bg-accent-translucent);
+     color: var(--accent);
+     animation: pulse 1.5s infinite;
+   }
+   
+   .badge.cache-badge.partial {
+     background: var(--bg-warning-translucent);
+     color: var(--color-warning);
+   }
+   
+   .badge.cache-badge.remote {
+     background: var(--bg-muted-translucent);
+     color: var(--text-muted);
+   }
+   
+   .badge.cache-badge.unknown {
+     background: var(--bg-black-translucent-medium);
+     color: var(--text-secondary);
+   }
+   
+   @keyframes pulse {
+     0%, 100% { opacity: 1; }
+     50% { opacity: 0.6; }
+   }
 
   .meta-strip {
     position: absolute;
