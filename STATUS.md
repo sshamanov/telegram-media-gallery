@@ -91,12 +91,13 @@
 
 ### Phase 5: Author Features
 - `completed` Task 18: Extract and display author data (Block 5.1)
-- `pending` Task 19: Author filtering UI (Block 5.2)
+- `in_progress` Task 19: Author filtering UI (Block 5.2)
 
 ## Next Execution Order
 1. Phase 5 Block 5.2: Author filtering UI (FB003, FB005)
 
 ## Plan And Todo History
+- 2026-04-17 07:00 +02:00 - Started Task 19: Author filtering UI (Phase 5 Block 5.2).
 - 2026-04-17 06:55 +02:00 - Completed Task 18: Extract and display author data (Phase 5 Block 5.1) (commit 1f3ff4f).
 - 2026-04-16 23:24 +02:00 - Added shareable viewer URLs with route synchronization and pending route store.
 - 2026-04-16 22:27 +02:00 - Completed Task 16: Investigate download speed (Phase 3 Block 3.2).
