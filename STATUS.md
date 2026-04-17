@@ -65,10 +65,10 @@
 - `completed` Task 23: Block 1.3 - Update hard‑route.md
 - `completed` Task 24: Block 1.4 - Delete backlog file
 - `completed` Task 25: Block 1.5 - Validation
-- `pending` Task 26: Block 2.1 - Scan for legacy‑archive references
-- `pending` Task 27: Block 2.2 - Update AGENTS.md
-- `pending` Task 28: Block 2.3 - Update other documents
-- `pending` Task 29: Block 2.4 - Validation
+- `completed` Task 26: Block 2.1 - Scan for legacy‑archive references
+- `completed` Task 27: Block 2.2 - Update AGENTS.md
+- `completed` Task 28: Block 2.3 - Update other documents
+- `completed` Task 29: Block 2.4 - Validation
 - `pending` Task 30: Block 3.1 - Remove references from AGENTS.md
 - `pending` Task 31: Block 3.2 - Update command files
 - `pending` Task 32: Block 3.3 - Archive TECHNICAL_MIGRATION_PLAN.md

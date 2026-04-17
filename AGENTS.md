@@ -87,11 +87,10 @@ Never use `--no-verify`.
 6. **Adapter pattern**: never import `@mtcute/web` in feature code.
    All Telegram calls go through `src/lib/telegram/adapter.ts`.
 7. **No console.log in production**: use `src/lib/debug.ts` (stripped in prod build).
-8. **URL lifecycle**: every `URL.createObjectURL()` must pair with `URL.revokeObjectURL()`.
-9. **No alert/confirm**: use the Toast store and component.
+ 8. **URL lifecycle**: every `URL.createObjectURL()` must pair with `URL.revokeObjectURL()`.
+ 9. **No alert/confirm**: use the Toast store and component.
 10. **TypeScript strict**: no `any`, no type assertions outside adapter files.
 11. **Progressive jpeg**: every commit is a working, usable app. No stubs.
-12. **Reference code is archived in legacy-archive branch**: original MVP code preserved in git history.
 
 ## Required workflow documents
 
@@ -226,7 +225,6 @@ That manual compose path must keep real auth available and must not force mock m
 - TESTING_STRATEGY.md          - Comprehensive testing strategy and requirements
 - kilo-dev-process.md          - MVP architecture, function-level analysis
 - TECHNICAL_MIGRATION_PLAN.md  - full plan with phases, flows, design spec
-- legacy-archive branch        - original MVP code preserved in git history
 - STATUS.md                    - project status, progress tracking, plan cross‑references
 
 ## Status minimum sections
