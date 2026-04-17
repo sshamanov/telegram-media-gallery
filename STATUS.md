@@ -1,10 +1,10 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-17 18:38 +02:00
+**Last Updated:** 2026-04-17 18:45 +02:00
 **Current Phase:** Clever Island - Stale plan cleanup & priority execution
 **Active Plan:** `.kilo/plans/1776410435637-clever-island.md`
 **Branch:** `main`
-**Ahead Of `origin/main`:** 54 commits
+**Ahead Of `origin/main`:** 56 commits
 
 ---
 
@@ -80,8 +80,8 @@
 - `completed` Task 56: Block 3.1 - Keyboard navigation in gallery
 - `completed` Task 57: Block 3.2 - Restore pull-to-refresh
 - `completed` Task 58: Block 3.3 - Selection mode discoverability
-- `in_progress` Task 59: Block 3.4 - Icon button labels
-- `pending` Task 60: Block 3.5 - Validation
+- `completed` Task 59: Block 3.4 - Icon button labels
+- `in_progress` Task 60: Block 3.5 - Validation
 - `pending` Task 61: Block 4.1 - Masonry layout toggle
 - `pending` Task 62: Block 4.2 - Desktop layout variants
 - `pending` Task 63: Block 4.3 - Light theme support
@@ -163,6 +163,7 @@
 - **Block 5**: Performance optimization: bundle size reduction, download optimizations, memory efficiency.
 
 ## Plan And Todo History
+- 2026-04-17 18:45 +02:00 - Completed Task 59 (Block 3.4) of clever-island plan: added ARIA labels to icon-only buttons (viewer close, download, copy link, gallery back buttons) for accessibility. Committed as `8adeb17`.
 - 2026-04-17 18:38 +02:00 - Completed Task 58 (Block 3.3) of clever-island plan: added visual feedback for selection mode discoverability (scale animation during long-press, persistent store for hint dismissal). Committed as `7f1cb06`.
 - 2026-04-17 18:05 +02:00 - Completed Task 57 (Block 3.2) of clever-island plan: restored pull-to-refresh for mobile (touch gesture detection, visual feedback with pull indicator and spinner, triggers loadInitialMedia). Committed as `673e6a2`.
 - 2026-04-17 17:55 +02:00 - Completed Task 56 (Block 3.1) of clever-island plan: implemented keyboard navigation in gallery (arrow keys, Enter to open, Space to toggle selection, visual focus indicator). Committed as `cdbaba6`.
@@ -554,6 +555,7 @@
 ## Recent Commit Log
 | Commit | Date | Description |
 |--------|------|-------------|
+| `8adeb17` | 2026-04-17 | feat: add ARIA labels to icon-only buttons (Block 3.4) |
 | `7f1cb06` | 2026-04-17 | feat: add visual feedback for selection mode discoverability (Block 3.3) |
 | `673e6a2` | 2026-04-17 | feat: restore pull-to-refresh for mobile (Block 3.2) |
 | `cdbaba6` | 2026-04-17 | feat: add keyboard navigation to gallery (Block 3.1) |
