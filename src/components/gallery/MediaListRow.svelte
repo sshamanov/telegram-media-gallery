@@ -149,12 +149,12 @@
   }
 
   .list-row.selection-mode {
-    border-color: rgba(0, 136, 204, 0.22);
+    border-color: var(--border-accent-translucent-weak);
   }
 
   .list-row.selected {
-    border-color: rgba(0, 136, 204, 0.65);
-    background: rgba(0, 136, 204, 0.14);
+    border-color: var(--border-accent-translucent-strong);
+    background: var(--bg-accent-translucent);
   }
 
   /* Keyboard focus indicator */
@@ -179,7 +179,7 @@
   .fallback {
     display: grid;
     place-items: center;
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--bg-white-translucent-medium);
     color: var(--text-secondary);
     font-size: 0.74rem;
     letter-spacing: 0.08em;
@@ -230,8 +230,8 @@
     display: grid;
     place-items: center;
     border-radius: 999px;
-    background: rgba(0, 0, 0, 0.42);
-    border: 1px solid rgba(255, 255, 255, 0.28);
+    background: var(--bg-black-translucent-weak);
+    border: 1px solid var(--border-white-translucent-strong);
     font-size: 0.82rem;
     font-weight: 700;
   }

@@ -149,22 +149,22 @@
     overflow: hidden;
     border: 0;
     border-radius: 14px;
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--bg-white-translucent-weak);
   }
 
   .media-card.selection-mode::after {
     content: '';
     position: absolute;
     inset: 0;
-    background: rgba(0, 136, 204, 0.08);
+    background: var(--bg-accent-translucent);
   }
 
   .media-card.selected::after {
     content: '';
     position: absolute;
     inset: 0;
-    background: rgba(0, 136, 204, 0.26);
-    box-shadow: inset 0 0 0 2px rgba(0, 136, 204, 0.9);
+    background: var(--bg-accent-translucent-medium);
+    box-shadow: inset 0 0 0 2px var(--accent);
   }
 
   /* Keyboard focus indicator */
@@ -188,7 +188,7 @@
     gap: 8px;
     padding: 12px;
     color: var(--text-secondary);
-    background: linear-gradient(180deg, rgba(0, 136, 204, 0.12), rgba(255, 255, 255, 0.02));
+    background: linear-gradient(180deg, var(--bg-accent-translucent-medium), var(--bg-white-translucent-weak));
   }
 
   .glyph {
@@ -214,7 +214,7 @@
     display: grid;
     place-items: center;
     border-radius: 999px;
-    background: rgba(0, 0, 0, 0.6);
+    background: var(--bg-black-translucent-medium);
     backdrop-filter: blur(8px);
   }
 
@@ -242,7 +242,7 @@
     right: 0;
     bottom: 0;
     padding: 24px 10px 10px;
-    background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.82));
+    background: linear-gradient(180deg, transparent, var(--bg-black-translucent-strong));
   }
 
   .meta-name {
@@ -274,8 +274,8 @@
     display: grid;
     place-items: center;
     border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.28);
-    background: rgba(0, 0, 0, 0.42);
+    border: 1px solid var(--border-white-translucent-strong);
+    background: var(--bg-black-translucent-weak);
     font-weight: 700;
   }
 </style>

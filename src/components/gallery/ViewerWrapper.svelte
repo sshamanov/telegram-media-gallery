@@ -598,9 +598,9 @@
     justify-content: center;
     gap: 12px;
     padding: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border-white-translucent-medium);
     border-radius: 999px;
-    background: rgba(12, 12, 12, 0.58);
+    background: var(--bg-overlay-translucent);
     backdrop-filter: blur(20px);
   }
 
@@ -613,7 +613,7 @@
     border: 0;
     color: white;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.12);
+    background: var(--bg-white-translucent-very-strong);
   }
 
   .nav.left {
@@ -631,7 +631,7 @@
     color: var(--text-secondary);
     padding: 10px 14px;
     border-radius: 999px;
-    background: rgba(0, 0, 0, 0.45);
+    background: var(--bg-black-translucent-medium);
   }
 
   :global(.viewer-fallback),
@@ -648,7 +648,7 @@
     padding: 24px;
     color: white;
     border-radius: 20px;
-    background: rgba(20, 20, 20, 0.92);
+    background: var(--bg-surface-translucent-dark);
   }
 
   :global(.viewer-video-wrap) {
@@ -738,7 +738,7 @@
 
   :global(.viewer-fallback p) {
     margin: 0;
-    color: rgba(255, 255, 255, 0.72);
+    color: var(--text-secondary);
   }
 
   :global(.viewer-pdf-wrap) {

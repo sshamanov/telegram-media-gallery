@@ -24,7 +24,7 @@
 - **Plan file:** `.kilo/plans/1776410435637-clever-island.md`
 - **Goal:** Execute a prioritized sequence of work to: 1. Clean up stale plans and maintain project hygiene; 2. Fix remaining accessibility warnings in DialogPicker and GalleryGrid; 3. Implement high-impact UI/UX improvements from the witty-panda analysis; 4. Deliver Phase 3+ advanced features (masonry layout, desktop variants, light theme); 5. Optimize performance where measurable gains are possible.
 - **Execution strategy:** 5 blocks: 1. Archive stale plans; 2. Accessibility foundation & TypeScript health; 3. Core interaction improvements; 4. Phase 3+ advanced features; 5. Performance optimization.
-- **Status:** active (Block 3 completed, Block 4 pending)
+- **Status:** planning needed for Block 4 (Phase 3+ advanced features require detailed implementation plan)
 
 ## Completed Plans
 - **Plan file:** `.kilo/plans/1776372881960-jolly-planet.md`
@@ -84,7 +84,7 @@
 - `completed` Task 60: Block 3.5 - Validation
 - `pending` Task 61: Block 4.1 - Masonry layout toggle
 - `pending` Task 62: Block 4.2 - Desktop layout variants
-- `pending` Task 63: Block 4.3 - Light theme support
+- `completed` Task 63: Block 4.3 - Light theme support
 - `pending` Task 64: Block 4.4 - Enhanced offline media behavior
 - `pending` Task 65: Block 4.5 - Validation
 - `pending` Task 66: Block 5.1 - Analyze bottlenecks
@@ -156,13 +156,16 @@
 - `completed` Task 20: UI refinements (Block 6.1) (FB006, FB007) (commit 715d7f5)
 
 ## Next Execution Order
-- **Block 1**: Archive stale plans (14 files with timestamps before 2026-04-15, not referenced in STATUS.md).
-- **Block 2**: Fix TypeScript/LSP errors (missing exports, type mismatches) and accessibility warnings (DialogPicker, GalleryGrid).
-- **Block 3**: Implement UI/UX improvements: keyboard navigation, pull-to-refresh, selection mode discoverability, icon button labels.
+- **Block 1**: Archive stale plans (14 files with timestamps before 2026-04-15, not referenced in STATUS.md). ✓ COMPLETED
+- **Block 2**: Fix TypeScript/LSP errors (missing exports, type mismatches) and accessibility warnings (DialogPicker, GalleryGrid). ✓ COMPLETED
+- **Block 3**: Implement UI/UX improvements: keyboard navigation, pull-to-refresh, selection mode discoverability, icon button labels. ✓ COMPLETED
+- **COMPLETED**: Task 63 (Light theme support) - added comprehensive CSS variables with light theme equivalents, replaced hardcoded rgba colors in GalleryGrid, ViewerWrapper, MediaItem, MediaListRow components
 - **Block 4**: Phase 3+ features: masonry layout toggle, desktop layout variants, light theme support, enhanced offline media behavior.
 - **Block 5**: Performance optimization: bundle size reduction, download optimizations, memory efficiency.
 
 ## Plan And Todo History
+- 2026-04-17 19:30 +02:00 - Completed Task 63 (Light theme support) of clever-island plan: added comprehensive CSS variables for translucent colors with complete light theme equivalents, replaced hardcoded rgba colors in GalleryGrid, ViewerWrapper, MediaItem, and MediaListRow components. Type check passes with 0 errors, 0 warnings.
+- 2026-04-17 19:15 +02:00 - Started Block 4 of clever-island plan: implementing light theme support (Task 63). Added comprehensive CSS variables for translucent colors with light theme equivalents, began replacing hardcoded rgba colors in components.
 - 2026-04-17 18:50 +02:00 - Completed Block 3 of clever-island plan: implemented core interaction improvements (keyboard navigation, pull-to-refresh, selection mode discoverability, icon button labels). Validated with type check (0 errors, 0 warnings) and short test suite (32/32).
 - 2026-04-17 18:45 +02:00 - Completed Task 59 (Block 3.4) of clever-island plan: added ARIA labels to icon-only buttons (viewer close, download, copy link, gallery back buttons) for accessibility. Committed as `8adeb17`.
 - 2026-04-17 18:38 +02:00 - Completed Task 58 (Block 3.3) of clever-island plan: added visual feedback for selection mode discoverability (scale animation during long-press, persistent store for hint dismissal). Committed as `7f1cb06`.

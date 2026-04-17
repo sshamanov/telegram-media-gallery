@@ -933,7 +933,7 @@ import AuthorFilter from './AuthorFilter.svelte'
     align-items: center;
     gap: 16px;
     padding: 14px 16px;
-    background: rgba(42, 42, 42, 0.94);
+    background: var(--bg-surface-translucent);
     backdrop-filter: blur(20px);
   }
 
@@ -981,7 +981,7 @@ import AuthorFilter from './AuthorFilter.svelte'
 
   .progress-bar {
     height: 6px;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--bg-white-translucent-very-strong);
     border-radius: 3px;
     overflow: hidden;
   }
@@ -1019,7 +1019,7 @@ import AuthorFilter from './AuthorFilter.svelte'
     align-items: center;
     padding: 8px 12px;
     margin-bottom: 6px;
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--bg-white-translucent-weak);
     border-radius: 6px;
     border: 1px solid var(--border);
   }
@@ -1029,24 +1029,24 @@ import AuthorFilter from './AuthorFilter.svelte'
   }
 
   .queue-item.uploading {
-    border-color: rgba(0, 136, 204, 0.3);
-    background: rgba(0, 136, 204, 0.08);
+    border-color: var(--border-accent-translucent);
+    background: var(--bg-accent-translucent);
   }
 
   .queue-item.complete {
-    border-color: rgba(0, 204, 68, 0.3);
-    background: rgba(0, 204, 68, 0.08);
+    border-color: var(--border-success-translucent);
+    background: var(--bg-success-translucent);
   }
 
   .queue-item.error {
-    border-color: rgba(204, 68, 0, 0.3);
-    background: rgba(204, 68, 0, 0.08);
+    border-color: var(--border-warning-translucent);
+    background: var(--bg-warning-translucent);
   }
 
   .queue-item.cancelled {
     opacity: 0.6;
-    border-color: rgba(136, 136, 136, 0.3);
-    background: rgba(136, 136, 136, 0.08);
+    border-color: var(--border-muted-translucent);
+    background: var(--bg-muted-translucent);
   }
 
   .queue-item-info {
@@ -1085,13 +1085,13 @@ import AuthorFilter from './AuthorFilter.svelte'
     border-radius: 999px;
     padding: 10px 14px;
     color: var(--text-secondary);
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--bg-white-translucent-weak);
   }
 
   .filter-pill.active {
     color: var(--text-primary);
-    background: rgba(0, 136, 204, 0.24);
-    border-color: rgba(0, 136, 204, 0.45);
+    background: var(--bg-accent-translucent-medium);
+    border-color: var(--border-accent-translucent-strong);
   }
 
   .filter-pill.hidden-default::after {
@@ -1134,7 +1134,7 @@ import AuthorFilter from './AuthorFilter.svelte'
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: rgba(42, 42, 42, 0.9);
+    background: var(--bg-elevated-translucent);
     backdrop-filter: blur(10px);
     z-index: 10;
     transition: transform 0.2s ease;
