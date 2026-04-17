@@ -1,8 +1,8 @@
 # Telegram Gallery - Execution Ledger
 
 **Last Updated:** 2026-04-17 09:25 +02:00
-**Current Phase:** Documentation cleanup
-**Active Plan:** `.kilo/plans/1776372881960-jolly-planet.md`
+**Current Phase:** Documentation cleanup (completed)
+**Active Plan:** None
 **Branch:** `main`
 **Ahead Of `origin/main`:** 35 commits
 
@@ -21,12 +21,14 @@
 - This ledger must stay stricter than historical claims and must not overstate completion.
 
 ## Active Plan
-- **Plan file:** `.kilo/plans/1776334107170-playful-moon.md`
-- **Goal:** establish a future backlog system for Telegram Gallery and implement the highest-priority items in an iterative loop, starting with fixing thumbnail download inefficiency.
-- **Execution strategy:** Phase 0 cleanup & git housekeeping, Phase 1 backlog foundation, Phase 2 thumbnail efficiency fix, Phase 3 DEBUG flag & speed investigation, Phase 4 shareable URLs, Phase 5 author features, Phase 6 cosmetic improvements.
-- **Status:** pending
+None
 
 ## Completed Plans
+- **Plan file:** `.kilo/plans/1776372881960-jolly-planet.md`
+- **Goal:** eliminate `future-backlog.md` from the workflow, clean up legacy references, and clarify document boundaries between `APPLICATION_SPEC.md` (goal state) and `AGENTS.md` (process management).
+- **Execution strategy:** remove backlog file and references, clean up legacy-archive branch mentions, archive outdated documentation files, clarify document boundaries.
+- **Status:** completed
+
 - **Plan file:** `.kilo/plans/1776323125899-stellar-panda.md`
 - **Goal:** address remaining product blocker (upload mode selector refinement for large files) and fix accessibility warnings in DialogPicker and GalleryGrid.
 - **Execution strategy:** fix import error, implement upload size limits with auto‑fallback, add keyboard/ARIA fixes for dialog picker, resolve a11y warnings for gallery section, run validation.
@@ -81,8 +83,8 @@
 - `completed` Task 39: Block 5.2 - Edit APPLICATION_SPEC.md
 - `completed` Task 40: Block 5.3 - Edit AGENTS.md
 - `completed` Task 41: Block 5.4 - Validation
-- `pending` Task 42: Block 6.1 - Run full validation
-- `pending` Task 43: Block 6.2 - Update STATUS.md with plan completion
+- `completed` Task 42: Block 6.1 - Run full validation
+- `completed` Task 43: Block 6.2 - Update STATUS.md with plan completion
 
 ### Previous Plan (stellar-panda)
 - `completed` Task 0: Fix import error in GalleryGrid (verified no real error; tests pass)
@@ -122,9 +124,38 @@
 - `completed` Task 20: UI refinements (Block 6.1) (FB006, FB007) (commit 715d7f5)
 
 ## Next Execution Order
-- All phases completed; backlog system operational.
+- Documentation cleanup completed; workflow now relies solely on `STATUS.md` and plan files for task tracking.
+- Backlog system removed; legacy references cleaned up; document boundaries clarified.
 
 ## Plan And Todo History
+- 2026-04-17 09:42 +02:00 - Activated `.kilo/plans/1776372881960-jolly-planet.md` to eliminate backlog system and clarify document boundaries.
+- 2026-04-17 09:43 +02:00 - Completed Task 21: Block 1.1 - Inventory backlog items and update file.
+- 2026-04-17 09:43 +02:00 - Completed Task 22: Block 1.2 - Remove backlog references from AGENTS.md.
+- 2026-04-17 09:43 +02:00 - Completed Task 23: Block 1.3 - Update hard‑route.md.
+- 2026-04-17 09:43 +02:00 - Completed Task 24: Block 1.4 - Delete backlog file.
+- 2026-04-17 09:44 +02:00 - Completed Task 25: Block 1.5 - Validation (type check and short tests pass).
+- 2026-04-17 09:44 +02:00 - Committed Block 1 changes (`34f8b82`).
+- 2026-04-17 09:45 +02:00 - Completed Task 26: Block 2.1 - Scan for legacy‑archive references.
+- 2026-04-17 09:45 +02:00 - Completed Task 27: Block 2.2 - Update AGENTS.md.
+- 2026-04-17 09:45 +02:00 - Completed Task 28: Block 2.3 - Update other documents.
+- 2026-04-17 09:45 +02:00 - Completed Task 29: Block 2.4 - Validation.
+- 2026-04-17 09:45 +02:00 - Committed Block 2 changes (`e976b71`).
+- 2026-04-17 09:46 +02:00 - Completed Task 30: Block 3.1 - Remove references from AGENTS.md.
+- 2026-04-17 09:46 +02:00 - Completed Task 31: Block 3.2 - Update command files.
+- 2026-04-17 09:46 +02:00 - Completed Task 32: Block 3.3 - Archive TECHNICAL_MIGRATION_PLAN.md.
+- 2026-04-17 09:46 +02:00 - Completed Task 33: Block 3.4 - Validation.
+- 2026-04-17 09:46 +02:00 - Committed Block 3 changes (`fd5dd02`).
+- 2026-04-17 09:47 +02:00 - Completed Task 34: Block 4.1 - Extract valuable information from kilo-dev-process.md.
+- 2026-04-17 09:47 +02:00 - Completed Task 35: Block 4.2 - Archive kilo-dev-process.md.
+- 2026-04-17 09:47 +02:00 - Completed Task 36: Block 4.3 - Update references.
+- 2026-04-17 09:47 +02:00 - Completed Task 37: Block 4.4 - Validation.
+- 2026-04-17 09:47 +02:00 - Committed Block 4 changes (`1205f94`).
+- 2026-04-17 09:48 +02:00 - Completed Task 38: Block 5.1 - Compare APPLICATION_SPEC.md and AGENTS.md.
+- 2026-04-17 09:48 +02:00 - Completed Task 39: Block 5.2 - Edit APPLICATION_SPEC.md.
+- 2026-04-17 09:48 +02:00 - Completed Task 40: Block 5.3 - Edit AGENTS.md.
+- 2026-04-17 09:48 +02:00 - Completed Task 41: Block 5.4 - Validation.
+- 2026-04-17 09:48 +02:00 - Committed Block 5 changes (`a3b4cb9`).
+- 2026-04-17 09:49 +02:00 - Completed Task 42: Block 6.1 - Run full validation (type check and short tests pass).
 - 2026-04-17 07:43 +02:00 - Completed Task 20: UI refinements (Phase 6 Block 6.1); thumbnail refresh callback implemented, viewer background opacity set to 1.
 - 2026-04-17 07:00 +02:00 - Started Task 19: Author filtering UI (Phase 5 Block 5.2).
 - 2026-04-17 07:26 +02:00 - Fixed TypeScript error (unused import) and misplaced AuthorFilter component; type check passes; short tests pass.
@@ -233,12 +264,12 @@
 - ℹ️ Historical references to `.kilo/status.md` remain in dated records by design and are not treated as active drift.
 
 ## Last Validation
-- 2026-04-17 07:26 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
+- 2026-04-17 09:49 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
   - Result: passed with 0 errors, 0 warnings
-  - Main note: type checking passes cleanly after fixing unused import and misplaced AuthorFilter component.
-- 2026-04-17 07:26 +02:00 - `docker-compose -f docker-compose.test.yml run --rm playwright npx playwright test --config=playwright.config.ts --grep "@short" --project=desktop-chrome --reporter=line`
+  - Main note: type checking passes cleanly after all documentation cleanup changes.
+- 2026-04-17 09:49 +02:00 - `docker-compose -f docker-compose.test.yml run --rm playwright npx playwright test --config=playwright.config.ts --grep "@short" --project=desktop-chrome --reporter=line`
   - Result: passed (`32 passed`)
-  - Main note: short test suite passes after component placement fix.
+  - Main note: short test suite passes after documentation-only changes; no regression in product behavior.
 - 2026-04-17 06:55 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
   - Result: passed with 0 errors, 0 warnings
   - Main note: type checking passes cleanly after Phase 5 author data extraction and display.
@@ -468,6 +499,11 @@
 ## Recent Commit Log
 | Commit | Date | Description |
 |--------|------|-------------|
+| `a3b4cb9` | 2026-04-17 | docs: clarify document boundaries between spec and agents (Block 5) |
+| `1205f94` | 2026-04-17 | docs: archive kilo-dev-process.md and update references (Block 4) |
+| `fd5dd02` | 2026-04-17 | docs: archive TECHNICAL_MIGRATION_PLAN.md and update references (Block 3) |
+| `e976b71` | 2026-04-17 | docs: remove legacy-archive branch references (Block 2) |
+| `34f8b82` | 2026-04-17 | docs: remove backlog system and references (Block 1) |
 | `c23e51f` | 2026-04-17 | feat: add author filtering UI |
 | `db3d9fc` | 2026-04-17 | test: stabilize auth test with tab visibility wait |
 | `1ad0844` | 2026-04-17 | docs: update status ledger with Phase 5 Block 5.1 completion |
@@ -518,7 +554,8 @@
 
 
 ## Cross References
-- Active implementation plan: `.kilo/plans/1776334107170-playful-moon.md`
+- Completed documentation plan: `.kilo/plans/1776372881960-jolly-planet.md`
+- Previous implementation plan: `.kilo/plans/1776334107170-playful-moon.md`
 - Previous implementation plan: `.kilo/plans/1776295158000-phase-3-offline-kickoff.md`
 - Previous implementation plan: `.kilo/plans/1776291840732-kind-meadow.md`
 - Previous implementation plan: `.kilo/plans/1776287315253-happy-moon.md`
