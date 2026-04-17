@@ -4,7 +4,7 @@
 **Current Phase:** Phase 6: Cosmetic improvements (completed)
 **Active Plan:** `.kilo/plans/1776334107170-playful-moon.md`
 **Branch:** `main`
-**Ahead Of `origin/main`:** 30 commits
+**Ahead Of `origin/main`:** 31 commits
 
 ---
 
@@ -94,7 +94,7 @@
 - `completed` Task 19: Author filtering UI (Block 5.2) (commit c23e51f)
 
 ### Phase 6: Cosmetic Improvements
-- `completed` Task 20: UI refinements (Block 6.1) (FB006, FB007)
+- `completed` Task 20: UI refinements (Block 6.1) (FB006, FB007) (commit 715d7f5)
 
 ## Next Execution Order
 - All phases completed; backlog system operational.
