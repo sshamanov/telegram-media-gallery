@@ -7,9 +7,14 @@
   export let onClose: () => void = () => {}
   export let onForward: (dialogId: string, dialogTitle: string) => Promise<void> = async () => {}
 
-  let searchQuery = ''
-  let selectedDialog: Dialog | null = null
-  let isForwarding = false
+   import { onMount, onDestroy } from 'svelte'
+   import { trapFocus } from '../../lib/dom/focus-trap'
+   
+   let searchQuery = ''
+   let selectedDialog: Dialog | null = null
+   let isForwarding = false
+   let modalElement: HTMLDivElement | null = null
+   let cleanupFocusTrap: (() => void) | null = null
 
   $: filteredDialogs = $allDialogs.filter((dialog) =>
     dialog.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -55,40 +60,50 @@
     }
   }
 
-  function handleCancel(): void {
-    onClose()
-  }
+   function handleCancel(): void {
+     onClose()
+   }
+   
+   onMount(() => {
+     if (modalElement && open) {
+       // Store the element that triggered the dialog (the Forward button)
+       const triggerElement = document.querySelector('[data-testid="gallery-selection-forward"]') as HTMLElement | null
+       
+       cleanupFocusTrap = trapFocus(modalElement, {
+         triggerElement,
+         onEscape: handleCancel,
+         hideOtherContent: false // We're using an overlay, not a full-page modal
+       })
+     }
+   })
+   
+   onDestroy(() => {
+     if (cleanupFocusTrap) {
+       cleanupFocusTrap()
+       cleanupFocusTrap = null
+     }
+   })
 
-  function handleModalKeydown(_event: KeyboardEvent): void {
-    // no-op, just to satisfy a11y linter for click event
-  }
 
-  function handleOverlayKeydown(event: KeyboardEvent): void {
-    if (event.key === 'Enter' || event.key === ' ' || event.key === 'Escape') {
-      event.preventDefault()
-      handleCancel()
-    }
-  }
 </script>
 
   {#if open}
-  <div
-    class="dialog-picker-overlay"
-    role="button"
-    tabindex="0"
-    on:click={handleCancel}
-    on:keydown={handleOverlayKeydown}
-    aria-label="Close dialog picker"
-  >
-    <div
-      class="dialog-picker-modal"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="dialog-picker-title"
-      tabindex="0"
-      on:click|stopPropagation
-      on:keydown={handleModalKeydown}
-    >
+   <div
+     class="dialog-picker-overlay"
+     on:click={handleCancel}
+     aria-label="Close dialog picker"
+     role="button"
+     tabindex="0"
+     on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && handleCancel()}
+   >
+   <div
+     bind:this={modalElement}
+     class="dialog-picker-modal"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="dialog-picker-title"
+     tabindex="-1"
+   >
       <div class="dialog-picker-header">
         <h3 id="dialog-picker-title">Forward to</h3>
         <button class="button ghost small" type="button" on:click={handleCancel} aria-label="Close">×</button>
@@ -293,5 +308,13 @@
   .button.small {
     padding: 6px 12px;
     font-size: 0.9rem;
+  }
+  
+  @media (max-width: 720px) {
+    .button.small {
+      min-height: 44px;
+      min-width: 44px;
+      padding: 12px;
+    }
   }
 </style>

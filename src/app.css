@@ -299,6 +299,56 @@ button:focus:not(:focus-visible) {
   .dialog-item {
     min-height: 60px;
   }
+
+  /* Icon-only buttons without .button class */
+  .nav,
+  .viewer-ui .button.ghost,
+  .filter-pill,
+  .button.small,
+  .button.xsmall,
+  .button.ghost.small,
+  .button.ghost.xsmall {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 12px;
+  }
+
+  /* Cache badges and selection marks that are interactive */
+  .badge[role="button"],
+  .cache-badge[role="button"],
+  .selection-mark {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 8px;
+  }
+
+  /* Settings toggles and checkboxes */
+  .toggle,
+  input[type="checkbox"],
+  input[type="radio"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Ensure checkbox/radio labels have adequate touch area */
+  .checkbox-row,
+  .radio-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+  }
+  
+  .checkbox-row input,
+  .radio-row input {
+    flex-shrink: 0;
+  }
+
+  /* Search clear button */
+  .search-input + button {
+    min-height: 44px;
+    min-width: 44px;
+  }
 }
 
 /* Keyboard shortcuts overlay */

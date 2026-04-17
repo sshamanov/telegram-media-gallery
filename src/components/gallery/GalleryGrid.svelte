@@ -11,6 +11,7 @@
    import { navigateToDialogList } from '../../lib/routing'
    import { isDesktop, effectiveDesktopLayout, getDesktopGridColumns } from '../../lib/dom/desktop-detection'
    import DesktopSidebar from '../layout/DesktopSidebar.svelte'
+   import { trapFocus } from '../../lib/dom/focus-trap'
     import {
      canDownloadMediaSelectionOffline,
      currentDialog,
@@ -64,12 +65,89 @@
    let offlineDownloadReady = false
    let focusedItemIndex: number | null = null
    let selectedMediaItem: MediaItem | null = null
+   
+   // Focus trap for progress panels
+   let downloadPanelElement: HTMLDivElement | null = null
+   let forwardPanelElement: HTMLDivElement | null = null
+   let sharePanelElement: HTMLDivElement | null = null
+   let copyPanelElement: HTMLDivElement | null = null
+   let uploadPanelElement: HTMLDivElement | null = null
+   let cleanupFocusTraps: Array<() => void> = []
 
-  // Pull-to-refresh state
-  let pullStartY: number | null = null
-  let pullCurrentY: number | null = null
-  let isPulling = false
-  let isRefreshing = false
+   // Pull-to-refresh state
+   let pullStartY: number | null = null
+   let pullCurrentY: number | null = null
+   let isPulling = false
+   let isRefreshing = false
+   
+   // Manage focus traps for active progress panels
+   $: if ($downloadQueueState.active && downloadPanelElement) {
+     cleanupFocusTraps.forEach(fn => fn())
+     cleanupFocusTraps = []
+     
+     const cleanup = trapFocus(downloadPanelElement, {
+       onEscape: cancelDownloads,
+       hideOtherContent: false
+     })
+     cleanupFocusTraps.push(cleanup)
+   }
+   
+   $: if ($forwardQueueState.active && forwardPanelElement) {
+     cleanupFocusTraps.forEach(fn => fn())
+     cleanupFocusTraps = []
+     
+     const cleanup = trapFocus(forwardPanelElement, {
+       onEscape: cancelForwards,
+       hideOtherContent: false
+     })
+     cleanupFocusTraps.push(cleanup)
+   }
+   
+   $: if ($shareQueueState.active && sharePanelElement) {
+     cleanupFocusTraps.forEach(fn => fn())
+     cleanupFocusTraps = []
+     
+     const cleanup = trapFocus(sharePanelElement, {
+       onEscape: cancelShares,
+       hideOtherContent: false
+     })
+     cleanupFocusTraps.push(cleanup)
+   }
+   
+   $: if ($copyQueueState.active && copyPanelElement) {
+     cleanupFocusTraps.forEach(fn => fn())
+     cleanupFocusTraps = []
+     
+     const cleanup = trapFocus(copyPanelElement, {
+       onEscape: cancelCopies,
+       hideOtherContent: false
+     })
+     cleanupFocusTraps.push(cleanup)
+   }
+   
+   $: if ($uploadQueueState.active && uploadPanelElement) {
+     cleanupFocusTraps.forEach(fn => fn())
+     cleanupFocusTraps = []
+     
+     const cleanup = trapFocus(uploadPanelElement, {
+       onEscape: cancelUploadQueue,
+       hideOtherContent: false
+     })
+     cleanupFocusTraps.push(cleanup)
+   }
+   
+   // Clean up focus traps when panels become inactive
+   $: if (!$downloadQueueState.active && !$forwardQueueState.active && 
+          !$shareQueueState.active && !$copyQueueState.active && 
+          !$uploadQueueState.active) {
+     cleanupFocusTraps.forEach(fn => fn())
+     cleanupFocusTraps = []
+   }
+   
+   onDestroy(() => {
+     cleanupFocusTraps.forEach(fn => fn())
+     cleanupFocusTraps = []
+   })
 
    $: hiddenFilters = $settings.defaultHiddenFilters ?? []
   $: counts = countFilters($mediaItems)
@@ -619,8 +697,8 @@
           </p>
         {/if}
 
-        {#if $downloadQueueState.active}
-          <div class="panel download-panel" data-testid="gallery-download-panel">
+         {#if $downloadQueueState.active}
+           <div class="panel download-panel" data-testid="gallery-download-panel" bind:this={downloadPanelElement}>
             <div class="download-progress">
               <div class="download-status">
                 Downloading {$downloadQueueState.currentIndex + 1} of {$downloadQueueState.totalItems} items
@@ -650,8 +728,8 @@
           </div>
         {/if}
 
-        {#if $forwardQueueState.active}
-          <div class="panel download-panel" data-testid="gallery-forward-panel">
+         {#if $forwardQueueState.active}
+           <div class="panel download-panel" data-testid="gallery-forward-panel" bind:this={forwardPanelElement}>
             <div class="download-progress">
               <div class="download-status">
                 Forwarding {$forwardQueueState.currentIndex + 1} of {$forwardQueueState.totalItems} items
@@ -681,8 +759,8 @@
           </div>
          {/if}
 
-         {#if $shareQueueState.active}
-           <div class="panel download-panel" data-testid="gallery-share-panel">
+           {#if $shareQueueState.active}
+             <div class="panel download-panel" data-testid="gallery-share-panel" bind:this={sharePanelElement}>
              <div class="download-progress">
                <div class="download-status">
                  Sharing {$shareQueueState.currentIndex + 1} of {$shareQueueState.totalItems} items
@@ -712,8 +790,8 @@
            </div>
           {/if}
 
-          {#if $copyQueueState.active}
-            <div class="panel download-panel" data-testid="gallery-copy-panel">
+           {#if $copyQueueState.active}
+             <div class="panel download-panel" data-testid="gallery-copy-panel" bind:this={copyPanelElement}>
               <div class="download-progress">
                 <div class="download-status">
                   Copying {$copyQueueState.currentIndex + 1} of {$copyQueueState.totalItems} items
@@ -743,8 +821,8 @@
             </div>
            {/if}
 
-            {#if $uploadQueueState.active}
-              <div class="panel download-panel" data-testid="gallery-upload-panel">
+           {#if $uploadQueueState.active}
+             <div class="panel download-panel" data-testid="gallery-upload-panel" bind:this={uploadPanelElement}>
                 <div class="download-progress">
                   <div class="download-status">
                     Uploading {$uploadQueueState.currentIndex + 1} of {$uploadQueueState.items.length} items

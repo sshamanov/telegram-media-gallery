@@ -279,14 +279,22 @@
      white-space: nowrap;
    }
    
-   .badge.cache-badge {
-     right: 10px;
-     top: 10px;
-     bottom: auto;
-     width: 28px;
-     height: 28px;
-     font-size: 0.8rem;
-   }
+    .badge.cache-badge {
+      right: 10px;
+      top: 10px;
+      bottom: auto;
+      width: 28px;
+      height: 28px;
+      font-size: 0.8rem;
+    }
+    
+    @media (max-width: 720px) {
+      .badge.cache-badge {
+        width: 44px;
+        height: 44px;
+        padding: 8px;
+      }
+    }
    
    .badge.cache-badge.cached {
      background: var(--bg-success-translucent);
@@ -347,18 +355,26 @@
     transition: transform 0.1s ease;
   }
 
-  .selection-mark {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    z-index: 2;
-    width: 28px;
-    height: 28px;
-    display: grid;
-    place-items: center;
-    border-radius: 999px;
-    border: 1px solid var(--border-white-translucent-strong);
-    background: var(--bg-black-translucent-weak);
-    font-weight: 700;
-  }
+   .selection-mark {
+     position: absolute;
+     top: 10px;
+     right: 10px;
+     z-index: 2;
+     width: 28px;
+     height: 28px;
+     display: grid;
+     place-items: center;
+     border-radius: 999px;
+     border: 1px solid var(--border-white-translucent-strong);
+     background: var(--bg-black-translucent-weak);
+     font-weight: 700;
+   }
+   
+   @media (max-width: 720px) {
+     .selection-mark {
+       width: 44px;
+       height: 44px;
+       padding: 8px;
+     }
+   }
 </style>

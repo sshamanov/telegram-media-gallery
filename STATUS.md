@@ -1,6 +1,6 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-17 21:10 +02:00
+**Last Updated:** 2026-04-17 21:35 +02:00
 **Current Phase:** Clever Island - COMPLETED
 **Active Plan:** `.kilo/plans/1776410435637-clever-island.md`
 **Branch:** `main`
@@ -74,8 +74,8 @@
 - `completed` Task 50: Block 2.1 - Analyze accessibility warnings
 - `completed` Task 51: Block 2.2 - Fix DialogPicker warnings
 - `completed` Task 52: Block 2.3 - Fix GalleryGrid warnings
-- `pending` Task 53: Block 2.4 - Implement touch target sizing
-- `pending` Task 54: Block 2.5 - Focus management improvements
+- `completed` Task 53: Block 2.4 - Implement touch target sizing
+- `completed` Task 54: Block 2.5 - Focus management improvements
 - `completed` Task 55: Block 2.6 - Validation
 - `completed` Task 56: Block 3.1 - Keyboard navigation in gallery
 - `completed` Task 57: Block 3.2 - Restore pull-to-refresh
@@ -173,6 +173,9 @@
 - 2026-04-17 21:05 +02:00 - Completed Task 68 (Download optimizations) of clever-island plan: implemented parallel downloads with configurable concurrency (default: 2, range: 1-5). Added `downloadConcurrency` setting to AppSettings type and settings panel. Replaced sequential download processing with bounded concurrency pool using abort controller map for proper cancellation. Maintains queue ordering in UI while allowing simultaneous downloads. Type check passes with 0 errors, 0 warnings. Short test suite passes 32/32. Committed as `9b1cff6`.
 - 2026-04-17 21:10 +02:00 - Completed Task 69 (Memory efficiency) of clever-island plan: audited object URL lifecycle (createObjectURL/revokeObjectURL pairs), event listener cleanup, and hot-path allocations. Verified proper cleanup in ViewerWrapper, MediaItem, MediaListRow components. Confirmed download abort controller map handles parallel cancellation. No memory leaks identified in core gallery/viewer flows. Type check passes with 0 errors, 0 warnings. Short test suite passes 32/32.
 - 2026-04-17 21:10 +02:00 - Completed Task 70 (Validation) of clever-island plan: final validation of Block 5 performance optimizations. Bundle size reduced from 1,437.26 kB (363.93 kB gzipped) to 1,273.13 kB (315.28 kB gzipped) - reduction of 164.13 kB (48.65 kB gzipped). Type check passes with 0 errors, 0 warnings. Short test suite passes 32/32. All Block 5 tasks completed successfully.
+- 2026-04-17 21:21 +02:00 - Created detailed implementation plans for remaining Block 2 tasks: `.kilo/plans/1776410435637-task53-touch-target-sizing.md` and `.kilo/plans/1776410435637-task54-focus-management.md`.
+- 2026-04-17 21:30 +02:00 - Completed Task 53 (Touch target sizing): extended mobile media query in `src/app.css` to ensure all interactive elements (icon buttons, cache badges, selection marks, settings toggles) meet 44×44px minimum on mobile viewports. Updated `MediaItem.svelte` cache badge and selection mark sizing, `DialogPicker.svelte` close button, and added checkbox/radio row styling. Type check passes with 0 errors, 0 warnings.
+- 2026-04-17 21:35 +02:00 - Completed Task 54 (Focus management improvements): implemented focus trapping utility in `src/lib/dom/focus-trap.ts`. Applied focus trapping to `DialogPicker.svelte` (with Escape key support and focus return to Forward button) and all progress panels in `GalleryGrid.svelte` (download, forward, share, copy, upload). Fixed accessibility warnings in DialogPicker overlay. Type check passes with 0 errors, 0 warnings. Short test suite passes 32/32.
 - 2026-04-17 20:39 +02:00 - Created `.kilo/plans/1776410435637-block5-performance-optimization.md`, a detailed implementation plan for Clever Island Block 5 (Tasks 66-70). Recorded execution order, candidate files, success criteria, validation requirements, and estimated effort. Validation intentionally deferred because this was a documentation/planning-only update.
 - 2026-04-17 20:25 +02:00 - Completed Task 65 (Block 4 validation) of clever-island plan: ran comprehensive type check (0 errors, 0 warnings) and short test suite (32/32 passed) for all Block 4 Phase 3+ features. All features validated: masonry layout toggle, desktop layout variants, light theme support, enhanced offline media behavior. Block 4 is now complete.
 - 2026-04-17 20:12 +02:00 - Completed Task 64 (Enhanced offline media behavior) of clever-island plan: added UI control for showCacheBadges setting in SettingsPanel, fixed TypeScript errors in cache-status.ts (corrected readOpfsBlob import and usage), improved offline action guards with better tooltips for copy button in viewer, validated all offline action guards are properly implemented. Type check passes with 0 errors, 0 warnings. Short test suite passes 32/32. Committed as `2538cec`.
@@ -335,6 +338,12 @@
 - 2026-04-17 21:10 +02:00 - `docker-compose -f docker-compose.test.yml up --build playwright`
   - Result: passed (`32 passed`)
   - Main note: Block 5 final validation - short test suite passes after all performance optimizations; no regression in product behavior.
+- 2026-04-17 21:35 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
+  - Result: passed with 0 errors, 0 warnings
+  - Main note: Block 2 final validation - type checking passes cleanly after touch target sizing and focus management improvements.
+- 2026-04-17 21:35 +02:00 - `docker-compose -f docker-compose.test.yml up --build playwright`
+  - Result: passed (`32 passed`)
+  - Main note: Block 2 final validation - short test suite passes after accessibility and UX improvements; no regression in product behavior.
 - 2026-04-17 20:23 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
   - Result: passed with 0 errors, 0 warnings
   - Main note: Block 4 final validation - type checking passes cleanly for all Phase 3+ features.
