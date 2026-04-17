@@ -4,7 +4,7 @@
 **Current Phase:** Phase 5: Author Features (in_progress)
 **Active Plan:** `.kilo/plans/1776334107170-playful-moon.md`
 **Branch:** `main`
-**Ahead Of `origin/main`:** 24 commits
+**Ahead Of `origin/main`:** 26 commits
 
 ---
 
@@ -205,9 +205,9 @@
 - 2026-04-17 06:55 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
   - Result: passed with 0 errors, 0 warnings
   - Main note: type checking passes cleanly after Phase 5 author data extraction and display.
-- 2026-04-17 06:55 +02:00 - `docker-compose -f docker-compose.test.yml run --rm playwright npx playwright test --config=playwright.config.ts --grep "@short" --project=desktop-chrome --reporter=line`
-  - Result: 31 passed, 1 failed (auth.spec.ts phone input field exists)
-  - Main note: short test suite passes for gallery/viewer features; one unrelated authentication test failure appears flaky (passes when run alone).
+- 2026-04-17 07:00 +02:00 - `docker-compose -f docker-compose.test.yml run --rm playwright npx playwright test --config=playwright.config.ts --grep "@short" --project=desktop-chrome --reporter=line`
+  - Result: passed (`32 passed`)
+  - Main note: short test suite passes after auth test stabilization.
 - 2026-04-17 02:17 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
   - Result: passed with 0 errors, 0 warnings
   - Main note: type checking passes cleanly after Phase 4 shareable viewer URL implementation.
@@ -431,6 +431,7 @@
 ## Recent Commit Log
 | Commit | Date | Description |
 |--------|------|-------------|
+| `db3d9fc` | 2026-04-17 | test: stabilize auth test with tab visibility wait |
 | `1ad0844` | 2026-04-17 | docs: update status ledger with Phase 5 Block 5.1 completion |
 | `1f3ff4f` | 2026-04-17 | feat: add author badges and display names for Telegram auto-filenames |
 | `680badf` | 2026-04-17 | docs: update backlog and plan for Phase 5 |
