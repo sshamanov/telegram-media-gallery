@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from 'svelte'
+   import { onMount, onDestroy } from 'svelte'
   import { galleryFilters, mediaTypeToFilter } from '../../lib/media'
   import MediaItemCard from './MediaItem.svelte'
   import MediaListRow from './MediaListRow.svelte'
@@ -7,12 +7,13 @@ import AuthorFilter from './AuthorFilter.svelte'
   import DialogPicker from './DialogPicker.svelte'
   import { tooltip } from '../../lib/dom/tooltips'
   import { navigateToDialogList } from '../../lib/routing'
-  import {
+   import {
     canDownloadMediaSelectionOffline,
     currentDialog,
     galleryViewMode,
     hasMoreMedia,
     isLoadingMore,
+    loadInitialMedia,
     loadMoreMedia,
     loadState,
     mediaItems,
@@ -60,7 +61,13 @@ import AuthorFilter from './AuthorFilter.svelte'
   let offlineDownloadReady = false
   let focusedItemIndex: number | null = null
 
-  $: hiddenFilters = $settings.defaultHiddenFilters ?? []
+  // Pull-to-refresh state
+  let pullStartY: number | null = null
+  let pullCurrentY: number | null = null
+  let isPulling = false
+  let isRefreshing = false
+
+   $: hiddenFilters = $settings.defaultHiddenFilters ?? []
   $: counts = countFilters($mediaItems)
   $: visibleItems = $filteredMediaItems
   $: selectedItems = visibleItems.filter((item) => $selectedMediaIds.has(item.id))
@@ -70,6 +77,11 @@ import AuthorFilter from './AuthorFilter.svelte'
     ? 'Offline - cached thumbnails remain visible, cached full media still opens, and uncached items fall back to placeholders.'
     : null
   $: void refreshOfflineSelectionState(selectedItems, $isOffline)
+
+  // Pull-to-refresh calculations
+  $: pullDistance = pullStartY !== null && pullCurrentY !== null ? Math.max(0, pullCurrentY - pullStartY) : 0
+  $: pullProgress = Math.min(pullDistance / 80, 1) // 80px threshold
+  $: showPullIndicator = isPulling && pullDistance > 10
 
    $: if ($currentDialog?.id) {
     showUploadSheet = false
@@ -372,8 +384,87 @@ import AuthorFilter from './AuthorFilter.svelte'
     await enqueueCopies(selectedItems)
   }
 
+   function handleTouchStart(event: TouchEvent): void {
+    if (scroller?.scrollTop !== 0 || isRefreshing) {
+      return
+    }
+
+    pullStartY = event.touches[0].clientY
+    pullCurrentY = pullStartY
+    isPulling = true
+  }
+
+  function handleTouchMove(event: TouchEvent): void {
+    if (!isPulling || pullStartY === null) {
+      return
+    }
+
+    pullCurrentY = event.touches[0].clientY
+    const pullDistance = Math.max(0, pullCurrentY - pullStartY)
+
+    // Limit pull distance to 150px
+    if (pullDistance > 150) {
+      event.preventDefault()
+    }
+  }
+
+  function handleTouchEnd(): void {
+    if (!isPulling || pullStartY === null || pullCurrentY === null) {
+      resetPullState()
+      return
+    }
+
+    const pullDistance = pullCurrentY - pullStartY
+    const pullThreshold = 80
+
+    if (pullDistance >= pullThreshold) {
+      triggerRefresh()
+    } else {
+      resetPullState()
+    }
+  }
+
+  async function triggerRefresh(): Promise<void> {
+    isRefreshing = true
+    isPulling = false
+
+    try {
+      await loadInitialMedia()
+    } finally {
+      setTimeout(() => {
+        isRefreshing = false
+        pullStartY = null
+        pullCurrentY = null
+      }, 300)
+    }
+  }
+
+  function resetPullState(): void {
+    isPulling = false
+    pullStartY = null
+    pullCurrentY = null
+  }
+
   onMount(() => {
     scroller?.focus()
+
+    // Add touch event listeners
+    if (scroller) {
+      scroller.addEventListener('touchstart', handleTouchStart, { passive: true })
+      scroller.addEventListener('touchmove', handleTouchMove, { passive: false })
+      scroller.addEventListener('touchend', handleTouchEnd)
+      scroller.addEventListener('touchcancel', resetPullState)
+    }
+  })
+
+  onDestroy(() => {
+    // Clean up event listeners
+    if (scroller) {
+      scroller.removeEventListener('touchstart', handleTouchStart)
+      scroller.removeEventListener('touchmove', handleTouchMove)
+      scroller.removeEventListener('touchend', handleTouchEnd)
+      scroller.removeEventListener('touchcancel', resetPullState)
+    }
   })
 </script>
 
@@ -390,6 +481,23 @@ import AuthorFilter from './AuthorFilter.svelte'
       on:keydown={handleKeyDown}
       data-testid="gallery-root"
     >
+      {#if showPullIndicator || isRefreshing}
+        <div class="pull-refresh-indicator" style:transform={isRefreshing ? 'none' : `translateY(${Math.min(pullDistance, 80)}px)`}>
+          {#if isRefreshing}
+            <div class="refresh-spinner">↻</div>
+            <div class="refresh-text">Refreshing...</div>
+          {:else}
+            <div class="pull-arrow" style:transform={`rotate(${pullProgress * 180}deg)`}>↓</div>
+            <div class="pull-text">
+              {#if pullProgress >= 1}
+                Release to refresh
+              {:else}
+                Pull to refresh
+              {/if}
+            </div>
+          {/if}
+        </div>
+      {/if}
     {#if $selectionMode}
       <header class="panel gallery-header selection-header" data-testid="gallery-selection-header">
         <button class="button ghost" type="button" on:click={exitSelectionMode} data-testid="gallery-selection-cancel">Cancel</button>
@@ -797,7 +905,7 @@ import AuthorFilter from './AuthorFilter.svelte'
       <div class="loading muted" data-testid="gallery-complete">All media loaded</div>
     {/if}
 
-    <div class="pull-refresh-note muted">Pull-to-refresh is temporarily disabled during gallery recovery.</div>
+    <div class="pull-refresh-note muted">Pull down to refresh gallery content.</div>
 
     <DialogPicker
       open={showDialogPicker}
@@ -1009,11 +1117,49 @@ import AuthorFilter from './AuthorFilter.svelte'
   }
 
   .empty-state,
-  .loading,
+   .loading,
   .pull-refresh-note,
   .gallery-status {
     padding: 12px 0 18px;
     text-align: center;
+  }
+
+  .pull-refresh-indicator {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(42, 42, 42, 0.9);
+    backdrop-filter: blur(10px);
+    z-index: 10;
+    transition: transform 0.2s ease;
+  }
+
+  .pull-arrow,
+  .refresh-spinner {
+    font-size: 24px;
+    margin-bottom: 6px;
+    transition: transform 0.3s ease;
+  }
+
+  .refresh-spinner {
+    animation: spin 1s linear infinite;
+  }
+
+  .pull-text,
+  .refresh-text {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+  }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
   }
 
   @media (max-width: 720px) {
