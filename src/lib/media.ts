@@ -118,6 +118,11 @@ export function matchesFilter(item: MediaItem, filterId: GalleryFilterId): boole
   return filterId === 'all' ? true : mediaTypeToFilter(item.type) === filterId
 }
 
+export function matchesAuthorFilter(item: MediaItem, selectedAuthors: string[]): boolean {
+  if (selectedAuthors.length === 0) return true
+  return item.sender !== null && item.sender !== undefined && selectedAuthors.includes(item.sender)
+}
+
 export function isImageItem(item: MediaItem): boolean {
   return item.type === 'photo' || item.type === 'document-image'
 }

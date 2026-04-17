@@ -1,13 +1,14 @@
-import { get, writable } from 'svelte/store'
+import { get, writable, derived } from 'svelte/store'
 import { debugLog } from '../lib/debug'
-import { classifyMediaType, isImageItem } from '../lib/media'
+import { classifyMediaType, isImageItem, matchesFilter, matchesAuthorFilter, mediaTypeToFilter } from '../lib/media'
 import { getTelegramAdapter, type MessagePage } from '../lib/telegram/adapter'
 import { blobToFile, getCachedBlob, getCachedOrDownloadBlob, parseFloodWaitSeconds, sleep } from '../lib/files'
 import { getSizeLimitForMediaType } from '../lib/telegram/constants'
 import { navigateToViewer, getRouter } from '../lib/routing'
 import { isOffline, pushToast } from './ui'
-import type { Dialog, GalleryViewMode, MediaItem, Message, UploadMode, UploadQueueItem, UploadQueueState, UploadState, DownloadQueueState, DownloadQueueItem, ForwardQueueState, ForwardQueueItem, ShareQueueState, ShareQueueItem, CopyQueueState, CopyQueueItem } from '../types/telegram'
+import type { Dialog, GalleryViewMode, GalleryFilterId, MediaItem, Message, UploadMode, UploadQueueItem, UploadQueueState, UploadState, DownloadQueueState, DownloadQueueItem, ForwardQueueState, ForwardQueueItem, ShareQueueState, ShareQueueItem, CopyQueueState, CopyQueueItem } from '../types/telegram'
 import { persisted } from './persisted'
+import { settings } from './settings'
 
 const PAGE_SIZE = 100
 
@@ -101,6 +102,31 @@ export const copyQueueState = writable<CopyQueueState>({
 export const selectionMode = writable(false)
 export const selectedMediaIds = writable<Set<string>>(new Set())
 export const selectionAnchorId = writable<string | null>(null)
+export const selectedFilter = writable<GalleryFilterId>('all')
+export const selectedAuthors = writable<string[]>([])
+export const authors = derived(mediaItems, ($mediaItems) => {
+  const senders = new Set<string>()
+  for (const item of $mediaItems) {
+    if (item.sender) senders.add(item.sender)
+  }
+  return Array.from(senders).sort()
+})
+
+export const filteredMediaItems = derived(
+  [mediaItems, selectedFilter, selectedAuthors, settings],
+  ([$mediaItems, $selectedFilter, $selectedAuthors, $settings]) => {
+    const hidden = $settings.defaultHiddenFilters ?? []
+    return $mediaItems.filter(item => {
+      // media type filter
+      if ($selectedFilter !== 'all' && !matchesFilter(item, $selectedFilter)) return false
+      // hidden filters (when selectedFilter is 'all')
+      if ($selectedFilter === 'all' && hidden.includes(mediaTypeToFilter(item.type))) return false
+      // author filter
+      if (!matchesAuthorFilter(item, $selectedAuthors)) return false
+      return true
+    })
+  }
+)
 
 let loadedMessageIds = new Set<number>()
 let activeUploadAbortController: AbortController | null = null

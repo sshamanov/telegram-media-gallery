@@ -1,8 +1,9 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import { galleryFilters, matchesFilter, mediaTypeToFilter } from '../../lib/media'
+  import { galleryFilters, mediaTypeToFilter } from '../../lib/media'
   import MediaItemCard from './MediaItem.svelte'
   import MediaListRow from './MediaListRow.svelte'
+import AuthorFilter from './AuthorFilter.svelte'
   import DialogPicker from './DialogPicker.svelte'
   import { tooltip } from '../../lib/dom/tooltips'
   import { navigateToDialogList } from '../../lib/routing'
@@ -15,6 +16,8 @@
     loadMoreMedia,
     loadState,
     mediaItems,
+    selectedFilter,
+    filteredMediaItems,
     openViewer,
     setGalleryViewMode,
     totalMessageCount,
@@ -48,7 +51,7 @@
   import { isOffline, pushToast } from '../../stores/ui'
   import type { GalleryFilterId, MediaItem, UploadMode as UploadModeType } from '../../types/telegram'
 
-  let activeFilter: GalleryFilterId = 'all'
+
   let showUploadSheet = false
   let fileInput: HTMLInputElement | null = null
   let pendingUploadMode: UploadModeType = 'media'
@@ -58,7 +61,7 @@
 
   $: hiddenFilters = $settings.defaultHiddenFilters ?? []
   $: counts = countFilters($mediaItems)
-  $: visibleItems = $mediaItems.filter((item) => isVisible(item, activeFilter, hiddenFilters))
+  $: visibleItems = $filteredMediaItems
   $: selectedItems = visibleItems.filter((item) => $selectedMediaIds.has(item.id))
   $: gridTemplate = `repeat(${$settings.gridColumns}, minmax(0, 1fr))`
   $: selectedCount = $selectedMediaIds.size
@@ -87,13 +90,7 @@
     return next
   }
 
-  function isVisible(item: MediaItem, filterId: GalleryFilterId, hidden: GalleryFilterId[]): boolean {
-    if (filterId === 'all') {
-      return !hidden.includes(mediaTypeToFilter(item.type))
-    }
 
-    return matchesFilter(item, filterId)
-  }
 
   function back(): void {
     navigateToDialogList()
@@ -139,7 +136,7 @@
   }
 
   function selectFilter(filterId: GalleryFilterId): void {
-    activeFilter = filterId
+    selectedFilter.set(filterId)
   }
 
   function toggleViewMode(): void {
@@ -545,7 +542,8 @@
                             {:else if item.status === 'cancelled'}
                               Cancelled
                             {/if}
-                          </div>
+    </div>
+
                         </div>
                         <div class="queue-item-actions">
                           {#if item.status === 'error'}
@@ -648,7 +646,7 @@
     <div class="filter-bar" data-testid="gallery-filter-bar">
       {#each galleryFilters as filter}
         <button
-          class:active={activeFilter === filter.id}
+          class:active={$selectedFilter === filter.id}
           class={`filter-pill ${filter.id !== 'all' && hiddenFilters.includes(filter.id) ? 'hidden-default' : ''}`}
           type="button"
           disabled={filter.id !== 'all' && counts[filter.id] === 0}
@@ -659,6 +657,8 @@
         </button>
       {/each}
     </div>
+
+    <AuthorFilter />
 
     {#if galleryStatusText}
       <p class="gallery-status muted" data-testid="gallery-data-status">{galleryStatusText}</p>
