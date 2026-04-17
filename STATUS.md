@@ -83,7 +83,7 @@
 - `completed` Task 59: Block 3.4 - Icon button labels
 - `completed` Task 60: Block 3.5 - Validation
 - `completed` Task 61: Block 4.1 - Masonry layout toggle
-- `pending` Task 62: Block 4.2 - Desktop layout variants
+- `completed` Task 62: Block 4.2 - Desktop layout variants
 - `completed` Task 63: Block 4.3 - Light theme support
 - `pending` Task 64: Block 4.4 - Enhanced offline media behavior
 - `pending` Task 65: Block 4.5 - Validation
@@ -160,12 +160,14 @@
 - **Block 2**: Fix TypeScript/LSP errors (missing exports, type mismatches) and accessibility warnings (DialogPicker, GalleryGrid). ✓ COMPLETED
 - **Block 3**: Implement UI/UX improvements: keyboard navigation, pull-to-refresh, selection mode discoverability, icon button labels. ✓ COMPLETED
 - **COMPLETED**: Task 61 (Masonry layout toggle) - implemented masonry layout with auto-detection and manual override, added CSS masonry styles with browser fallback, added settings panel controls for layout mode and auto-detection, added toast notification for auto-detection suggestions
+- **COMPLETED**: Task 62 (Desktop layout variants) - implemented three desktop layout variants (wide grid, sidebar, dual pane) with screen width detection (>1024px), added desktop layout settings panel, created DesktopSidebar component for metadata display, added responsive CSS for all layout variants
 - **COMPLETED**: Task 63 (Light theme support) - added comprehensive CSS variables with light theme equivalents, replaced hardcoded rgba colors in GalleryGrid, ViewerWrapper, MediaItem, MediaListRow components
-- **IN PROGRESS**: Task 62 (Desktop layout variants) - implementing desktop-optimized layout variants
+- **IN PROGRESS**: Task 64 (Enhanced offline media behavior) - implementing improved cache management and user feedback
 - **Block 4**: Phase 3+ features: masonry layout toggle, desktop layout variants, light theme support, enhanced offline media behavior.
 - **Block 5**: Performance optimization: bundle size reduction, download optimizations, memory efficiency.
 
 ## Plan And Todo History
+- 2026-04-17 20:00 +02:00 - Completed Task 62 (Desktop layout variants) of clever-island plan: implemented three desktop layout variants (wide grid, sidebar, dual pane) with screen width detection (>1024px). Added DesktopLayoutMode type and desktopLayout setting, created desktop-detection utility with responsive store, added settings panel controls for layout selection, created DesktopSidebar component for metadata display, added comprehensive CSS for all layout variants with improved typography and spacing. Type check passes with 0 errors, 0 warnings. Short test suite passes 32/32. Committed as `0c15efa`.
 - 2026-04-17 19:40 +02:00 - Completed Task 61 (Masonry layout toggle) of clever-island plan: implemented masonry layout with auto-detection and manual override. Added CSS masonry styles with browser fallback (grid-template-rows: masonry with column-count fallback), added settings panel controls for layout mode (grid/masonry) and auto-detection toggle, added toast notification for auto-detection suggestions when visual content ≥90%, fixed duplicate imports in GalleryGrid component. Type check passes with 0 errors, 0 warnings. Short test suite passes 32/32. Committed as `078e16a`.
 - 2026-04-17 19:30 +02:00 - Completed Task 63 (Light theme support) of clever-island plan: added comprehensive CSS variables for translucent colors with complete light theme equivalents, replaced hardcoded rgba colors in GalleryGrid, ViewerWrapper, MediaItem, and MediaListRow components. Type check passes with 0 errors, 0 warnings. Committed as `9ec709a`.
 - 2026-04-17 19:15 +02:00 - Started Block 4 of clever-island plan: implementing light theme support (Task 63). Added comprehensive CSS variables for translucent colors with light theme equivalents, began replacing hardcoded rgba colors in components.
@@ -315,6 +317,12 @@
 - ℹ️ Historical references to `.kilo/status.md` remain in dated records by design and are not treated as active drift.
 
 ## Last Validation
+- 2026-04-17 20:05 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
+  - Result: passed with 0 errors, 0 warnings
+  - Main note: type checking passes cleanly after desktop layout implementation.
+- 2026-04-17 20:05 +02:00 - `docker-compose -f docker-compose.test.yml up --build playwright`
+  - Result: passed (`32 passed`)
+  - Main note: short test suite passes after desktop layout implementation; no regression in product behavior.
 - 2026-04-17 19:45 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
   - Result: passed with 0 errors, 0 warnings
   - Main note: type checking passes cleanly after masonry layout implementation.
