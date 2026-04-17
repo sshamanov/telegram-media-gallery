@@ -73,10 +73,10 @@
 - `completed` Task 31: Block 3.2 - Update command files
 - `completed` Task 32: Block 3.3 - Archive TECHNICAL_MIGRATION_PLAN.md
 - `completed` Task 33: Block 3.4 - Validation
-- `pending` Task 34: Block 4.1 - Extract valuable information from kilo-dev-process.md
-- `pending` Task 35: Block 4.2 - Archive kilo-dev-process.md
-- `pending` Task 36: Block 4.3 - Update references
-- `pending` Task 37: Block 4.4 - Validation
+- `completed` Task 34: Block 4.1 - Extract valuable information from kilo-dev-process.md
+- `completed` Task 35: Block 4.2 - Archive kilo-dev-process.md
+- `completed` Task 36: Block 4.3 - Update references
+- `completed` Task 37: Block 4.4 - Validation
 - `pending` Task 38: Block 5.1 - Compare APPLICATION_SPEC.md and AGENTS.md
 - `pending` Task 39: Block 5.2 - Edit APPLICATION_SPEC.md
 - `pending` Task 40: Block 5.3 - Edit AGENTS.md
