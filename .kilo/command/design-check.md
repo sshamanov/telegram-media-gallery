@@ -5,10 +5,10 @@ agent: hard-route
 Check the component: $ARGUMENTS
 
 Do the following:
-1. Read `APPLICATION_SPEC.md`, `.kilo/status.md`, and the active plan before judging the component
+ 1. Read `APPLICATION_SPEC.md`, `STATUS.md`, and the active plan before judging the component
 1. Read the component file in src/components/
-2. Read the relevant screen design from Part 3.5 of TECHNICAL_MIGRATION_PLAN.md
-   (color tokens, screen layout ASCII, component patterns)
+ 2. Read the relevant screen design from the active plan and APPLICATION_SPEC.md
+    (color tokens, screen layout ASCII, component patterns)
 3. Check:
    - Color usage matches CSS custom properties (--bg-surface, --accent, etc.)
    - No hardcoded color values outside the :root token block

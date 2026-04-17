@@ -224,7 +224,6 @@ That manual compose path must keep real auth available and must not force mock m
 ## Reference files
 - TESTING_STRATEGY.md          - Comprehensive testing strategy and requirements
 - kilo-dev-process.md          - MVP architecture, function-level analysis
-- TECHNICAL_MIGRATION_PLAN.md  - full plan with phases, flows, design spec
 - STATUS.md                    - project status, progress tracking, plan cross‑references
 
 ## Status minimum sections

@@ -4,8 +4,8 @@ agent: hard-route
 ---
 Write a feature spec for: $ARGUMENTS
 
-Before writing, read `APPLICATION_SPEC.md`, `.kilo/status.md`, and the active plan if one exists.
-Register the new spec/plan work in `.kilo/status.md` before implementation begins.
+Before writing, read `APPLICATION_SPEC.md`, `STATUS.md`, and the active plan if one exists.
+Register the new spec/plan work in `STATUS.md` before implementation begins.
 
 Cover:
 1. User-visible behavior (step-by-step, from the user's perspective)
@@ -15,5 +15,5 @@ Cover:
 5. Edge cases and error states
 
 Reference existing current code and `APPLICATION_SPEC.md` for behavior to preserve.
-Reference `TECHNICAL_MIGRATION_PLAN.md` only when it does not conflict with the current spec/status reality.
+Reference the active plan and `APPLICATION_SPEC.md` for architectural guidance.
 Do NOT write implementation code in this response.

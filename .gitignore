@@ -7,6 +7,7 @@ tmp/
 temp/
 .kilo/node_modules/
 .kilo/bun.lock
+.kilo/archive/
 tsconfig.tsbuildinfo
 playwright-report/
 test-results/

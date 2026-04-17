@@ -2,7 +2,7 @@
 description: Audit implementation against active phase acceptance criteria
 agent: hard-route
 ---
-Read `APPLICATION_SPEC.md`, `.kilo/status.md`, the active plan, and `TECHNICAL_MIGRATION_PLAN.md`.
+Read `APPLICATION_SPEC.md`, `STATUS.md`, and the active plan.
 Identify the active implementation phase based on the current accepted repo state, not stale aspirational claims.
 
 For each acceptance criterion in that phase:
