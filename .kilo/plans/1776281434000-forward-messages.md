@@ -1,5 +1,8 @@
 # Forward Messages Implementation Plan
 
+> **Status:** superseded
+> Reason: Forward functionality implemented with dialog picker UI, forward queue state, and selection header integration.
+
 ## Goal
 - Add forward functionality for selected media items in gallery selection mode
 - Implement dialog picker UI for selecting destination chat
