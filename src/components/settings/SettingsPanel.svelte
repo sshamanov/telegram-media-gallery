@@ -141,6 +141,11 @@
     <span>Default grid columns</span>
     <input class="field" bind:value={draft.gridColumns} type="number" min="1" max="8" />
   </label>
+  <label>
+    <span>Download concurrency</span>
+    <input class="field" bind:value={draft.downloadConcurrency} type="number" min="1" max="5" />
+    <small class="hint">Number of files to download simultaneously (1-5)</small>
+  </label>
 
    <fieldset class="theme-section">
      <legend>Theme</legend>

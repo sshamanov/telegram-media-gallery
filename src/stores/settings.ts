@@ -20,6 +20,7 @@ const defaultSettings: AppSettings = {
   autoDetectMasonry: true,
   desktopLayout: 'wide',
   showCacheBadges: true,
+  downloadConcurrency: 2,
 }
 
 export const settings = persisted<AppSettings>('settings', defaultSettings)

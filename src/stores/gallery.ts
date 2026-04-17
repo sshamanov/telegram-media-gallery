@@ -12,6 +12,9 @@ import { settings } from './settings'
 
 const PAGE_SIZE = 100
 
+// Map of active download abort controllers for parallel downloads
+const activeDownloadControllers = new Map<string, AbortController>()
+
 function detectUploadMediaType(file: File, mode: UploadMode): { mediaType: 'photo' | 'video' | 'audio' | 'document', fallback: boolean } {
   if (mode === 'file') {
     return { mediaType: 'document', fallback: false }
@@ -629,30 +632,84 @@ function updateDownloadQueueItem(itemId: string, updater: (item: DownloadQueueIt
 async function processDownloadQueue(mediaItems: MediaItem[]): Promise<void> {
   const state = get(downloadQueueState)
   const directoryHandle = state.directoryHandle
+  const concurrency = get(settings).downloadConcurrency || 2
+  
+  downloadQueueState.update((current) => ({ ...current, active: true }))
 
-  for (let index = 0; index < state.items.length; index += 1) {
-    const snapshot = get(downloadQueueState)
-    const item = snapshot.items[index]
+  // Create a pool of workers for parallel downloads
+  const queue = [...state.items]
+  let completedCount = 0
 
-    if (!item || item.status === 'cancelled' || item.status === 'complete') {
-      continue
-    }
+  // Process queue with limited concurrency
+  const processNext = async (): Promise<void> => {
+    while (activeDownloadControllers.size < concurrency && queue.length > 0) {
+      const item = queue.shift()
+      if (!item) break
 
-    downloadQueueState.update((current) => ({ ...current, active: true, currentIndex: index }))
-    updateDownloadQueueItem(item.id, (current) => ({ ...current, status: 'downloading', progress: 0, error: null }))
+      // Skip already processed items
+      if (item.status === 'cancelled' || item.status === 'complete') {
+        completedCount++
+        downloadQueueState.update((current) => ({ 
+          ...current, 
+          completedItems: completedCount 
+        }))
+        continue
+      }
 
-    const mediaItem = mediaItems.find((m) => m.id === item.mediaItemId)
-    if (!mediaItem) {
-      updateDownloadQueueItem(item.id, (current) => ({
-        ...current,
-        status: 'error',
-        error: 'Media item not found',
+      const mediaItem = mediaItems.find((m) => m.id === item.mediaItemId)
+      if (!mediaItem) {
+        updateDownloadQueueItem(item.id, (current) => ({
+          ...current,
+          status: 'error',
+          error: 'Media item not found',
+        }))
+        completedCount++
+        downloadQueueState.update((current) => ({ 
+          ...current, 
+          completedItems: completedCount 
+        }))
+        continue
+      }
+
+      updateDownloadQueueItem(item.id, (current) => ({ 
+        ...current, 
+        status: 'downloading', 
+        progress: 0, 
+        error: null 
       }))
-      continue
+
+      const controller = new AbortController()
+      activeDownloadControllers.set(item.id, controller)
+
+      // Start download in background
+      void downloadItem(item, mediaItem, controller).then(() => {
+        activeDownloadControllers.delete(item.id)
+        completedCount++
+        downloadQueueState.update((current) => ({ 
+          ...current, 
+          completedItems: completedCount 
+        }))
+        // Process next item
+        void processNext()
+      })
     }
 
-    const controller = new AbortController()
+    // Check if all downloads are complete
+    if (activeDownloadControllers.size === 0 && queue.length === 0) {
+      downloadQueueState.update((current) => ({ 
+        ...current, 
+        active: false, 
+        currentIndex: -1 
+      }))
+    }
+  }
 
+  // Download a single item
+  async function downloadItem(
+    item: DownloadQueueItem, 
+    mediaItem: MediaItem, 
+    controller: AbortController
+  ): Promise<void> {
     try {
       const { getCachedOrDownloadBlob, saveBlob } = await import('../lib/files')
       
@@ -668,8 +725,12 @@ async function processDownloadQueue(mediaItems: MediaItem[]): Promise<void> {
       }
 
       await saveBlob(blob, item.fileName, directoryHandle ?? undefined)
-      updateDownloadQueueItem(item.id, (current) => ({ ...current, progress: 100, status: 'complete', error: null }))
-      downloadQueueState.update((current) => ({ ...current, completedItems: current.completedItems + 1 }))
+      updateDownloadQueueItem(item.id, (current) => ({ 
+        ...current, 
+        progress: 100, 
+        status: 'complete', 
+        error: null 
+      }))
     } catch (error) {
       const isCancelled = controller.signal.aborted
       updateDownloadQueueItem(item.id, (current) => ({
@@ -681,7 +742,10 @@ async function processDownloadQueue(mediaItems: MediaItem[]): Promise<void> {
     }
   }
 
-  downloadQueueState.update((current) => ({ ...current, active: false, currentIndex: -1 }))
+  // Start initial batch of downloads
+  for (let i = 0; i < Math.min(concurrency, queue.length); i++) {
+    void processNext()
+  }
 }
 
 export async function enqueueDownloads(mediaItems: MediaItem[], directoryHandle?: FileSystemDirectoryHandle | null): Promise<void> {
@@ -716,17 +780,23 @@ export async function enqueueDownloads(mediaItems: MediaItem[], directoryHandle?
 }
 
 export function cancelDownloads(): void {
+  // Abort all active downloads
+  for (const [, controller] of activeDownloadControllers) {
+    controller.abort()
+  }
+  activeDownloadControllers.clear()
+  
   downloadQueueState.update((current) => ({
     ...current,
     active: false,
     currentIndex: -1,
-    items: current.items.map((item, index) =>
+    items: current.items.map((item) =>
       item.status === 'complete'
         ? item
         : {
             ...item,
-            status: index >= current.currentIndex ? 'cancelled' : item.status,
-            error: index >= current.currentIndex ? 'Download cancelled' : item.error,
+            status: item.status === 'downloading' ? 'cancelled' : item.status,
+            error: item.status === 'downloading' ? 'Download cancelled' : item.error,
           }),
   }))
 }

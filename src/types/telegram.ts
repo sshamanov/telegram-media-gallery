@@ -85,6 +85,7 @@ export interface AppSettings {
   autoDetectMasonry: boolean
   desktopLayout: DesktopLayoutMode
   showCacheBadges: boolean
+  downloadConcurrency: number
 }
 
 export interface ToastMessage {
