@@ -1,10 +1,10 @@
 # Telegram Gallery - Execution Ledger
 
 **Last Updated:** 2026-04-17 07:26 +02:00
-**Current Phase:** Phase 5: Author Features (in_progress)
+**Current Phase:** Phase 6: Cosmetic improvements (pending)
 **Active Plan:** `.kilo/plans/1776334107170-playful-moon.md`
 **Branch:** `main`
-**Ahead Of `origin/main`:** 26 commits
+**Ahead Of `origin/main`:** 29 commits
 
 ---
 
@@ -91,10 +91,10 @@
 
 ### Phase 5: Author Features
 - `completed` Task 18: Extract and display author data (Block 5.1)
-- `in_progress` Task 19: Author filtering UI (Block 5.2)
+- `completed` Task 19: Author filtering UI (Block 5.2) (commit c23e51f)
 
 ## Next Execution Order
-1. Phase 5 Block 5.2: Author filtering UI (FB003, FB005)
+1. Phase 6 Block 6.1: UI refinements (FB006, FB007)
 
 ## Plan And Todo History
 - 2026-04-17 07:00 +02:00 - Started Task 19: Author filtering UI (Phase 5 Block 5.2).
@@ -439,6 +439,7 @@
 ## Recent Commit Log
 | Commit | Date | Description |
 |--------|------|-------------|
+| `c23e51f` | 2026-04-17 | feat: add author filtering UI |
 | `db3d9fc` | 2026-04-17 | test: stabilize auth test with tab visibility wait |
 | `1ad0844` | 2026-04-17 | docs: update status ledger with Phase 5 Block 5.1 completion |
 | `1f3ff4f` | 2026-04-17 | feat: add author badges and display names for Telegram auto-filenames |
