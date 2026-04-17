@@ -77,10 +77,10 @@
 - `completed` Task 35: Block 4.2 - Archive kilo-dev-process.md
 - `completed` Task 36: Block 4.3 - Update references
 - `completed` Task 37: Block 4.4 - Validation
-- `pending` Task 38: Block 5.1 - Compare APPLICATION_SPEC.md and AGENTS.md
-- `pending` Task 39: Block 5.2 - Edit APPLICATION_SPEC.md
-- `pending` Task 40: Block 5.3 - Edit AGENTS.md
-- `pending` Task 41: Block 5.4 - Validation
+- `completed` Task 38: Block 5.1 - Compare APPLICATION_SPEC.md and AGENTS.md
+- `completed` Task 39: Block 5.2 - Edit APPLICATION_SPEC.md
+- `completed` Task 40: Block 5.3 - Edit AGENTS.md
+- `completed` Task 41: Block 5.4 - Validation
 - `pending` Task 42: Block 6.1 - Run full validation
 - `pending` Task 43: Block 6.2 - Update STATUS.md with plan completion
 

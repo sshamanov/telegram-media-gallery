@@ -95,8 +95,9 @@ Never use `--no-verify`.
 ## Required workflow documents
 
 ### Document authority
-- `APPLICATION_SPEC.md` is the architecture and supported-behavior source of truth.
-- `STATUS.md` is the execution ledger for plans, todo states, blockers, validations, and commits.
+- `APPLICATION_SPEC.md` is the immutable architecture and supported-behavior source of truth (goal state).
+- `STATUS.md` is the mutable execution ledger for plans, todo states, blockers, validations, and commits (current state).
+- `AGENTS.md` is the mutable process guide defining workflow rules and agent behavior.
 - If code changes architecture, supported behavior, workflow gates, or accepted limitations, update `APPLICATION_SPEC.md`.
 - If work changes plan state, todo state, validation state, blocker state, or commit state, update `STATUS.md`.
 

@@ -33,13 +33,7 @@ Browser-based photo/video gallery using Telegram as a storage backend. Client-on
 - **PWA**: Manifest is part of the app; broader offline/service-worker behavior remains phase-scoped
 
 ### System Boundaries
-1. **Working directory is project root only** - never read or write outside the repo.
-2. **No system-level tool installation** - do not modify the host OS.
-3. **No system configuration modification** - do not touch shell, git, or service config outside the repo.
-4. **No external access** - do not access remote services or external network resources.
-5. **All builds run inside Docker with `--network host`** - every project `docker run` must include `--network host`.
-6. **Temporary files use `./tmp/`** - never use system `/tmp/`.
-7. **Dev server must use port `5173`** - keep that port fixed for local validation.
+See `AGENTS.md` for the complete set of system boundary rules that govern execution environment, Docker usage, port management, and temporary file locations.
 
 ### Standard Build Patterns
 ```bash
@@ -244,44 +238,7 @@ src/components/
 
 ## Testing Workflow
 
-### Required Validation Policy
-- `npm run check` must pass before a logical block is complete unless the block is intentionally documentation-only and the deferral is recorded in `STATUS.md`.
-- Required Playwright suites must contain executable assertions only.
-- Commented-out, placeholder, or speculative tests do not satisfy process gates.
 
-### Test Commands
-Current repo scripts include:
-- `npm run check`
-- `npm run test:short`
-- `npm run test:long`
-- `npm run test:all`
-- `npm run test:ui`
-- `npm run test:visual`
-
-### Docker Compose Test Flow
-Use Docker Compose for Playwright validation:
-```bash
-docker-compose -f docker-compose.test.yml up --build playwright
-
-# Specific suite/project example
-docker-compose -f docker-compose.test.yml run --rm playwright npx playwright test --config=playwright.config.ts --grep "@short" --project=desktop-chrome
-```
-
-### Current Required Short-Test Contract
-Short tests are intended to validate only currently supported baseline behavior:
-- auth screen rendering and auth flows
-- dialogs screen rendering and tab semantics
-- settings open/close baseline
-- gallery baseline when accepted in current status
-- viewer baseline when accepted in current status
-
-### Current Long-Test Policy
-- Long tests must cover only executable, supported flows.
-- If an advanced flow is not restored end-to-end, it must not remain as a required assertion.
-- Unsupported advanced behavior must be tracked as a gap instead of being hidden behind weakened tests.
-- Service-worker acceptance uses a dedicated production preview path; dev-server-only checks do not satisfy offline shell validation.
-- Offline dialog acceptance requires proving the dialog list renders from the persisted snapshot after a prior online load.
-- Final Phase 3 acceptance requires executable coverage for offline action guards in gallery/viewer UI plus cache/settings wording that matches shipped behavior.
 
 ## Development Workflow
 
