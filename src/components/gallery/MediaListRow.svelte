@@ -4,9 +4,10 @@
   import { loadThumbnailBlob } from '../../lib/thumbnails'
   import type { MediaItem } from '../../types/telegram'
 
-  export let item: MediaItem
+   export let item: MediaItem
   export let selected = false
   export let selectionMode = false
+  export let focused = false
   export let onActivate: (itemId: string, event: MouseEvent) => void
   export let onLongPress: (itemId: string) => void
 
@@ -94,10 +95,12 @@
   bind:this={element}
   class:selected
   class:selection-mode={selectionMode}
+  class:focused={focused}
   class="list-row panel"
   type="button"
   data-testid="media-item"
   data-media-id={item.id}
+  data-item-id={item.id}
   on:click={handleClick}
   on:pointercancel={clearLongPress}
   on:pointerdown={handlePointerDown}
@@ -200,6 +203,11 @@
 
   .size {
     font-size: 0.88rem;
+  }
+
+   .list-row.focused {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
   }
 
   .selection-mark {

@@ -52,12 +52,13 @@ import AuthorFilter from './AuthorFilter.svelte'
   import type { GalleryFilterId, MediaItem, UploadMode as UploadModeType } from '../../types/telegram'
 
 
-  let showUploadSheet = false
+   let showUploadSheet = false
   let fileInput: HTMLInputElement | null = null
   let pendingUploadMode: UploadModeType = 'media'
   let scroller: HTMLElement | null = null
   let showDialogPicker = false
   let offlineDownloadReady = false
+  let focusedItemIndex: number | null = null
 
   $: hiddenFilters = $settings.defaultHiddenFilters ?? []
   $: counts = countFilters($mediaItems)
@@ -70,8 +71,18 @@ import AuthorFilter from './AuthorFilter.svelte'
     : null
   $: void refreshOfflineSelectionState(selectedItems, $isOffline)
 
-  $: if ($currentDialog?.id) {
+   $: if ($currentDialog?.id) {
     showUploadSheet = false
+  }
+
+  $: {
+    // Reset focus when items change
+    focusedItemIndex = null
+  }
+
+  $: if (!$selectionMode) {
+    // Reset focus when exiting selection mode
+    focusedItemIndex = null
   }
 
   function countFilters(items: MediaItem[]): Record<GalleryFilterId, number> {
@@ -184,10 +195,88 @@ import AuthorFilter from './AuthorFilter.svelte'
     }
   }
 
-  function handleKeyDown(event: KeyboardEvent): void {
+   function handleKeyDown(event: KeyboardEvent): void {
     if (event.key === 'Escape' && $selectionMode) {
       exitSelectionMode()
+      return
     }
+
+    // Don't handle keyboard navigation if we're in a form element
+    if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
+      return
+    }
+
+    // Handle arrow key navigation
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter', ' '].includes(event.key)) {
+      event.preventDefault()
+    }
+
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
+      handleArrowNavigation(event.key)
+    } else if (event.key === 'Enter' && focusedItemIndex !== null) {
+      // Enter opens the focused item
+      const item = visibleItems[focusedItemIndex]
+      if (item) {
+        openById(item.id)
+      }
+    } else if (event.key === ' ' && focusedItemIndex !== null) {
+      // Space toggles selection of focused item
+      const item = visibleItems[focusedItemIndex]
+      if (item) {
+        toggleSelectedMedia(item.id)
+      }
+    }
+  }
+
+  function handleArrowNavigation(key: string): void {
+    if (visibleItems.length === 0) {
+      focusedItemIndex = null
+      return
+    }
+
+    const columns = $settings.gridColumns
+    const totalItems = visibleItems.length
+
+    if (focusedItemIndex === null) {
+      // Start navigation from first item
+      focusedItemIndex = 0
+      return
+    }
+
+    let newIndex = focusedItemIndex
+
+    if ($galleryViewMode === 'grid') {
+      // Grid navigation
+      if (key === 'ArrowRight') {
+        newIndex = (focusedItemIndex + 1) % totalItems
+      } else if (key === 'ArrowLeft') {
+        newIndex = focusedItemIndex === 0 ? totalItems - 1 : focusedItemIndex - 1
+      } else if (key === 'ArrowDown') {
+        newIndex = Math.min(focusedItemIndex + columns, totalItems - 1)
+      } else if (key === 'ArrowUp') {
+        newIndex = Math.max(focusedItemIndex - columns, 0)
+      }
+    } else {
+      // List navigation (single column)
+      if (key === 'ArrowDown') {
+        newIndex = Math.min(focusedItemIndex + 1, totalItems - 1)
+      } else if (key === 'ArrowUp') {
+        newIndex = Math.max(focusedItemIndex - 1, 0)
+      } else if (key === 'ArrowRight' || key === 'ArrowLeft') {
+        // In list view, left/right don't navigate between items
+        return
+      }
+    }
+
+    focusedItemIndex = newIndex
+
+    // Scroll focused item into view
+    setTimeout(() => {
+      const focusedElement = document.querySelector(`[data-item-id="${visibleItems[focusedItemIndex!]?.id}"]`)
+      if (focusedElement) {
+        focusedElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+      }
+    }, 0)
   }
 
   async function refreshOfflineSelectionState(items: MediaItem[], offline: boolean): Promise<void> {
@@ -666,25 +755,27 @@ import AuthorFilter from './AuthorFilter.svelte'
 
     {#if $galleryViewMode === 'grid'}
       <div class="grid" style:grid-template-columns={gridTemplate} data-testid="gallery-grid">
-        {#each visibleItems as item (item.id)}
-          <MediaItemCard
+         {#each visibleItems as item, i (item.id)}
+            <MediaItemCard
             item={item}
             onActivate={handleItemActivate}
             onLongPress={handleItemLongPress}
             selectionMode={$selectionMode}
             selected={$selectedMediaIds.has(item.id)}
+            focused={focusedItemIndex === i}
           />
         {/each}
       </div>
     {:else}
       <div class="list-view" data-testid="gallery-list">
-        {#each visibleItems as item (item.id)}
+         {#each visibleItems as item, i (item.id)}
           <MediaListRow
             item={item}
             onActivate={handleItemActivate}
             onLongPress={handleItemLongPress}
             selectionMode={$selectionMode}
             selected={$selectedMediaIds.has(item.id)}
+            focused={focusedItemIndex === i}
           />
         {/each}
       </div>

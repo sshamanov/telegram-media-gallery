@@ -77,7 +77,7 @@
 - `pending` Task 53: Block 2.4 - Implement touch target sizing
 - `pending` Task 54: Block 2.5 - Focus management improvements
 - `completed` Task 55: Block 2.6 - Validation
-- `pending` Task 56: Block 3.1 - Keyboard navigation in gallery
+- `in_progress` Task 56: Block 3.1 - Keyboard navigation in gallery
 - `pending` Task 57: Block 3.2 - Restore pull-to-refresh
 - `pending` Task 58: Block 3.3 - Selection mode discoverability
 - `pending` Task 59: Block 3.4 - Icon button labels
