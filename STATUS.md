@@ -1,10 +1,10 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-16 23:24 +02:00
-**Current Phase:** Phase 4: Shareable URLs (pending)
+**Last Updated:** 2026-04-17 02:17 +02:00
+**Current Phase:** Phase 5: Author Features (pending)
 **Active Plan:** `.kilo/plans/1776334107170-playful-moon.md`
 **Branch:** `main`
-**Ahead Of `origin/main`:** 14 commits
+**Ahead Of `origin/main`:** 15 commits
 
 ---
 
@@ -87,10 +87,10 @@
 - `completed` Task 16: Investigate download speed (Block 3.2)
 
 ### Phase 4: Shareable URLs
-- `in_progress` Task 17: Shareable media URLs (Block 4.1)
+- `completed` Task 17: Shareable media URLs (Block 4.1)
 
 ## Next Execution Order
-1. Phase 4 Block 4.1: Shareable URLs (FB004)
+1. Phase 5 Block 5.1: Extract and display author data (FB003, FB005)
 
 ## Plan And Todo History
 - 2026-04-16 23:24 +02:00 - Added shareable viewer URLs with route synchronization and pending route store.
@@ -197,6 +197,12 @@
 - ℹ️ Historical references to `.kilo/status.md` remain in dated records by design and are not treated as active drift.
 
 ## Last Validation
+- 2026-04-17 02:17 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
+  - Result: passed with 0 errors, 0 warnings
+  - Main note: type checking passes cleanly after Phase 4 shareable viewer URL implementation.
+- 2026-04-17 02:17 +02:00 - `docker-compose -f docker-compose.test.yml up --build playwright`
+  - Result: passed (`32 passed`)
+  - Main note: short test suite passes after Phase 4 shareable viewer URL routing changes.
 - 2026-04-16 23:24 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
   - Result: passed with 0 errors, 0 warnings
   - Main note: type checking passes cleanly after adding shareable viewer URLs.
@@ -414,6 +420,7 @@
 ## Recent Commit Log
 | Commit | Date | Description |
 |--------|------|-------------|
+| `06987b3` | 2026-04-17 | docs: update backlog and plan for Phase 4 completion |
 | `3278f22` | 2026-04-16 | docs: update status ledger with viewer URL implementation |
 | `de9723f` | 2026-04-16 | feat: add shareable viewer URLs |
 | `1f89401` | 2026-04-16 | docs: update status ledger |
