@@ -4,7 +4,7 @@
 **Current Phase:** Phase 5: Author Features (in_progress)
 **Active Plan:** `.kilo/plans/1776334107170-playful-moon.md`
 **Branch:** `main`
-**Ahead Of `origin/main`:** 20 commits
+**Ahead Of `origin/main`:** 22 commits
 
 ---
 
@@ -97,7 +97,7 @@
 1. Phase 5 Block 5.2: Author filtering UI (FB003, FB005)
 
 ## Plan And Todo History
-- 2026-04-17 06:55 +02:00 - Completed Task 18: Extract and display author data (Phase 5 Block 5.1).
+- 2026-04-17 06:55 +02:00 - Completed Task 18: Extract and display author data (Phase 5 Block 5.1) (commit 1f3ff4f).
 - 2026-04-16 23:24 +02:00 - Added shareable viewer URLs with route synchronization and pending route store.
 - 2026-04-16 22:27 +02:00 - Completed Task 16: Investigate download speed (Phase 3 Block 3.2).
 - 2026-04-16 22:00 +02:00 - Completed Task 15: Implement DEBUG logging (Phase 3 Block 3.1).
@@ -431,6 +431,7 @@
 ## Recent Commit Log
 | Commit | Date | Description |
 |--------|------|-------------|
+| `1f3ff4f` | 2026-04-17 | feat: add author badges and display names for Telegram auto-filenames |
 | `680badf` | 2026-04-17 | docs: update backlog and plan for Phase 5 |
 | `f1a0e4e` | 2026-04-17 | docs: update backlog and plan for Phase 4 completion |
 | `3278f22` | 2026-04-16 | docs: update status ledger with viewer URL implementation |
