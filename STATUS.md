@@ -1,8 +1,8 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-17 07:43 +02:00
-**Current Phase:** Phase 6: Cosmetic improvements (completed)
-**Active Plan:** `.kilo/plans/1776334107170-playful-moon.md`
+**Last Updated:** 2026-04-17 09:25 +02:00
+**Current Phase:** Documentation cleanup
+**Active Plan:** `.kilo/plans/1776372881960-jolly-planet.md`
 **Branch:** `main`
 **Ahead Of `origin/main`:** 35 commits
 
@@ -58,6 +58,31 @@
 - **Status:** completed with commit `b28eb0b`
 
 ## Current Todo States
+
+### Jolly Planet Plan (Documentation Cleanup)
+- `completed` Task 21: Block 1.1 - Inventory backlog items and update file
+- `completed` Task 22: Block 1.2 - Remove backlog references from AGENTS.md
+- `completed` Task 23: Block 1.3 - Update hard‑route.md
+- `completed` Task 24: Block 1.4 - Delete backlog file
+- `completed` Task 25: Block 1.5 - Validation
+- `pending` Task 26: Block 2.1 - Scan for legacy‑archive references
+- `pending` Task 27: Block 2.2 - Update AGENTS.md
+- `pending` Task 28: Block 2.3 - Update other documents
+- `pending` Task 29: Block 2.4 - Validation
+- `pending` Task 30: Block 3.1 - Remove references from AGENTS.md
+- `pending` Task 31: Block 3.2 - Update command files
+- `pending` Task 32: Block 3.3 - Archive TECHNICAL_MIGRATION_PLAN.md
+- `pending` Task 33: Block 3.4 - Validation
+- `pending` Task 34: Block 4.1 - Extract valuable information from kilo-dev-process.md
+- `pending` Task 35: Block 4.2 - Archive kilo-dev-process.md
+- `pending` Task 36: Block 4.3 - Update references
+- `pending` Task 37: Block 4.4 - Validation
+- `pending` Task 38: Block 5.1 - Compare APPLICATION_SPEC.md and AGENTS.md
+- `pending` Task 39: Block 5.2 - Edit APPLICATION_SPEC.md
+- `pending` Task 40: Block 5.3 - Edit AGENTS.md
+- `pending` Task 41: Block 5.4 - Validation
+- `pending` Task 42: Block 6.1 - Run full validation
+- `pending` Task 43: Block 6.2 - Update STATUS.md with plan completion
 
 ### Previous Plan (stellar-panda)
 - `completed` Task 0: Fix import error in GalleryGrid (verified no real error; tests pass)

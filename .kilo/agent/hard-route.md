@@ -14,7 +14,4 @@ If you change plan state, todo state, validation state, blockers, or commit stat
 If code or workflow changes supported behavior, require that `APPLICATION_SPEC.md` be updated.
 Do not accept placeholder tests, speculative completion claims, or stale documentation as valid evidence.
 
-When looking for new work, check `.kilo/future-backlog.md` if:
-- No active plan exists in `STATUS.md`
-- Current plan completed with no immediate blockers
-- User requests new feature work without specifics
+
