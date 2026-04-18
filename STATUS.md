@@ -1,6 +1,6 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-18 16:11 +02:00
+**Last Updated:** 2026-04-18 21:42 +02:00
 **Current Phase:** Playful Otter - Bug Fixes & Improvements
 **Active Plan:** `.kilo/plans/1776456580754-playful-otter.md`
 **Branch:** `main`
@@ -721,6 +721,7 @@
 ## Recent Commit Log
 | Commit | Date | Description |
 |--------|------|-------------|
+| `0b12420` | 2026-04-18 | chore: create sub-plans for playful-otter tasks 7-10 and fix plan inconsistencies |
 | `7c7edb7` | 2026-04-18 | feat: add dialog metadata cache for faster reloads |
 | `20f7df9` | 2026-04-18 | docs: update STATUS.md and plan with Task 5 completion |
 | `98cfa51` | 2026-04-18 | fix: stabilize viewer close path |
