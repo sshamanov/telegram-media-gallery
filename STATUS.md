@@ -731,6 +731,7 @@
 ## Recent Commit Log
 | Commit | Date | Description |
 |--------|------|-------------|
+| `a8599c5` | 2026-04-18 | refactor: extract cache-first logic into shared utility |
 | `41cd71f` | 2026-04-18 | style: remove author thumbnail background, use text overlay |
 | `70e0cd9` | 2026-04-18 | fix: reduce toast auto-close timeout to 1 second |
 | `0b12420` | 2026-04-18 | chore: create sub-plans for playful-otter tasks 7-10 and fix plan inconsistencies |
