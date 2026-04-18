@@ -9,7 +9,7 @@
    import DialogPicker from './DialogPicker.svelte'
    import { tooltip } from '../../lib/dom/tooltips'
    import { navigateToDialogList } from '../../lib/routing'
-   import { isDesktop, effectiveDesktopLayout, getDesktopGridColumns } from '../../lib/dom/desktop-detection'
+    import { effectiveDesktopLayout } from '../../lib/dom/desktop-detection'
    import DesktopSidebar from '../layout/DesktopSidebar.svelte'
    import { trapFocus } from '../../lib/dom/focus-trap'
     import {
@@ -156,9 +156,7 @@
   $: counts = countFilters($mediaItems)
   $: visibleItems = $filteredMediaItems
   $: selectedItems = visibleItems.filter((item) => $selectedMediaIds.has(item.id))
-   $: effectiveColumns = $isDesktop && $effectiveDesktopLayout 
-     ? getDesktopGridColumns($effectiveDesktopLayout)
-     : $settings.gridColumns
+    $: effectiveColumns = $settings.gridColumns
    $: gridTemplate = `repeat(${effectiveColumns}, minmax(0, 1fr))`
    $: layoutMode = $settings.layoutMode
    $: shouldUseMasonry = layoutMode === 'masonry' && $galleryViewMode === 'grid'
@@ -411,7 +409,7 @@
       return
     }
 
-    const columns = $settings.gridColumns
+    const columns = effectiveColumns
     const totalItems = visibleItems.length
 
     if (focusedItemIndex === null) {

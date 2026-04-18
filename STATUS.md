@@ -1,6 +1,6 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-18 07:43 +02:00
+**Last Updated:** 2026-04-18 07:51 +02:00
 **Current Phase:** Playful Otter - Bug Fixes & Improvements
 **Active Plan:** `.kilo/plans/1776456580754-playful-otter.md`
 **Branch:** `main`
@@ -71,7 +71,7 @@
 
 ### Playful Otter Plan (Bug Fixes & Improvements)
 - `completed` Task 1: Investigate scroll position loss and implement scroll position preservation when returning from preview
-- `pending` Task 2: Fix grid columns button functionality
+- `completed` Task 2: Fix grid columns button functionality
 - `pending` Task 3: Fix masonry layout thumbnail sizing
 - `pending` Task 4: Fix settings title persistence
 - `pending` Task 5: Fix video preview exit behavior
@@ -173,12 +173,13 @@
 - `completed` Task 20: UI refinements (Block 6.1) (FB006, FB007) (commit 715d7f5)
 
 ## Next Execution Order
-- **Phase 1**: Continue investigation for remaining bug fixes after Task 1 root-cause confirmation.
-- **Phase 2**: Bug Fixes (Priority Order) - 2. Grid columns button functionality; 3. Masonry layout thumbnail sizing; 4. Settings title persistence; 5. Video preview exit behavior.
+- **Phase 1**: Continue investigation for remaining bug fixes after Task 2 root-cause confirmation.
+- **Phase 2**: Bug Fixes (Priority Order) - 3. Masonry layout thumbnail sizing; 4. Settings title persistence; 5. Video preview exit behavior.
 - **Phase 3**: Improvements & Features - 1. Telegram data caching; 2. Toast auto-close; 3. Author thumbnail background removal.
 - **Phase 4**: Code Refactoring & Tests - 1. Split large modules (mtcute.ts, mock.ts, GalleryGrid.svelte, ViewerWrapper.svelte); 2. Write unit tests for refactored code and bug fixes.
 
 ## Plan And Todo History
+- 2026-04-18 07:51 +02:00 - Completed Playful Otter Task 2 (grid columns button): identified that `src/components/gallery/GalleryGrid.svelte` updated `settings.gridColumns`, but desktop rendering ignored that value by overriding the active column count with `getDesktopGridColumns(...)`. Removed the desktop preset override so the grid columns button now changes the actual rendered columns and matching keyboard-navigation step size in grid mode. Validation passed: type check 0 errors/0 warnings; short suite 32/32 including the grid-columns regression test.
 - 2026-04-18 07:43 +02:00 - Completed Playful Otter Task 1 (scroll position preservation): identified that `scrollPositions` persistence existed in `src/stores/gallery.ts` but was never read or written by the gallery UI. Updated `src/components/gallery/GalleryGrid.svelte` to persist scroll position during scroll events and restore it once per dialog when the gallery view becomes active again after preview close. Validation in progress.
 - 2026-04-18 07:04 +02:00 - Activated playful-otter plan for bug fixes and improvements. Plan file: `.kilo/plans/1776456580754-playful-otter.md`. Clever Island plan marked as completed. Committed as `85d4e58`.
 - 2026-04-18 07:04 +02:00 - Removed duplicate plan files already in archive. Committed as `d6bf20d`.
@@ -343,6 +344,12 @@
 - ℹ️ Historical references to `.kilo/status.md` remain in dated records by design and are not treated as active drift.
 
 ## Last Validation
+- 2026-04-18 07:50 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
+  - Result: passed with 0 errors, 0 warnings
+  - Main note: Playful Otter Task 2 validation - grid column rendering now follows `settings.gridColumns` without desktop override.
+- 2026-04-18 07:51 +02:00 - `docker-compose -f docker-compose.test.yml up --build playwright`
+  - Result: passed (`32 passed`)
+  - Main note: Playful Otter Task 2 validation - short suite regression test for the grid columns button passes.
 - 2026-04-18 07:41 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
   - Result: passed with 0 errors, 0 warnings
   - Main note: Playful Otter Task 1 validation - scroll position preservation changes compile cleanly.
