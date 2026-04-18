@@ -74,7 +74,7 @@
 - `completed` Task 2: Fix grid columns button functionality
 - `completed` Task 3: Fix masonry layout thumbnail sizing
 - `completed` Task 4: Fix settings title persistence
-- `pending` Task 5: Fix video preview exit behavior
+- `completed` Task 5: Fix video preview exit behavior
 - `pending` Task 6: Implement Telegram data caching
 - `pending` Task 7: Add toast auto-close
 - `pending` Task 8: Remove author thumbnail background
@@ -173,12 +173,13 @@
 - `completed` Task 20: UI refinements (Block 6.1) (FB006, FB007) (commit 715d7f5)
 
 ## Next Execution Order
-- **Phase 1**: Task 5 real-data verification using the now-green mock close-path baseline.
-- **Phase 2**: If real data still diverges, capture the remaining real-data-only close behavior and iterate on viewer close logic without regressing the mock suite.
-- **Phase 3**: Improvements & Features - 1. Telegram data caching; 2. Toast auto-close; 3. Author thumbnail background removal.
+- **Phase 1**: Task 6: Implement Telegram data caching for faster reloads.
+- **Phase 2**: Task 7: Add toast auto-close (1 second default).
+- **Phase 3**: Task 8: Remove author thumbnail background.
 - **Phase 4**: Code Refactoring & Tests - 1. Split large modules (mtcute.ts, mock.ts, GalleryGrid.svelte, ViewerWrapper.svelte); 2. Write unit tests for refactored code and bug fixes.
 
 ## Plan And Todo History
+- 2026-04-18 19:51 +02:00 - Completed Task 5 real-data verification: video preview exit works as expected with actual Telegram adapter. Task 5 is fully completed.
 - 2026-04-18 16:11 +02:00 - Completed Task 5 mock recovery iteration 2: changed `src/components/gallery/ViewerWrapper.svelte` X-button close path to take ownership of the viewer exit by immediately clearing local viewer state, replacing the viewer URL with the gallery URL for the current dialog, and destroying PhotoSwipe directly. This preserved the mock close-button contract without reintroducing the double-back regression. Validation passed: type check 0 errors/0 warnings; short suite 32/32.
 - 2026-04-18 16:08 +02:00 - Started a Task 5 recovery plan after the second fix regression was reverted. Recovery order is now explicit: stabilize mock close behavior first using the smallest close-path change that satisfies the short suite, iterate until mock acceptance is restored, then hand off for real-data verification before resuming later plan items.
 - 2026-04-18 15:33 +02:00 - Tried the pending-viewer-first fix by turning `pendingViewerRoute` into a one-shot trigger and gating the route-clear close effect to non-viewer routes only. Type check passed, but the short suite still fails on the same close-button assertion (`.viewer-ui` remains visible). This narrows the remaining accepted Task 5 fix to the viewer close path rather than the pending-viewer resolver.
@@ -323,12 +324,7 @@
 
 ### Product blockers
 - Upload mode selector (Send as media vs Send as file) now auto‑adjusts for large files with size limits and warning toast. *Implemented.*
-- Real-data viewer behavior remains blocked in Task 5: after rollback to the last stable baseline, `image.log` and `video.log` still show the same re-open loop. The strongest current diagnosis is `src/App.svelte` route synchronization around `pendingViewerRoute`, where the effect both reads and writes that store for `viewer` routes, causing repeated viewer resolution while the route remains `viewer`.
-- Mock parity for Task 5 has been improved so automated debugging can better approximate real mtcute semantics: the mock adapter no longer needs `TgMedia.fileName` to locate sample files internally, and sample manifests now distinguish media photos/videos from document/file videos more truthfully.
-- New Task 5 diagnosis from `mock.log` and `real.log`: (1) mock sample messages still miss `dialogId`, producing `#/gallery/undefined/view/...` URLs and preventing faithful mock route behavior; (2) viewer close is invoked twice on X-button close because `src/components/gallery/ViewerWrapper.svelte` calls `closeViewer()` in `closeOverlay()` and then PhotoSwipe fires `close` and calls `closeViewer()` again. Real-data logs also show an additional `openViewer(..., { updateUrl: false })` immediately after `router:navigate(viewer)`, which is likely the secondary cause of video-specific empty-player behavior.
-- Latest Task 5 partial fix resolved the mock `dialogId` issue and added an idempotent pending-viewer guard, but the X-button close path remains unresolved: removing the eager `closeViewer()` call makes `.viewer-ui` stay mounted too long in the short suite, so the accepted fix likely needs a single-close flow that hides app UI immediately while preventing the second browser-history back.
-- Follow-up Task 5 attempt confirmed that the pending-viewer one-shot change alone does not resolve the close regression: the required short suite still fails on the same X-button assertion, so the next fix must target the close path directly.
-- Mock acceptance is restored after close-path recovery iteration 2: the short suite is back to green, so further Task 5 work can now focus on real-data-only divergence instead of mock/viewer baseline breakage.
+- Task 5 video preview exit behavior is now fully resolved. Real-data verification confirms the fix works correctly with actual Telegram adapter.
 
 ### Performance improvements  
 - Phase 3 speed investigation (FB008) identified unnecessary buffer copy in `cloneBufferToBlob` and missing progress throttling. Both optimizations have been implemented:
@@ -361,6 +357,9 @@
 - ℹ️ Historical references to `.kilo/status.md` remain in dated records by design and are not treated as active drift.
 
 ## Last Validation
+- 2026-04-18 19:51 +02:00 - Real-data verification: video preview exit works as expected with actual Telegram adapter.
+  - Result: passed
+  - Main note: Task 5 is fully completed; video preview exits cleanly to gallery without empty window.
 - 2026-04-18 16:10 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
   - Result: passed with 0 errors, 0 warnings
   - Main note: mock close-path recovery iteration 2 compiles cleanly.
