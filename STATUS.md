@@ -712,6 +712,17 @@
 ## Recent Commit Log
 | Commit | Date | Description |
 |--------|------|-------------|
+| `20f7df9` | 2026-04-18 | docs: update STATUS.md and plan with Task 5 completion |
+| `98cfa51` | 2026-04-18 | fix: stabilize viewer close path |
+| `04e6b47` | 2026-04-18 | fix: align mock viewer metadata with real mode |
+| `6a1611c` | 2026-04-18 | fix: clear gallery state outside gallery routes |
+| `d860e51` | 2026-04-18 | fix: preserve media aspect ratios in masonry |
+| `47235da` | 2026-04-18 | fix: honor grid column setting in gallery |
+| `521fecc` | 2026-04-18 | fix: preserve gallery scroll position after preview |
+| `eff7c63` | 2026-04-18 | chore: fix plan inconsistencies and register playful‑otter |
+| `9e111bb` | 2026-04-18 | docs: update STATUS.md with latest commit hashes |
+| `d6bf20d` | 2026-04-18 | chore: remove duplicate plan files already in archive |
+| `85d4e58` | 2026-04-18 | chore: fix plan inconsistencies and register playful-otter |
 | `8adeb17` | 2026-04-17 | feat: add ARIA labels to icon-only buttons (Block 3.4) |
 | `7f1cb06` | 2026-04-17 | feat: add visual feedback for selection mode discoverability (Block 3.3) |
 | `673e6a2` | 2026-04-17 | feat: restore pull-to-refresh for mobile (Block 3.2) |
