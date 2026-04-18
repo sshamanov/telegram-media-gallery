@@ -1,8 +1,8 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-17 21:35 +02:00
-**Current Phase:** Clever Island - COMPLETED
-**Active Plan:** `.kilo/plans/1776410435637-clever-island.md`
+**Last Updated:** 2026-04-18 07:04 +02:00
+**Current Phase:** Playful Otter - Bug Fixes & Improvements
+**Active Plan:** `.kilo/plans/1776456580754-playful-otter.md`
 **Branch:** `main`
 **Ahead Of `origin/main`:** 57 commits
 
@@ -21,12 +21,17 @@
 - This ledger must stay stricter than historical claims and must not overstate completion.
 
 ## Active Plan
+- **Plan file:** `.kilo/plans/1776456580754-playful-otter.md`
+- **Goal:** Fix reported UI bugs, implement caching improvements, refactor large modules, and add unit tests.
+- **Execution strategy:** 4 phases: 1. Investigation & analysis; 2. Bug fixes (scroll position, grid columns, masonry thumbnails, settings title, video preview); 3. Improvements (Telegram data caching, toast auto-close, author thumbnail background); 4. Code refactoring & unit tests.
+- **Status:** pending activation
+
+## Completed Plans
 - **Plan file:** `.kilo/plans/1776410435637-clever-island.md`
 - **Goal:** Execute a prioritized sequence of work to: 1. Clean up stale plans and maintain project hygiene; 2. Fix remaining accessibility warnings in DialogPicker and GalleryGrid; 3. Implement high-impact UI/UX improvements from the witty-panda analysis; 4. Deliver Phase 3+ advanced features (masonry layout, desktop variants, light theme); 5. Optimize performance where measurable gains are possible.
 - **Execution strategy:** 5 blocks: 1. Archive stale plans; 2. Accessibility foundation & TypeScript health; 3. Core interaction improvements; 4. Phase 3+ advanced features; 5. Performance optimization.
-- **Status:** Block 4 completed; Block 5 detailed implementation plan created in `.kilo/plans/1776410435637-block5-performance-optimization.md` and ready for execution
+- **Status:** completed with all blocks implemented; validation passed
 
-## Completed Plans
 - **Plan file:** `.kilo/plans/1776372881960-jolly-planet.md`
 - **Goal:** eliminate `future-backlog.md` from the workflow, clean up legacy references, and clarify document boundaries between `APPLICATION_SPEC.md` (goal state) and `AGENTS.md` (process management).
 - **Execution strategy:** remove backlog file and references, clean up legacy-archive branch mentions, archive outdated documentation files, clarify document boundaries.
@@ -156,18 +161,13 @@
 - `completed` Task 20: UI refinements (Block 6.1) (FB006, FB007) (commit 715d7f5)
 
 ## Next Execution Order
-- **Block 1**: Archive stale plans (14 files with timestamps before 2026-04-15, not referenced in STATUS.md). ✓ COMPLETED
-- **Block 2**: Fix TypeScript/LSP errors (missing exports, type mismatches) and accessibility warnings (DialogPicker, GalleryGrid). ✓ COMPLETED
-- **Block 3**: Implement UI/UX improvements: keyboard navigation, pull-to-refresh, selection mode discoverability, icon button labels. ✓ COMPLETED
-- **COMPLETED**: Task 61 (Masonry layout toggle) - implemented masonry layout with auto-detection and manual override, added CSS masonry styles with browser fallback, added settings panel controls for layout mode and auto-detection, added toast notification for auto-detection suggestions
-- **COMPLETED**: Task 62 (Desktop layout variants) - implemented three desktop layout variants (wide grid, sidebar, dual pane) with screen width detection (>1024px), added desktop layout settings panel, created DesktopSidebar component for metadata display, added responsive CSS for all layout variants
-- **COMPLETED**: Task 63 (Light theme support) - added comprehensive CSS variables with light theme equivalents, replaced hardcoded rgba colors in GalleryGrid, ViewerWrapper, MediaItem, MediaListRow components
-- **COMPLETED**: Task 64 (Enhanced offline media behavior) - added UI control for showCacheBadges setting, fixed TypeScript errors in cache-status.ts, improved offline action guards with better tooltips, validated all offline action guards
-- **COMPLETED**: Task 65 (Block 4 validation) - final testing and verification of all Block 4 features
-- **Block 4**: ✓ COMPLETED - Phase 3+ features: masonry layout toggle, desktop layout variants, light theme support, enhanced offline media behavior.
-- **Block 5**: ✓ COMPLETED - Performance optimization: executed `.kilo/plans/1776410435637-block5-performance-optimization.md` (baseline analysis, bundle reduction, download optimizations, memory efficiency, final validation). Bundle size reduced by 164.13 kB (48.65 kB gzipped), parallel downloads implemented, memory cleanup verified.
+- **Phase 1**: Investigation & Analysis - Analyze each bug to understand root cause, identify affected components and stores, review current caching mechanisms.
+- **Phase 2**: Bug Fixes (Priority Order) - 1. Scroll position preservation; 2. Grid columns button functionality; 3. Masonry layout thumbnail sizing; 4. Settings title persistence; 5. Video preview exit behavior.
+- **Phase 3**: Improvements & Features - 1. Telegram data caching; 2. Toast auto-close; 3. Author thumbnail background removal.
+- **Phase 4**: Code Refactoring & Tests - 1. Split large modules (mtcute.ts, mock.ts, GalleryGrid.svelte, ViewerWrapper.svelte); 2. Write unit tests for refactored code and bug fixes.
 
 ## Plan And Todo History
+- 2026-04-18 07:04 +02:00 - Activated playful-otter plan for bug fixes and improvements. Plan file: `.kilo/plans/1776456580754-playful-otter.md`. Clever Island plan marked as completed.
 - 2026-04-17 20:46 +02:00 - Completed Task 66 (Analyze bottlenecks) of clever-island plan: established baseline metrics - bundle size 1,437.26 kB (363.93 kB gzipped), CSS 44.44 kB (8.86 kB gzipped). Critical finding: main chunk >500 kB (actual 1.4 MB). Identified optimization backlog: 1) code splitting (high), 2) CSS syntax fixes (high), 3) parallel downloads (medium), 4) memory cleanup audit (low). Type check passes with 0 errors, 0 warnings.
 - 2026-04-17 20:55 +02:00 - Completed Task 67 (Bundle size reduction) of clever-island plan: implemented code splitting with dynamic imports for AuthScreen, DialogList, GalleryGrid, and SettingsScreen components. Lazy-loaded PhotoSwipe library (60.45 kB) and its CSS (4.62 kB). Fixed Svelte 5 syntax issues (converted `$:` to `$effect`, `$state` declarations, replaced deprecated `<svelte:component>` with `@render`). Bundle size reduced from 1,333.17 kB to 1,272.76 kB (60.41 kB reduction). Type check passes with 0 errors, 0 warnings. Short test suite passes 32/32. Committed as `b967fd5`.
 - 2026-04-17 21:05 +02:00 - Completed Task 68 (Download optimizations) of clever-island plan: implemented parallel downloads with configurable concurrency (default: 2, range: 1-5). Added `downloadConcurrency` setting to AppSettings type and settings panel. Replaced sequential download processing with bounded concurrency pool using abort controller map for proper cancellation. Maintains queue ordering in UI while allowing simultaneous downloads. Type check passes with 0 errors, 0 warnings. Short test suite passes 32/32. Committed as `9b1cff6`.
