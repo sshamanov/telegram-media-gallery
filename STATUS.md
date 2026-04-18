@@ -177,6 +177,7 @@
 - **Future work**: Complete remaining refactoring (Task 9), implement unit test framework (Task 10), or begin new plan based on application priorities.
 
 ## Plan And Todo History
+- 2026-04-18 23:25 +02:00 - Fixed inconsistent state: restored deleted cache-first.ts file and updated STATUS.md to correctly reflect Task 9 as partially_completed (cache-first logic extracted) and Task 10 as deferred. Validation passed: type check 0 errors/0 warnings, short test suite 32/32. (commit 1a06273)
 - 2026-04-18 22:28 +02:00 - Playful Otter plan execution completed: Tasks 7-8 fully implemented, Task 9 partially implemented (cache-first logic extracted), Task 10 deferred. All validation passes (type check 0 errors/0 warnings, short test suite 32/32).
 - 2026-04-18 22:28 +02:00 - Partially completed Task 9 (refactor large modules): extracted cache-first logic from mtcute.ts and mock.ts into shared utility `src/lib/telegram/utils/cache-first.ts`. Reduced duplication, preserved existing behavior. Validation passed: type check 0 errors/0 warnings; short suite 32/32.
 - 2026-04-18 22:28 +02:00 - Completed Task 8 (remove author thumbnail background): removed background and backdrop-filter from author badges in grid view (`MediaItem.svelte`), replaced with text overlay using white color and text-shadow for readability. List view (`MediaListRow.svelte`) author styling unchanged (no background). Validation passed: type check 0 errors/0 warnings; short suite 32/32.
@@ -733,6 +734,7 @@
 ## Recent Commit Log
 | Commit | Date | Description |
 |--------|------|-------------|
+| `1a06273` | 2026-04-18 | fix: restore cache-first.ts and update STATUS.md |
 | `a8599c5` | 2026-04-18 | refactor: extract cache-first logic into shared utility |
 | `41cd71f` | 2026-04-18 | style: remove author thumbnail background, use text overlay |
 | `70e0cd9` | 2026-04-18 | fix: reduce toast auto-close timeout to 1 second |
