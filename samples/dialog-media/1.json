@@ -1,0 +1,171 @@
+{
+  "dialogId": "1",
+  "messages": [
+    {
+      "id": 1000,
+      "date": 1775968962987,
+      "text": "File: Android_Studio.pdf",
+      "sender": "You",
+      "media": {
+        "id": "document_0_0",
+        "kind": "document",
+        "fileName": "Android_Studio.pdf",
+        "mimeType": "application/pdf",
+        "size": 13158885,
+        "width": null,
+        "height": null,
+        "durationSeconds": null
+      }
+    },
+    {
+      "id": 1001,
+      "date": 1775882562987,
+      "text": "Video: DSC_4118.MOV",
+      "sender": "You",
+      "media": {
+        "id": "video_0_1",
+        "kind": "document",
+        "fileName": "DSC_4118.MOV",
+        "mimeType": "video/quicktime",
+        "size": 49818024,
+        "width": 1280,
+        "height": 720,
+        "durationSeconds": 53
+      }
+    },
+    {
+      "id": 1002,
+      "date": 1775796162987,
+      "text": "Photo: PXL_20260327_154052656.jpg",
+      "sender": "You",
+      "media": {
+        "id": "photo_0_2",
+        "kind": "photo",
+        "fileName": null,
+        "sampleFileName": "PXL_20260327_154052656.jpg",
+        "mimeType": "image/jpeg",
+        "size": 1740375,
+        "width": 1280,
+        "height": 720,
+        "durationSeconds": null
+      }
+    },
+    {
+      "id": 1003,
+      "date": 1775709762987,
+      "text": "Photo: photo_5310163532189997432_y.jpg",
+      "sender": "You",
+      "media": {
+        "id": "photo_0_3",
+        "kind": "photo",
+        "fileName": null,
+        "sampleFileName": "photo_5310163532189997432_y.jpg",
+        "mimeType": "image/jpeg",
+        "size": 230021,
+        "width": 1280,
+        "height": 720,
+        "durationSeconds": null
+      }
+    },
+    {
+      "id": 1004,
+      "date": 1775623362987,
+      "text": "Photo: photo_5388733052562905280_w.jpg",
+      "sender": "You",
+      "media": {
+        "id": "photo_0_4",
+        "kind": "photo",
+        "fileName": null,
+        "sampleFileName": "photo_5388733052562905280_w.jpg",
+        "mimeType": "image/jpeg",
+        "size": 216912,
+        "width": 1280,
+        "height": 720,
+        "durationSeconds": null
+      }
+    },
+    {
+      "id": 1005,
+      "date": 1775536962987,
+      "text": "Video: PXL_20260327_154054202.mp4",
+      "sender": "You",
+      "media": {
+        "id": "video_0_5",
+        "kind": "video",
+        "fileName": null,
+        "sampleFileName": "PXL_20260327_154054202.mp4",
+        "mimeType": "video/mp4",
+        "size": 12969182,
+        "width": 1280,
+        "height": 720,
+        "durationSeconds": 175
+      }
+    },
+    {
+      "id": 1006,
+      "date": 1775450562987,
+      "text": "Video: PXL_20260104_120213849~2.mp4",
+      "sender": "You",
+      "media": {
+        "id": "video_0_6",
+        "kind": "video",
+        "fileName": null,
+        "sampleFileName": "PXL_20260104_120213849~2.mp4",
+        "mimeType": "video/mp4",
+        "size": 14101718,
+        "width": 1280,
+        "height": 720,
+        "durationSeconds": 152
+      }
+    },
+    {
+      "id": 1007,
+      "date": 1775364162987,
+      "text": "Video: document_5350612872298798312.mp4",
+      "sender": "You",
+      "media": {
+        "id": "video_0_7",
+        "kind": "document",
+        "fileName": "document_5350612872298798312.mp4",
+        "mimeType": "video/mp4",
+        "size": 5035584,
+        "width": 1280,
+        "height": 720,
+        "durationSeconds": 71
+      }
+    },
+    {
+      "id": 1008,
+      "date": 1775277762987,
+      "text": "Video: document_5470115153284471294.mp4",
+      "sender": "You",
+      "media": {
+        "id": "video_0_8",
+        "kind": "document",
+        "fileName": "document_5470115153284471294.mp4",
+        "mimeType": "video/mp4",
+        "size": 5035584,
+        "width": 1280,
+        "height": 720,
+        "durationSeconds": 71
+      }
+    },
+    {
+      "id": 1009,
+      "date": 1775191362987,
+      "text": "File: sbornik - Otche nash Dubenskogo.m4a",
+      "sender": "You",
+      "media": {
+        "id": "document_0_9",
+        "kind": "document",
+        "fileName": "sbornik - Otche nash Dubenskogo.m4a",
+        "mimeType": "audio/mp4",
+        "size": 2786136,
+        "width": null,
+        "height": null,
+        "durationSeconds": null
+      }
+    }
+  ],
+  "totalMessages": 10
+}

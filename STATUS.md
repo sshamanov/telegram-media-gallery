@@ -1,6 +1,6 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-18 09:41 +02:00
+**Last Updated:** 2026-04-18 15:33 +02:00
 **Current Phase:** Playful Otter - Bug Fixes & Improvements
 **Active Plan:** `.kilo/plans/1776456580754-playful-otter.md`
 **Branch:** `main`
@@ -24,7 +24,7 @@
 - **Plan file:** `.kilo/plans/1776456580754-playful-otter.md`
 - **Goal:** Fix reported UI bugs, implement caching improvements, refactor large modules, and add unit tests.
 - **Execution strategy:** 4 phases: 1. Investigation & analysis; 2. Bug fixes (scroll position, grid columns, masonry thumbnails, settings title, video preview); 3. Improvements (Telegram data caching, toast auto-close, author thumbnail background); 4. Code refactoring & unit tests.
-- **Status:** in progress; Tasks 1-4 completed and validated, Task 5 investigation next
+- **Status:** in progress; Tasks 1-4 completed and validated, Task 5 investigation restarted from rollback baseline with a safer diagnostics plan pending implementation
 
 ## Completed Plans
 - **Plan file:** `.kilo/plans/1776410435637-clever-island.md`
@@ -179,6 +179,13 @@
 - **Phase 4**: Code Refactoring & Tests - 1. Split large modules (mtcute.ts, mock.ts, GalleryGrid.svelte, ViewerWrapper.svelte); 2. Write unit tests for refactored code and bug fixes.
 
 ## Plan And Todo History
+- 2026-04-18 15:33 +02:00 - Tried the pending-viewer-first fix by turning `pendingViewerRoute` into a one-shot trigger and gating the route-clear close effect to non-viewer routes only. Type check passed, but the short suite still fails on the same close-button assertion (`.viewer-ui` remains visible). This narrows the remaining accepted Task 5 fix to the viewer close path rather than the pending-viewer resolver.
+- 2026-04-18 15:30 +02:00 - Task 5 partial fix attempt updated `src/lib/telegram/mock.ts` to normalize sample `dialogId`, changed `src/components/gallery/ViewerWrapper.svelte` so X-button close no longer calls `closeViewer()` before `pswp.close()`, and added an idempotent pending-viewer guard in `src/App.svelte`. Type check passed, but required short validation failed because `.viewer-ui` remained visible after close button click, so the fix is not accepted. Current narrowed diagnosis: the final fix must preserve immediate app-overlay teardown while ensuring browser history is stepped back exactly once.
+- 2026-04-18 15:20 +02:00 - Analyzed `mock.log` and `real.log` after the mock-parity block. Confirmed two high-confidence Task 5 issues without changing runtime logic: `samples/dialog-media/*.json` messages still omit `dialogId`, so the mock adapter returns items with `dialogId: undefined` and generates `#/gallery/undefined/view/...` routes; and `src/components/gallery/ViewerWrapper.svelte` currently closes the viewer twice on X-button exit (`closeOverlay()` calls `closeViewer()` before `pswp?.close()`, then `pswp.on('close')` calls `closeViewer()` again), matching the observed double-back to dialog list/root. Real-data logs additionally show a second `openViewer(..., { updateUrl: false })` after viewer navigation, making `pendingViewerRoute` the leading secondary suspect for video-specific empty-player behavior.
+- 2026-04-18 14:40 +02:00 - Completed a Task 5 mock-parity preparation block without changing app/viewer logic: updated `src/lib/telegram/mock.ts` to normalize sample media into mtcute-like `TgMedia` while keeping sample-file resolution internal to the mock adapter, and updated `samples/dialog-media/{1,2,3,4,5}.json` so photos and media-videos can expose `fileName: null` like real mtcute data while file videos remain `kind: document`. Validation passed: type check 0 errors/0 warnings; short suite 32/32.
+- 2026-04-18 14:29 +02:00 - Added a safer Task 5 diagnostic path after rollback: restored a minimal Vite Docker-stdout relay and enabled only non-reactive logs in router methods, gallery store open/close functions, viewer attach/content/close handlers, and app startup. Avoided any logging inside `src/App.svelte` route-sync effects to prevent the prior self-trigger issue. Validation passed: type check 0 errors/0 warnings; short suite 32/32.
+- 2026-04-18 14:25 +02:00 - Restarted Task 5 investigation from the rollback baseline with a narrower diagnostic plan. The prior Docker relay experiment was reverted because its reactive logging in `src/App.svelte` altered the runtime dependency graph and produced misleading self-trigger loops. Next diagnostic step: restore a minimal Docker stdout relay and log only non-reactive viewer/router/store events so mock and real data can be compared without mutating route-sync behavior.
+- 2026-04-18 14:17 +02:00 - Reverted all uncommitted Task 5/debug experiments to the last stable committed baseline and revalidated successfully (type check 0 errors/0 warnings; short suite 32/32). Analysis of the preserved real-data `image.log` and `video.log` shows the rollback baseline still has a Task 5 feedback loop in `src/App.svelte`: the route-sync effect both depends on and mutates `pendingViewerRoute`, producing repeated `app:route-sync` / `app:pending-viewer:resolve` cycles and dead viewer behavior on real data. Minimal fix candidate identified; awaiting confirmation before code changes.
 - 2026-04-18 09:41 +02:00 - Completed Playful Otter Task 4 (settings title persistence): identified that `src/App.svelte` kept `currentDialog` alive when routing away from gallery/viewer because route synchronization only set dialog state on entry and never cleared it on exit. Added route cleanup for `dialog-list` and `settings` routes so gallery state is reset immediately when leaving the gallery flow. Validation passed: type check 0 errors/0 warnings; short suite 32/32.
 - 2026-04-18 09:39 +02:00 - Completed Playful Otter Task 3 (masonry thumbnail sizing): identified that `src/components/gallery/MediaItem.svelte` forced every media card to `aspect-ratio: 1`, which made masonry items render as squares regardless of media dimensions. Added a `masonry` prop from `src/components/gallery/GalleryGrid.svelte` and switched card sizing to use the media item's intrinsic `width / height` ratio only in masonry mode, while preserving square cards in the regular grid. Validation passed: type check 0 errors/0 warnings; short suite 32/32.
 - 2026-04-18 07:51 +02:00 - Completed Playful Otter Task 2 (grid columns button): identified that `src/components/gallery/GalleryGrid.svelte` updated `settings.gridColumns`, but desktop rendering ignored that value by overriding the active column count with `getDesktopGridColumns(...)`. Removed the desktop preset override so the grid columns button now changes the actual rendered columns and matching keyboard-navigation step size in grid mode. Validation passed: type check 0 errors/0 warnings; short suite 32/32 including the grid-columns regression test.
@@ -314,6 +321,11 @@
 
 ### Product blockers
 - Upload mode selector (Send as media vs Send as file) now auto‑adjusts for large files with size limits and warning toast. *Implemented.*
+- Real-data viewer behavior remains blocked in Task 5: after rollback to the last stable baseline, `image.log` and `video.log` still show the same re-open loop. The strongest current diagnosis is `src/App.svelte` route synchronization around `pendingViewerRoute`, where the effect both reads and writes that store for `viewer` routes, causing repeated viewer resolution while the route remains `viewer`.
+- Mock parity for Task 5 has been improved so automated debugging can better approximate real mtcute semantics: the mock adapter no longer needs `TgMedia.fileName` to locate sample files internally, and sample manifests now distinguish media photos/videos from document/file videos more truthfully.
+- New Task 5 diagnosis from `mock.log` and `real.log`: (1) mock sample messages still miss `dialogId`, producing `#/gallery/undefined/view/...` URLs and preventing faithful mock route behavior; (2) viewer close is invoked twice on X-button close because `src/components/gallery/ViewerWrapper.svelte` calls `closeViewer()` in `closeOverlay()` and then PhotoSwipe fires `close` and calls `closeViewer()` again. Real-data logs also show an additional `openViewer(..., { updateUrl: false })` immediately after `router:navigate(viewer)`, which is likely the secondary cause of video-specific empty-player behavior.
+- Latest Task 5 partial fix resolved the mock `dialogId` issue and added an idempotent pending-viewer guard, but the X-button close path remains unresolved: removing the eager `closeViewer()` call makes `.viewer-ui` stay mounted too long in the short suite, so the accepted fix likely needs a single-close flow that hides app UI immediately while preventing the second browser-history back.
+- Follow-up Task 5 attempt confirmed that the pending-viewer one-shot change alone does not resolve the close regression: the required short suite still fails on the same X-button assertion, so the next fix must target the close path directly.
 
 ### Performance improvements  
 - Phase 3 speed investigation (FB008) identified unnecessary buffer copy in `cloneBufferToBlob` and missing progress throttling. Both optimizations have been implemented:
@@ -346,6 +358,36 @@
 - ℹ️ Historical references to `.kilo/status.md` remain in dated records by design and are not treated as active drift.
 
 ## Last Validation
+- 2026-04-18 15:32 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
+  - Result: passed with 0 errors, 0 warnings
+  - Main note: pending-viewer one-shot follow-up compiles cleanly.
+- 2026-04-18 15:33 +02:00 - `docker-compose -f docker-compose.test.yml up --build playwright`
+  - Result: failed (`1 failed, 31 passed`)
+  - Main note: follow-up Task 5 attempt leaves the same X-button regression untouched, confirming the remaining accepted fix must be in the close path.
+- 2026-04-18 15:27 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
+  - Result: passed with 0 errors, 0 warnings
+  - Main note: Task 5 partial fix attempt compiles cleanly after mock `dialogId` normalization, X-close change, and the pending-viewer guard.
+- 2026-04-18 15:28 +02:00 - `docker-compose -f docker-compose.test.yml up --build playwright`
+  - Result: failed (`1 failed, 31 passed`)
+  - Main note: `tests/e2e/short/viewer.spec.ts` now fails because `.viewer-ui` remains visible after close button click, so the partial Task 5 fix is not accepted.
+- 2026-04-18 14:39 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
+  - Result: passed with 0 errors, 0 warnings
+  - Main note: mock-parity adapter normalization and sample-manifest updates compile cleanly.
+- 2026-04-18 14:40 +02:00 - `docker-compose -f docker-compose.test.yml up --build playwright`
+  - Result: passed (`32 passed`)
+  - Main note: mock-parity changes preserve the full short-suite baseline while moving mock media behavior closer to real mtcute mode.
+- 2026-04-18 14:27 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
+  - Result: passed with 0 errors, 0 warnings
+  - Main note: safer non-reactive Task 5 diagnostics compile cleanly.
+- 2026-04-18 14:29 +02:00 - `docker-compose -f docker-compose.test.yml up --build playwright`
+  - Result: passed (`32 passed`)
+  - Main note: safer non-reactive Task 5 diagnostics preserve the mock short-suite baseline while preparing for real-data reproduction.
+- 2026-04-18 14:12 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
+  - Result: passed with 0 errors, 0 warnings
+  - Main note: rollback to the last stable committed baseline after failed Task 5 experiments validates cleanly.
+- 2026-04-18 14:13 +02:00 - `docker-compose -f docker-compose.test.yml up --build playwright`
+  - Result: passed (`32 passed`)
+  - Main note: rollback baseline preserves all required short-suite behavior; the remaining Task 5 issue reproduces only on the real-data path.
 - 2026-04-18 09:40 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
   - Result: passed with 0 errors, 0 warnings
   - Main note: Playful Otter Task 4 validation - settings/dialog routes now clear stale gallery state when leaving gallery/viewer flows.

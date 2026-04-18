@@ -1,5 +1,5 @@
 import { get, writable, derived } from 'svelte/store'
-import { debugLog } from '../lib/debug'
+import { debugLog, DEBUG_VIEWER } from '../lib/debug'
 import { classifyMediaType, isImageItem, matchesFilter, matchesAuthorFilter, mediaTypeToFilter } from '../lib/media'
 import { getTelegramAdapter, type MessagePage } from '../lib/telegram/adapter'
 import { blobToFile, getCachedBlob, getCachedOrDownloadBlob, parseFloodWaitSeconds, sleep } from '../lib/files'
@@ -332,6 +332,15 @@ export function setActiveDialog(dialog: Dialog | null): void {
 
 export function openViewer(items: MediaItem[], index: number, options?: { updateUrl?: boolean }): void {
   const { updateUrl = true } = options ?? {}
+
+  if (DEBUG_VIEWER) {
+    debugLog('gallery:openViewer', {
+      index,
+      itemCount: items.length,
+      updateUrl,
+      item: items[index] ?? null,
+    })
+  }
   
   viewerItems.set(items)
   viewerIndex.set(index)
@@ -344,6 +353,14 @@ export function openViewer(items: MediaItem[], index: number, options?: { update
 
 export function closeViewer(options?: { updateUrl?: boolean }): void {
   const { updateUrl = true } = options ?? {}
+
+  if (DEBUG_VIEWER) {
+    debugLog('gallery:closeViewer', {
+      updateUrl,
+      currentViewerIndex: get(viewerIndex),
+      currentRoute: getRouter().getCurrentRoute(),
+    })
+  }
   
   viewerItems.set([])
   viewerIndex.set(null)
@@ -357,6 +374,7 @@ export function closeViewer(options?: { updateUrl?: boolean }): void {
 export function setViewerIndex(index: number | null): void {
   viewerIndex.set(index)
 }
+
 
 export function storeScrollPosition(dialogId: string, value: number): void {
   scrollPositions.update((current) => ({ ...current, [dialogId]: value }))

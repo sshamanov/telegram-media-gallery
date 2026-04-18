@@ -1,0 +1,89 @@
+{
+  "dialogId": "3",
+  "messages": [
+    {
+      "id": 1200,
+      "date": 1775948962988,
+      "text": "Photo: DSC_3238.JPG",
+      "sender": "Dad",
+      "media": {
+        "id": "photo_2_0",
+        "kind": "photo",
+        "fileName": null,
+        "sampleFileName": "DSC_3238.JPG",
+        "mimeType": "image/jpeg",
+        "size": 1330836,
+        "width": 1280,
+        "height": 720,
+        "durationSeconds": null
+      }
+    },
+    {
+      "id": 1201,
+      "date": 1775862562988,
+      "text": "File: Divna Ljubojevic - Kyrie Eleison Kirie zleison.m4a",
+      "sender": "Dad",
+      "media": {
+        "id": "document_2_1",
+        "kind": "document",
+        "fileName": "Divna Ljubojevic - Kyrie Eleison Kirie zleison.m4a",
+        "mimeType": "audio/mp4",
+        "size": 2944183,
+        "width": null,
+        "height": null,
+        "durationSeconds": null
+      }
+    },
+    {
+      "id": 1202,
+      "date": 1775776162988,
+      "text": "Video: document_5350612872298798312.mp4",
+      "sender": "Dad",
+      "media": {
+        "id": "video_2_2",
+        "kind": "document",
+        "fileName": "document_5350612872298798312.mp4",
+        "mimeType": "video/mp4",
+        "size": 5035584,
+        "width": 1280,
+        "height": 720,
+        "durationSeconds": 71
+      }
+    },
+    {
+      "id": 1203,
+      "date": 1775689762988,
+      "text": "Photo: photo_5377531571696506656_w.jpg",
+      "sender": "Dad",
+      "media": {
+        "id": "photo_2_3",
+        "kind": "photo",
+        "fileName": null,
+        "sampleFileName": "photo_5377531571696506656_w.jpg",
+        "mimeType": "image/jpeg",
+        "size": 152526,
+        "width": 1280,
+        "height": 720,
+        "durationSeconds": null
+      }
+    },
+    {
+      "id": 1204,
+      "date": 1775603362988,
+      "text": "Photo: photo_5388920957382104293_w.jpg",
+      "sender": "Dad",
+      "media": {
+        "id": "photo_2_4",
+        "kind": "photo",
+        "fileName": null,
+        "sampleFileName": "photo_5388920957382104293_w.jpg",
+        "mimeType": "image/jpeg",
+        "size": 214252,
+        "width": 1280,
+        "height": 720,
+        "durationSeconds": null
+      }
+    }
+  ],
+  "totalMessages": 15
+}

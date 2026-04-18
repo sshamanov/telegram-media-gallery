@@ -43,8 +43,51 @@ function serviceWorkerPrecachePlugin(): Plugin {
   }
 }
 
+function debugRelayPlugin(): Plugin {
+  return {
+    name: 'debug-relay',
+    apply: 'serve',
+    configureServer(server) {
+      server.middlewares.use('/__debug', (req, res) => {
+        if (req.method !== 'POST') {
+          res.statusCode = 405
+          res.end('Method Not Allowed')
+          return
+        }
+
+        const chunks: Buffer[] = []
+        req.on('data', (chunk) => {
+          chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
+        })
+
+        req.on('end', () => {
+          try {
+            const raw = Buffer.concat(chunks).toString('utf8')
+            const payload = JSON.parse(raw) as {
+              level?: string
+              event?: string
+              data?: unknown
+              timestamp?: string
+            }
+
+            const level = payload.level === 'warn' ? 'warn' : 'log'
+            console[level]('[telegram-gallery][relay]', payload.timestamp ?? new Date().toISOString(), payload.event ?? 'event', payload.data ?? null)
+
+            res.statusCode = 204
+            res.end()
+          } catch (error) {
+            console.warn('[telegram-gallery][relay] invalid payload', error)
+            res.statusCode = 400
+            res.end('Bad Request')
+          }
+        })
+      })
+    },
+  }
+}
+
 export default defineConfig({
-  plugins: [svelte(), basicSsl(), serviceWorkerPrecachePlugin()],
+  plugins: [svelte(), basicSsl(), debugRelayPlugin(), serviceWorkerPrecachePlugin()],
   optimizeDeps: {
     exclude: ['@mtcute/wasm'],
     entries: ['index.html'],

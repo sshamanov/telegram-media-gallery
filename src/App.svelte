@@ -42,7 +42,7 @@
       })
     }
   })
-  import { currentDialog, loadInitialMedia, setActiveDialog, openViewer, mediaItems, viewerIndex, closeViewer } from './stores/gallery'
+  import { currentDialog, loadInitialMedia, setActiveDialog, openViewer, mediaItems, viewerItems, viewerIndex, closeViewer } from './stores/gallery'
   import { allDialogs, galleries, hydrateDialogsFromSnapshot, setDialogs } from './stores/dialogs'
   import { authState, authStatus, session, getCurrentAdapter, handleDisconnect } from './stores/telegram'
   import { isOffline, pushToast } from './stores/ui'
@@ -52,6 +52,7 @@
   import { getKeyboardShortcutsManager } from './lib/dom/keyboard-shortcuts'
   import { createRouterStore } from './lib/routing'
   import { routeTransition } from './lib/dom/transitions'
+  import { debugLog, DEBUG_VIEWER } from './lib/debug'
 
   let dialogsLoaded = $state(false)
   let dialogsLoading = $state(false)
@@ -155,14 +156,22 @@
       // Find media item index
       const index = $mediaItems.findIndex(item => item.dialogId === dialogId && item.messageId === messageId)
       if (index >= 0) {
-        openViewer($mediaItems, index, { updateUrl: false })
+        const activeViewerItem = $viewerIndex !== null
+          ? ($viewerItems[$viewerIndex] ?? $mediaItems[$viewerIndex] ?? null)
+          : null
+
+        if (!activeViewerItem || activeViewerItem.dialogId !== dialogId || activeViewerItem.messageId !== messageId) {
+          openViewer($mediaItems, index, { updateUrl: false })
+        }
+
+        pendingViewerRoute.set(null)
       }
     }
   })
 
   // Close viewer when pending viewer route is cleared (e.g., back button)
   $effect(() => {
-    if ($pendingViewerRoute === null && $viewerIndex !== null) {
+    if ($router.type !== 'viewer' && $pendingViewerRoute === null && $viewerIndex !== null) {
       closeViewer({ updateUrl: false })
     }
   })
@@ -173,6 +182,13 @@
   })
 
   onMount(() => {
+    if (DEBUG_VIEWER) {
+      debugLog('app:startup', {
+        href: window.location.href,
+        hash: window.location.hash,
+      })
+    }
+
     // Initialize keyboard shortcuts manager
     getKeyboardShortcutsManager()
     

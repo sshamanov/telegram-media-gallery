@@ -31,6 +31,8 @@ export interface RouterOptions {
   scrollToTop?: boolean
 }
 
+import { DEBUG_VIEWER, debugLog } from './debug'
+
 class Router {
   private currentRoute: Route = { type: 'dialog-list' }
   private previousRoute: Route | null = null
@@ -108,6 +110,13 @@ class Router {
    */
   private handleHashChange(_event: HashChangeEvent): void {
     this.parseHash(window.location.hash)
+    if (DEBUG_VIEWER) {
+      debugLog('router:hashchange', {
+        hash: window.location.hash,
+        currentRoute: this.currentRoute,
+        previousRoute: this.previousRoute,
+      })
+    }
     this.notifyListeners()
   }
 
@@ -149,6 +158,15 @@ class Router {
     } else {
       window.history.replaceState({}, '', hash)
     }
+
+    if (DEBUG_VIEWER) {
+      debugLog('router:navigate', {
+        route,
+        hash,
+        updateHistory,
+        scrollToTop,
+      })
+    }
     
     // Parse and update route
     this.parseHash(hash)
@@ -166,6 +184,13 @@ class Router {
    * Navigate back to previous route
    */
   back(): void {
+    if (DEBUG_VIEWER) {
+      debugLog('router:back', {
+        currentRoute: this.currentRoute,
+        previousRoute: this.previousRoute,
+        hash: window.location.hash,
+      })
+    }
     window.history.back()
   }
 

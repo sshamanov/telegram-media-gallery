@@ -5,6 +5,7 @@
   import { formatSize, isAudioItem, isDownloadOnlyItem, isImageItem, isPdfItem, isTextItem, isTextLikeFileName, isVideoItem, mediaKindLabel } from '../../lib/media'
   import { readTextBlob } from '../../lib/thumbnails'
   import { createGallerySwipeGestures } from '../../lib/dom/swipe-gestures'
+  import { debugLog, debugWarn, DEBUG_VIEWER } from '../../lib/debug'
   import {
     closeViewer,
     mediaItems,
@@ -215,6 +216,17 @@
   async function handleContentLoad(content: ViewerContent, item: MediaItem, token: number, event: { content: { onLoaded: () => void }; preventDefault: () => void }): Promise<void> {
     event.preventDefault()
 
+    if (DEBUG_VIEWER && (isImageItem(item) || isVideoItem(item))) {
+      debugLog('viewer:contentLoad', {
+        token,
+        itemId: item.id,
+        messageId: item.messageId,
+        filename: item.filename,
+        type: item.type,
+        route: getRouter().getCurrentRoute(),
+      })
+    }
+
     // Offline: check cache first, show placeholder if not cached
     if ($isOffline) {
       const cachedFullBlob = await getCachedBlob(item, 'full')
@@ -287,11 +299,28 @@
 
       const fullBlob = await getCachedOrDownloadedBlob(item, 'full', token)
       if (!fullBlob || token !== pswpOpenToken) {
+        if (DEBUG_VIEWER) {
+          debugWarn('viewer:video:blob-missing-or-stale', {
+            itemId: item.id,
+            filename: item.filename,
+            token,
+            currentToken: pswpOpenToken,
+            hasBlob: Boolean(fullBlob),
+          })
+        }
         return
       }
 
       const fullUrl = URL.createObjectURL(fullBlob)
       content.fullUrl = fullUrl
+      if (DEBUG_VIEWER) {
+        debugLog('viewer:video:attach', {
+          itemId: item.id,
+          filename: item.filename,
+          blobSize: fullBlob.size,
+          blobType: fullBlob.type,
+        })
+      }
       video.src = fullUrl
       loadProgress = 100
       markLoaded(event)
@@ -326,6 +355,15 @@
     const token = pswpOpenToken
     showInfo = false
     loadProgress = 0
+
+    if (DEBUG_VIEWER) {
+      debugLog('viewer:attach:start', {
+        token,
+        index,
+        itemCount: items.length,
+        item: index !== null ? items[index] ?? null : null,
+      })
+    }
 
     // Dynamically import PhotoSwipe only when needed
     const PhotoSwipeModule = await import('photoswipe')
@@ -366,6 +404,12 @@
     })
 
     pswp.on('close', () => {
+      if (DEBUG_VIEWER) {
+        debugLog('viewer:pswp:close', {
+          viewerIndex: get(viewerIndex),
+          route: getRouter().getCurrentRoute(),
+        })
+      }
       closeViewer()
     })
 
@@ -384,6 +428,12 @@
     })
 
     pswp.on('destroy', () => {
+      if (DEBUG_VIEWER) {
+        debugLog('viewer:pswp:destroy', {
+          viewerIndex: get(viewerIndex),
+          route: getRouter().getCurrentRoute(),
+        })
+      }
       pswp = null
       pswpOpenToken += 1
     })
@@ -501,8 +551,21 @@
   }
 
   function closeOverlay(): void {
+    if (DEBUG_VIEWER) {
+      debugLog('viewer:closeOverlay', {
+        viewerIndex: get(viewerIndex),
+        activeItem: get(activeItem),
+        route: getRouter().getCurrentRoute(),
+        hasPswp: Boolean(pswp),
+      })
+    }
+
+    if (pswp) {
+      pswp.close()
+      return
+    }
+
     closeViewer()
-    pswp?.close()
   }
 
   $: if ($viewerIndex !== null && !pswp) {

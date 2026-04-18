@@ -1,0 +1,90 @@
+{
+  "dialogId": "5",
+  "messages": [
+    {
+      "id": 1400,
+      "date": 1775928962988,
+      "text": "Photo: DSC_3719.JPG",
+      "sender": "Alice",
+      "media": {
+        "id": "photo_4_0",
+        "kind": "photo",
+        "fileName": null,
+        "sampleFileName": "DSC_3719.JPG",
+        "mimeType": "image/jpeg",
+        "size": 14550647,
+        "width": 1280,
+        "height": 720,
+        "durationSeconds": null
+      }
+    },
+    {
+      "id": 1401,
+      "date": 1775842562988,
+      "text": "Video: PXL_20260104_120213849~2.mp4",
+      "sender": "Alice",
+      "media": {
+        "id": "video_4_1",
+        "kind": "video",
+        "fileName": null,
+        "sampleFileName": "PXL_20260104_120213849~2.mp4",
+        "mimeType": "video/mp4",
+        "size": 14101718,
+        "width": 1280,
+        "height": 720,
+        "durationSeconds": 152
+      }
+    },
+    {
+      "id": 1402,
+      "date": 1775756162988,
+      "text": "File: ls.txt",
+      "sender": "Alice",
+      "media": {
+        "id": "document_4_2",
+        "kind": "document",
+        "fileName": "ls.txt",
+        "mimeType": "text/plain",
+        "size": 6662,
+        "width": null,
+        "height": null,
+        "durationSeconds": null
+      }
+    },
+    {
+      "id": 1403,
+      "date": 1775669762988,
+      "text": "Photo: photo_5388733052562905250_w.jpg",
+      "sender": "Alice",
+      "media": {
+        "id": "photo_4_3",
+        "kind": "photo",
+        "fileName": null,
+        "sampleFileName": "photo_5388733052562905250_w.jpg",
+        "mimeType": "image/jpeg",
+        "size": 760232,
+        "width": 1280,
+        "height": 720,
+        "durationSeconds": null
+      }
+    },
+    {
+      "id": 1404,
+      "date": 1775583362988,
+      "text": "Photo: photo_5388920957382104304_w.jpg",
+      "sender": "Alice",
+      "media": {
+        "id": "photo_4_4",
+        "kind": "photo",
+        "fileName": null,
+        "sampleFileName": "photo_5388920957382104304_w.jpg",
+        "mimeType": "image/jpeg",
+        "size": 399117,
+        "width": 1280,
+        "height": 720,
+        "durationSeconds": null
+      }
+    }
+  ],
+  "totalMessages": 15
+}

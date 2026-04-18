@@ -1,0 +1,88 @@
+{
+  "dialogId": "4",
+  "messages": [
+    {
+      "id": 1300,
+      "date": 1775938962988,
+      "text": "Video: DSC_3569.MOV",
+      "sender": "John Doe",
+      "media": {
+        "id": "video_3_0",
+        "kind": "document",
+        "fileName": "DSC_3569.MOV",
+        "mimeType": "video/quicktime",
+        "size": 67652853,
+        "width": 1280,
+        "height": 720,
+        "durationSeconds": 48
+      }
+    },
+    {
+      "id": 1301,
+      "date": 1775852562988,
+      "text": "File: NIKON_Horror_Movie_Release_FINAL.pdf",
+      "sender": "John Doe",
+      "media": {
+        "id": "document_3_1",
+        "kind": "document",
+        "fileName": "NIKON_Horror_Movie_Release_FINAL.pdf",
+        "mimeType": "application/pdf",
+        "size": 402590,
+        "width": null,
+        "height": null,
+        "durationSeconds": null
+      }
+    },
+    {
+      "id": 1302,
+      "date": 1775766162988,
+      "text": "File: guide-nb-interests.pdf",
+      "sender": "John Doe",
+      "media": {
+        "id": "document_3_2",
+        "kind": "document",
+        "fileName": "guide-nb-interests.pdf",
+        "mimeType": "application/pdf",
+        "size": 345814,
+        "width": null,
+        "height": null,
+        "durationSeconds": null
+      }
+    },
+    {
+      "id": 1303,
+      "date": 1775679762988,
+      "text": "Photo: photo_5386669157568419546_w.jpg",
+      "sender": "John Doe",
+      "media": {
+        "id": "photo_3_3",
+        "kind": "photo",
+        "fileName": null,
+        "sampleFileName": "photo_5386669157568419546_w.jpg",
+        "mimeType": "image/jpeg",
+        "size": 355372,
+        "width": 1280,
+        "height": 720,
+        "durationSeconds": null
+      }
+    },
+    {
+      "id": 1304,
+      "date": 1775593362988,
+      "text": "Photo: photo_5388920957382104303_w.jpg",
+      "sender": "John Doe",
+      "media": {
+        "id": "photo_3_4",
+        "kind": "photo",
+        "fileName": null,
+        "sampleFileName": "photo_5388920957382104303_w.jpg",
+        "mimeType": "image/jpeg",
+        "size": 402466,
+        "width": 1280,
+        "height": 720,
+        "durationSeconds": null
+      }
+    }
+  ],
+  "totalMessages": 15
+}

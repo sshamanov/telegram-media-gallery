@@ -3,9 +3,54 @@ import type { MessagePage, TelegramAdapter } from './adapter'
 import { debugLog, debugWarn, DEBUG_MEDIA_SIZES } from '../debug'
 import { emit } from '../events'
 
+type SampleMedia = TgMedia & {
+  sampleFileName?: string | null
+}
+
+type SampleMessage = Omit<Message, 'media'> & {
+  media?: SampleMedia | null
+}
+
+type SampleDialogMessages = {
+  dialogId: string
+  messages: SampleMessage[]
+}
+
 // Load dialogs from JSON
 let DIALOGS: Dialog[] = []
 let messagesCache = new Map<string, Message[]>()
+let mediaSampleSources = new Map<string, string | null>()
+
+function normalizeSampleMedia(media: SampleMedia): TgMedia {
+  const sampleFileName = media.sampleFileName ?? media.fileName ?? null
+  mediaSampleSources.set(media.id, sampleFileName)
+
+  return {
+    id: media.id,
+    kind: media.kind,
+    fileName: media.fileName ?? null,
+    mimeType: media.mimeType ?? null,
+    size: media.size ?? null,
+    width: media.width ?? null,
+    height: media.height ?? null,
+    durationSeconds: media.durationSeconds ?? null,
+  }
+}
+
+function normalizeSampleMessage(message: SampleMessage, dialogId: string): Message {
+  return {
+    id: message.id,
+    dialogId: message.dialogId ?? dialogId,
+    date: message.date,
+    text: message.text,
+    sender: message.sender ?? null,
+    media: message.media ? normalizeSampleMedia(message.media) : null,
+  }
+}
+
+function resolveSampleFileName(media: TgMedia): string | null {
+  return mediaSampleSources.get(media.id) ?? media.fileName ?? null
+}
 
 // Load dialogs from samples/dialogs.json
 async function loadDialogs(): Promise<Dialog[]> {
@@ -73,10 +118,11 @@ async function loadDialogMessages(dialogId: string): Promise<Message[]> {
     // Load messages from dialog-media JSON file
     const response = await fetch(`/samples/dialog-media/${dialogId}.json`)
     if (!response.ok) throw new Error(`HTTP ${response.status}`)
-    const data = await response.json()
+    const data = await response.json() as SampleDialogMessages
+    const messages = data.messages.map((message) => normalizeSampleMessage(message, data.dialogId))
     
-    messagesCache.set(dialogId, data.messages)
-    return data.messages
+    messagesCache.set(dialogId, messages)
+    return messages
   } catch (error) {
     debugWarn(`Failed to load messages for dialog ${dialogId}:`, error)
     
@@ -247,9 +293,10 @@ export class MockTelegramAdapter implements TelegramAdapter {
 
   async downloadThumbnail(media: TgMedia): Promise<Uint8Array | null> {
     await this.delay(300)
+    const sampleFileName = resolveSampleFileName(media)
     
     if (DEBUG_MEDIA_SIZES) {
-      debugLog('Mock thumbnail debug:', { id: media.id, kind: media.kind, width: media.width, height: media.height })
+      debugLog('Mock thumbnail debug:', { id: media.id, kind: media.kind, width: media.width, height: media.height, sampleFileName })
     }
     
     const cacheKey = `thumb_${media.id}`
@@ -270,9 +317,9 @@ export class MockTelegramAdapter implements TelegramAdapter {
     }
     
     // For photos, we can use the actual file as thumbnail
-    if (media.kind === 'photo' && media.fileName) {
+    if (media.kind === 'photo' && sampleFileName) {
       try {
-        const fileData = await loadFileFromSamples(media.fileName)
+        const fileData = await loadFileFromSamples(sampleFileName)
         if (fileData.length > 0) {
           this.fileCache.set(cacheKey, fileData)
           if (DEBUG_MEDIA_SIZES) {
@@ -281,7 +328,7 @@ export class MockTelegramAdapter implements TelegramAdapter {
           return fileData
         }
       } catch (error) {
-        debugWarn(`Failed to load thumbnail for ${media.fileName}:`, error)
+        debugWarn(`Failed to load thumbnail for ${sampleFileName}:`, error)
       }
     }
     
@@ -325,7 +372,7 @@ export class MockTelegramAdapter implements TelegramAdapter {
         
         // Add file extension
         ctx.font = '10px Arial'
-        const ext = media.fileName ? media.fileName.split('.').pop()?.toUpperCase() || 'FILE' : 'FILE'
+        const ext = sampleFileName ? sampleFileName.split('.').pop()?.toUpperCase() || 'FILE' : 'FILE'
         ctx.fillText(ext, 50, 70)
         
         // Convert canvas to PNG
@@ -357,9 +404,10 @@ export class MockTelegramAdapter implements TelegramAdapter {
 
   async downloadFull(media: TgMedia, onProgress?: (pct: number) => void, abortSignal?: AbortSignal): Promise<Uint8Array> {
     await this.delay(100)
+    const sampleFileName = resolveSampleFileName(media)
     
     if (DEBUG_MEDIA_SIZES) {
-      debugLog('Mock downloadFull start:', { id: media.id, size: media.size, width: media.width, height: media.height })
+      debugLog('Mock downloadFull start:', { id: media.id, size: media.size, width: media.width, height: media.height, sampleFileName })
     }
     
     if (abortSignal?.aborted) {
@@ -376,7 +424,7 @@ export class MockTelegramAdapter implements TelegramAdapter {
     }
     
     // Try to load actual file from samples directory
-    if (media.fileName) {
+    if (sampleFileName) {
       try {
         // Simulate download progress
         if (onProgress) {
@@ -389,7 +437,7 @@ export class MockTelegramAdapter implements TelegramAdapter {
           }
         }
         
-        const fileData = await loadFileFromSamples(media.fileName)
+        const fileData = await loadFileFromSamples(sampleFileName)
         if (fileData.length > 0) {
           this.fileCache.set(cacheKey, fileData)
           if (DEBUG_MEDIA_SIZES) {
@@ -399,7 +447,7 @@ export class MockTelegramAdapter implements TelegramAdapter {
           return fileData
         }
       } catch (error) {
-        debugWarn(`Failed to load full file ${media.fileName}:`, error)
+        debugWarn(`Failed to load full file ${sampleFileName}:`, error)
       }
     }
     
