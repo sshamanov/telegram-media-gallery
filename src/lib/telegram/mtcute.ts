@@ -3,7 +3,7 @@ import { debugLog, debugWarn, DEBUG_MEDIA_SIZES } from '../debug'
 import { throttle } from '../files'
 import { emit } from '../events'
 import { getSizeLimitForMediaType } from './constants'
-import { readCachedDialogs, writeCachedDialogs } from '../cache/indexeddb'
+import { cacheFirstGetDialogs } from './utils/cache-first'
 import type { Dialog, Message, TgMedia, UploadMode } from '../../types/telegram'
 import type { MessagePage, TelegramAdapter } from './adapter'
 import { getTelegramApiCredentials } from './adapter'
@@ -358,57 +358,29 @@ class MtcuteTelegramAdapter implements TelegramAdapter {
   }
 
   async getDialogs(_opts?: { limit?: number; offsetDate?: number; forceRefresh?: boolean }): Promise<Dialog[]> {
-    const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
-    const now = Date.now()
-
-    // Helper to filter dialogs by offsetDate and limit, deduplicate
-    const filterDialogs = (allDialogs: Dialog[], limit: number, offsetDate: number): Dialog[] => {
+    // Fetch fresh dialogs from Telegram
+    const fetchFreshDialogs = async (): Promise<Dialog[]> => {
+      const client = this.getClient()
+      const allDialogs: Dialog[] = []
       const seen = new Set<string>()
-      const filtered: Dialog[] = []
-      for (const dialog of allDialogs) {
-        if (dialog.lastMessageDate && dialog.lastMessageDate <= offsetDate) continue
-        if (seen.has(dialog.id)) continue
-        seen.add(dialog.id)
-        filtered.push(dialog)
-        if (filtered.length >= limit) break
+      for await (const dialog of client.iterDialogs({ limit: Infinity, offsetDate: 0 })) {
+        const mapped = mapPeer(dialog.peer)
+        mapped.lastMessageDate = dialog.lastMessage?.date.getTime() ?? null
+        if (seen.has(mapped.id)) continue
+        seen.add(mapped.id)
+        allDialogs.push(mapped)
       }
-      return filtered
+      return allDialogs
     }
 
-    // 1. Try cache unless forceRefresh is true
-    if (!_opts?.forceRefresh) {
-      const cached = await readCachedDialogs()
-      if (cached && now - cached.updatedAt < CACHE_TTL) {
-        debugLog('mtcute:getDialogs returning cached data', { count: cached.dialogs.length })
-        const limit = _opts?.limit ?? Infinity
-        const offsetDate = _opts?.offsetDate ?? 0
-        return filterDialogs(cached.dialogs, limit, offsetDate)
-      }
-    }
-
-    // 2. Fetch fresh data from Telegram (always fetch all dialogs for cache)
-    const client = this.getClient()
-    const allDialogs: Dialog[] = []
-    const seen = new Set<string>()
-    for await (const dialog of client.iterDialogs({ limit: Infinity, offsetDate: 0 })) {
-      const mapped = mapPeer(dialog.peer)
-      mapped.lastMessageDate = dialog.lastMessage?.date.getTime() ?? null
-      if (seen.has(mapped.id)) continue
-      seen.add(mapped.id)
-      allDialogs.push(mapped)
-    }
-
-    // 3. Update cache (ignore errors)
-    try {
-      await writeCachedDialogs(allDialogs)
-    } catch (error) {
-      debugWarn('Failed to write dialog cache', error)
-    }
-
-    // 4. Return filtered result according to opts
-    const limit = _opts?.limit ?? Infinity
-    const offsetDate = _opts?.offsetDate ?? 0
-    return filterDialogs(allDialogs, limit, offsetDate)
+    const result = await cacheFirstGetDialogs(
+      fetchFreshDialogs,
+      _opts,
+      5 * 60 * 1000, // 5 minutes TTL
+      'mtcute'
+    )
+    
+    return result.dialogs
   }
 
   async getMessages(dialogId: string, opts: { limit: number; offset?: { id: number; date: number } | null }): Promise<MessagePage> {

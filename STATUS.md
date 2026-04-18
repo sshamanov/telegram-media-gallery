@@ -78,7 +78,7 @@
 - `completed` Task 6: Implement Telegram data caching (plan: `.kilo/plans/1776487925900-task6-telegram-data-caching.md`)
 - `completed` Task 7: Add toast auto-close (plan: `.kilo/plans/1776540483161-task7-toast-auto-close.md`)
 - `completed` Task 8: Remove author thumbnail background (plan: `.kilo/plans/1776540483162-task8-remove-author-thumbnail-background.md`)
-- `pending` Task 9: Refactor large modules (plan: `.kilo/plans/1776540483163-task9-refactor-large-modules.md`)
+- `partially_completed` Task 9: Refactor large modules (plan: `.kilo/plans/1776540483163-task9-refactor-large-modules.md`) - cache-first logic extracted
 - `pending` Task 10: Write unit tests (plan: `.kilo/plans/1776540483164-task10-write-unit-tests.md`)
 
 ### Clever Island Plan (Stale plan cleanup & priority execution)
@@ -176,6 +176,7 @@
 - **Phase 1**: Code Refactoring & Tests - 1. Split large modules (mtcute.ts, mock.ts, GalleryGrid.svelte, ViewerWrapper.svelte); 2. Write unit tests for refactored code and bug fixes.
 
 ## Plan And Todo History
+- 2026-04-18 22:28 +02:00 - Partially completed Task 9 (refactor large modules): extracted cache-first logic from mtcute.ts and mock.ts into shared utility `src/lib/telegram/utils/cache-first.ts`. Reduced duplication, preserved existing behavior. Validation passed: type check 0 errors/0 warnings; short suite 32/32.
 - 2026-04-18 22:28 +02:00 - Completed Task 8 (remove author thumbnail background): removed background and backdrop-filter from author badges in grid view (`MediaItem.svelte`), replaced with text overlay using white color and text-shadow for readability. List view (`MediaListRow.svelte`) author styling unchanged (no background). Validation passed: type check 0 errors/0 warnings; short suite 32/32.
 - 2026-04-18 22:28 +02:00 - Completed Task 7 (toast auto-close): reduced toast auto-close timeout from 3 s to 1 s default. Added `TOAST_AUTO_CLOSE_MS = 1000` constant in `src/stores/ui.ts`, preserved error-toast exclusion (`kind !== 'error'`). Validation passed: type check 0 errors/0 warnings; short suite 32/32.
 - 2026-04-18 21:42 +02:00 - Created detailed implementation plans for Tasks 7-10: toast auto-close (`.kilo/plans/1776540483161-task7-toast-auto-close.md`), author thumbnail background removal (`.kilo/plans/1776540483162-task8-remove-author-thumbnail-background.md`), large module refactoring (`.kilo/plans/1776540483163-task9-refactor-large-modules.md`), and unit tests (`.kilo/plans/1776540483164-task10-write-unit-tests.md`). Updated command/agent files to reference STATUS.md instead of .kilo/status.md.
@@ -360,6 +361,9 @@
 - ℹ️ Historical references to `.kilo/status.md` remain in dated records by design and are not treated as active drift.
 
 ## Last Validation
+- 2026-04-18 22:28 +02:00 - Task 9 partial implementation validation: extracted cache-first logic.
+  - Result: passed with 0 errors, 0 warnings
+  - Main note: Type check passes; short test suite passes 32/32; cache-first logic successfully extracted into shared utility.
 - 2026-04-18 22:28 +02:00 - Task 8 implementation validation: removed author thumbnail background.
   - Result: passed with 0 errors, 0 warnings
   - Main note: Type check passes; short test suite passes 32/32; author badges now show as text overlay without background in grid view.
