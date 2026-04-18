@@ -1,6 +1,6 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-18 07:51 +02:00
+**Last Updated:** 2026-04-18 09:39 +02:00
 **Current Phase:** Playful Otter - Bug Fixes & Improvements
 **Active Plan:** `.kilo/plans/1776456580754-playful-otter.md`
 **Branch:** `main`
@@ -24,7 +24,7 @@
 - **Plan file:** `.kilo/plans/1776456580754-playful-otter.md`
 - **Goal:** Fix reported UI bugs, implement caching improvements, refactor large modules, and add unit tests.
 - **Execution strategy:** 4 phases: 1. Investigation & analysis; 2. Bug fixes (scroll position, grid columns, masonry thumbnails, settings title, video preview); 3. Improvements (Telegram data caching, toast auto-close, author thumbnail background); 4. Code refactoring & unit tests.
-- **Status:** in progress; Task 1 (scroll position preservation) implemented and under validation
+- **Status:** in progress; Tasks 1-3 completed and validated, Task 4 investigation next
 
 ## Completed Plans
 - **Plan file:** `.kilo/plans/1776410435637-clever-island.md`
@@ -72,7 +72,7 @@
 ### Playful Otter Plan (Bug Fixes & Improvements)
 - `completed` Task 1: Investigate scroll position loss and implement scroll position preservation when returning from preview
 - `completed` Task 2: Fix grid columns button functionality
-- `pending` Task 3: Fix masonry layout thumbnail sizing
+- `completed` Task 3: Fix masonry layout thumbnail sizing
 - `pending` Task 4: Fix settings title persistence
 - `pending` Task 5: Fix video preview exit behavior
 - `pending` Task 6: Implement Telegram data caching
@@ -173,12 +173,13 @@
 - `completed` Task 20: UI refinements (Block 6.1) (FB006, FB007) (commit 715d7f5)
 
 ## Next Execution Order
-- **Phase 1**: Continue investigation for remaining bug fixes after Task 2 root-cause confirmation.
-- **Phase 2**: Bug Fixes (Priority Order) - 3. Masonry layout thumbnail sizing; 4. Settings title persistence; 5. Video preview exit behavior.
+- **Phase 1**: Continue investigation for remaining bug fixes after Task 3 root-cause confirmation.
+- **Phase 2**: Bug Fixes (Priority Order) - 4. Settings title persistence; 5. Video preview exit behavior.
 - **Phase 3**: Improvements & Features - 1. Telegram data caching; 2. Toast auto-close; 3. Author thumbnail background removal.
 - **Phase 4**: Code Refactoring & Tests - 1. Split large modules (mtcute.ts, mock.ts, GalleryGrid.svelte, ViewerWrapper.svelte); 2. Write unit tests for refactored code and bug fixes.
 
 ## Plan And Todo History
+- 2026-04-18 09:39 +02:00 - Completed Playful Otter Task 3 (masonry thumbnail sizing): identified that `src/components/gallery/MediaItem.svelte` forced every media card to `aspect-ratio: 1`, which made masonry items render as squares regardless of media dimensions. Added a `masonry` prop from `src/components/gallery/GalleryGrid.svelte` and switched card sizing to use the media item's intrinsic `width / height` ratio only in masonry mode, while preserving square cards in the regular grid. Validation passed: type check 0 errors/0 warnings; short suite 32/32.
 - 2026-04-18 07:51 +02:00 - Completed Playful Otter Task 2 (grid columns button): identified that `src/components/gallery/GalleryGrid.svelte` updated `settings.gridColumns`, but desktop rendering ignored that value by overriding the active column count with `getDesktopGridColumns(...)`. Removed the desktop preset override so the grid columns button now changes the actual rendered columns and matching keyboard-navigation step size in grid mode. Validation passed: type check 0 errors/0 warnings; short suite 32/32 including the grid-columns regression test.
 - 2026-04-18 07:43 +02:00 - Completed Playful Otter Task 1 (scroll position preservation): identified that `scrollPositions` persistence existed in `src/stores/gallery.ts` but was never read or written by the gallery UI. Updated `src/components/gallery/GalleryGrid.svelte` to persist scroll position during scroll events and restore it once per dialog when the gallery view becomes active again after preview close. Validation in progress.
 - 2026-04-18 07:04 +02:00 - Activated playful-otter plan for bug fixes and improvements. Plan file: `.kilo/plans/1776456580754-playful-otter.md`. Clever Island plan marked as completed. Committed as `85d4e58`.
@@ -344,6 +345,12 @@
 - ℹ️ Historical references to `.kilo/status.md` remain in dated records by design and are not treated as active drift.
 
 ## Last Validation
+- 2026-04-18 09:38 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
+  - Result: passed with 0 errors, 0 warnings
+  - Main note: Playful Otter Task 3 validation - masonry cards now use intrinsic media aspect ratios without affecting regular grid sizing.
+- 2026-04-18 09:39 +02:00 - `docker-compose -f docker-compose.test.yml up --build playwright`
+  - Result: passed (`32 passed`)
+  - Main note: Playful Otter Task 3 validation - short suite passes after masonry thumbnail sizing fix.
 - 2026-04-18 07:50 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
   - Result: passed with 0 errors, 0 warnings
   - Main note: Playful Otter Task 2 validation - grid column rendering now follows `settings.gridColumns` without desktop override.

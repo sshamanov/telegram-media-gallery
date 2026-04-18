@@ -10,6 +10,7 @@
   export let selected = false
   export let selectionMode = false
   export let focused = false
+  export let masonry = false
   export let onActivate: (itemId: string, event: MouseEvent) => void
   export let onLongPress: (itemId: string) => void
 
@@ -138,6 +139,19 @@
     clearLongPress()
     setThumbUrl(null)
   })
+  $: aspectRatio = getAspectRatio(item, masonry)
+
+  function getAspectRatio(mediaItem: GalleryMediaItem, useMasonry: boolean): string {
+    if (!useMasonry) {
+      return '1 / 1'
+    }
+
+    if (mediaItem.width > 0 && mediaItem.height > 0) {
+      return `${mediaItem.width} / ${mediaItem.height}`
+    }
+
+    return '1 / 1'
+  }
 </script>
 
 <button
@@ -148,6 +162,7 @@
   class:long-pressing={isLongPressing}
   class="media-card"
   type="button"
+  style:aspect-ratio={aspectRatio}
   data-testid="media-item"
   data-media-id={item.id}
   data-item-id={item.id}
@@ -188,7 +203,6 @@
 <style>
   .media-card {
     position: relative;
-    aspect-ratio: 1;
     overflow: hidden;
     border: 0;
     border-radius: 14px;

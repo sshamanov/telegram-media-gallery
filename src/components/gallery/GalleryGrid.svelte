@@ -1052,11 +1052,12 @@
                <MediaItemCard
                  item={item}
                  onActivate={handleItemActivate}
-                 onLongPress={handleItemLongPress}
-                 selectionMode={$selectionMode}
-                 selected={$selectedMediaIds.has(item.id)}
-                 focused={focusedItemIndex === i}
-               />
+                onLongPress={handleItemLongPress}
+                selectionMode={$selectionMode}
+                selected={$selectedMediaIds.has(item.id)}
+                focused={focusedItemIndex === i}
+                masonry={shouldUseMasonry}
+              />
              {/each}
            </div>
            <DesktopSidebar currentMediaItem={selectedMediaItem} />
@@ -1068,11 +1069,12 @@
                <MediaItemCard
                  item={item}
                  onActivate={handleItemActivate}
-                 onLongPress={handleItemLongPress}
-                 selectionMode={$selectionMode}
-                 selected={$selectedMediaIds.has(item.id)}
-                 focused={focusedItemIndex === i}
-               />
+                onLongPress={handleItemLongPress}
+                selectionMode={$selectionMode}
+                selected={$selectedMediaIds.has(item.id)}
+                focused={focusedItemIndex === i}
+                masonry={shouldUseMasonry}
+              />
              {/each}
            </div>
            <div class="desktop-sidebar-panel">
@@ -1097,11 +1099,12 @@
              <MediaItemCard
                item={item}
                onActivate={handleItemActivate}
-               onLongPress={handleItemLongPress}
-               selectionMode={$selectionMode}
-               selected={$selectedMediaIds.has(item.id)}
-               focused={focusedItemIndex === i}
-             />
+                onLongPress={handleItemLongPress}
+                selectionMode={$selectionMode}
+                selected={$selectedMediaIds.has(item.id)}
+                focused={focusedItemIndex === i}
+                masonry={shouldUseMasonry}
+              />
            {/each}
          </div>
        {/if}
