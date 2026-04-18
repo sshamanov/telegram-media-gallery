@@ -1,118 +1,23 @@
-import { TelegramClient, type Chat, type Message as MtcuteMessage, type Photo, type Video, type Document, type Audio, type Voice } from '@mtcute/web'
+import { TelegramClient, type Message as MtcuteMessage, type Photo, type Video, type Document, type Audio, type Voice } from '@mtcute/web'
 import { debugLog, debugWarn, DEBUG_MEDIA_SIZES } from '../debug'
 import { throttle } from '../files'
 import { emit } from '../events'
-import { getSizeLimitForMediaType } from './constants'
 import { cacheFirstGetDialogs } from './utils/cache-first'
+import {
+  errorMessage,
+  isPasswordRequired,
+  fileLikeName,
+  fileLikeDimensions,
+  fileLikeDuration,
+  photoSize,
+  uploadMediaType,
+  mapPeer
+} from './utils/mtcute-helpers'
 import type { Dialog, Message, TgMedia, UploadMode } from '../../types/telegram'
 import type { MessagePage, TelegramAdapter } from './adapter'
 import { getTelegramApiCredentials } from './adapter'
 
 type DownloadableMedia = Photo | Video | Document | Audio | Voice
-
-function errorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error)
-}
-
-function isPasswordRequired(error: unknown): boolean {
-  return errorMessage(error).includes('SESSION_PASSWORD_NEEDED')
-}
-
-function documentDimensions(document: Document): { width: number; height: number } {
-  const attributes = ((document.raw as { attributes?: unknown }).attributes ?? []) as Array<Record<string, unknown>>
-
-  for (const attribute of attributes) {
-    if (attribute._ === 'documentAttributeImageSize' || attribute._ === 'documentAttributeVideo') {
-      return {
-        width: typeof attribute.w === 'number' ? attribute.w : 0,
-        height: typeof attribute.h === 'number' ? attribute.h : 0,
-      }
-    }
-  }
-
-  return { width: 0, height: 0 }
-}
-
-function documentDuration(document: Document): number | null {
-  const attributes = ((document.raw as { attributes?: unknown }).attributes ?? []) as Array<Record<string, unknown>>
-
-  for (const attribute of attributes) {
-    if ((attribute._ === 'documentAttributeVideo' || attribute._ === 'documentAttributeAudio') && typeof attribute.duration === 'number') {
-      return attribute.duration
-    }
-  }
-
-  return null
-}
-
-function fileLikeName(media: Document | Audio | Voice): string | null {
-  return media.fileName ?? null
-}
-
-function fileLikeDimensions(media: Document | Audio | Voice): { width: number; height: number } {
-  return documentDimensions(media as unknown as Document)
-}
-
-function fileLikeDuration(media: Document | Audio | Voice): number | null {
-  return documentDuration(media as unknown as Document)
-}
-
-function photoSize(photo: Photo): number | null {
-  return photo.fileSize ?? null
-}
-
-function uploadMediaType(file: File, mode: UploadMode): 'audio' | 'document' | 'photo' | 'video' {
-  if (mode === 'file') {
-    return 'document'
-  }
-
-  let detected: 'photo' | 'video' | 'audio' | 'document' = 'document'
-
-  if (file.type.startsWith('image/')) {
-    detected = 'photo'
-  } else if (file.type.startsWith('video/')) {
-    detected = 'video'
-  } else if (file.type.startsWith('audio/')) {
-    detected = 'audio'
-  }
-
-  // If detected media type has a size limit and file exceeds it, fall back to document
-  if (detected !== 'document') {
-    const limit = getSizeLimitForMediaType(detected)
-    if (file.size > limit) {
-      debugLog(`File size ${file.size} exceeds ${detected} limit ${limit}, falling back to document`)
-      detected = 'document'
-    }
-  }
-
-  return detected
-}
-
-function mapPeer(peer: Chat | import('@mtcute/web').User): Dialog {
-  if (peer.type === 'user') {
-    return {
-      id: String(peer.id),
-      title: peer.displayName,
-      kind: 'chat',
-      subtitle: peer.username ? `@${peer.username}` : 'Direct chat',
-      username: peer.username ?? null,
-    }
-  }
-
-  const subtitle = peer.chatType === 'channel'
-    ? 'Channel'
-    : peer.chatType === 'supergroup'
-      ? 'Supergroup'
-      : 'Group'
-
-  return {
-    id: String(peer.id),
-    title: peer.displayName,
-    kind: 'group',
-    subtitle,
-    username: peer.username ?? null,
-  }
-}
 
 class MtcuteTelegramAdapter implements TelegramAdapter {
   private session: string | null = localStorage.getItem('session')
