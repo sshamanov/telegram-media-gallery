@@ -277,21 +277,25 @@
 
 
 
-   .badge.author {
-     right: auto;
-     left: 10px;
-     top: 10px;
-     bottom: auto;
-     width: auto;
-     min-width: 44px;
-     max-width: 120px;
-     height: auto;
-     padding: 4px 8px;
-     font-size: 0.72rem;
-     overflow: hidden;
-     text-overflow: ellipsis;
-     white-space: nowrap;
-   }
+    .badge.author {
+      right: auto;
+      left: 10px;
+      top: 10px;
+      bottom: auto;
+      width: auto;
+      min-width: 44px;
+      max-width: 120px;
+      height: auto;
+      padding: 4px 8px;
+      font-size: 0.72rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      background: transparent;
+      backdrop-filter: none;
+      color: white;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+    }
    
     .badge.cache-badge {
       right: 10px;
