@@ -716,6 +716,7 @@
 ## Recent Commit Log
 | Commit | Date | Description |
 |--------|------|-------------|
+| `7c7edb7` | 2026-04-18 | feat: add dialog metadata cache for faster reloads |
 | `20f7df9` | 2026-04-18 | docs: update STATUS.md and plan with Task 5 completion |
 | `98cfa51` | 2026-04-18 | fix: stabilize viewer close path |
 | `04e6b47` | 2026-04-18 | fix: align mock viewer metadata with real mode |
