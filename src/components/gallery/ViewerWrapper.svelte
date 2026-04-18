@@ -561,7 +561,20 @@
     }
 
     if (pswp) {
-      pswp.close()
+      const route = getRouter().getCurrentRoute()
+      const dialogId = route.type === 'viewer'
+        ? route.dialogId
+        : get(activeItem)?.dialogId ?? null
+      const currentPswp = pswp
+
+      pswp = null
+      closeViewer({ updateUrl: false })
+
+      if (dialogId) {
+        getRouter().navigate({ type: 'gallery', dialogId }, { updateHistory: false })
+      }
+
+      currentPswp.destroy()
       return
     }
 

@@ -1,6 +1,6 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-18 15:33 +02:00
+**Last Updated:** 2026-04-18 16:11 +02:00
 **Current Phase:** Playful Otter - Bug Fixes & Improvements
 **Active Plan:** `.kilo/plans/1776456580754-playful-otter.md`
 **Branch:** `main`
@@ -24,7 +24,7 @@
 - **Plan file:** `.kilo/plans/1776456580754-playful-otter.md`
 - **Goal:** Fix reported UI bugs, implement caching improvements, refactor large modules, and add unit tests.
 - **Execution strategy:** 4 phases: 1. Investigation & analysis; 2. Bug fixes (scroll position, grid columns, masonry thumbnails, settings title, video preview); 3. Improvements (Telegram data caching, toast auto-close, author thumbnail background); 4. Code refactoring & unit tests.
-- **Status:** in progress; Tasks 1-4 completed and validated, Task 5 investigation restarted from rollback baseline with a safer diagnostics plan pending implementation
+- **Status:** in progress; Tasks 1-4 completed and validated, Task 5 mock close-path recovery is validated and ready for real-data verification
 
 ## Completed Plans
 - **Plan file:** `.kilo/plans/1776410435637-clever-island.md`
@@ -173,12 +173,14 @@
 - `completed` Task 20: UI refinements (Block 6.1) (FB006, FB007) (commit 715d7f5)
 
 ## Next Execution Order
-- **Phase 1**: Continue investigation for remaining bug fixes after Task 4 root-cause confirmation.
-- **Phase 2**: Bug Fixes (Priority Order) - 5. Video preview exit behavior.
+- **Phase 1**: Task 5 real-data verification using the now-green mock close-path baseline.
+- **Phase 2**: If real data still diverges, capture the remaining real-data-only close behavior and iterate on viewer close logic without regressing the mock suite.
 - **Phase 3**: Improvements & Features - 1. Telegram data caching; 2. Toast auto-close; 3. Author thumbnail background removal.
 - **Phase 4**: Code Refactoring & Tests - 1. Split large modules (mtcute.ts, mock.ts, GalleryGrid.svelte, ViewerWrapper.svelte); 2. Write unit tests for refactored code and bug fixes.
 
 ## Plan And Todo History
+- 2026-04-18 16:11 +02:00 - Completed Task 5 mock recovery iteration 2: changed `src/components/gallery/ViewerWrapper.svelte` X-button close path to take ownership of the viewer exit by immediately clearing local viewer state, replacing the viewer URL with the gallery URL for the current dialog, and destroying PhotoSwipe directly. This preserved the mock close-button contract without reintroducing the double-back regression. Validation passed: type check 0 errors/0 warnings; short suite 32/32.
+- 2026-04-18 16:08 +02:00 - Started a Task 5 recovery plan after the second fix regression was reverted. Recovery order is now explicit: stabilize mock close behavior first using the smallest close-path change that satisfies the short suite, iterate until mock acceptance is restored, then hand off for real-data verification before resuming later plan items.
 - 2026-04-18 15:33 +02:00 - Tried the pending-viewer-first fix by turning `pendingViewerRoute` into a one-shot trigger and gating the route-clear close effect to non-viewer routes only. Type check passed, but the short suite still fails on the same close-button assertion (`.viewer-ui` remains visible). This narrows the remaining accepted Task 5 fix to the viewer close path rather than the pending-viewer resolver.
 - 2026-04-18 15:30 +02:00 - Task 5 partial fix attempt updated `src/lib/telegram/mock.ts` to normalize sample `dialogId`, changed `src/components/gallery/ViewerWrapper.svelte` so X-button close no longer calls `closeViewer()` before `pswp.close()`, and added an idempotent pending-viewer guard in `src/App.svelte`. Type check passed, but required short validation failed because `.viewer-ui` remained visible after close button click, so the fix is not accepted. Current narrowed diagnosis: the final fix must preserve immediate app-overlay teardown while ensuring browser history is stepped back exactly once.
 - 2026-04-18 15:20 +02:00 - Analyzed `mock.log` and `real.log` after the mock-parity block. Confirmed two high-confidence Task 5 issues without changing runtime logic: `samples/dialog-media/*.json` messages still omit `dialogId`, so the mock adapter returns items with `dialogId: undefined` and generates `#/gallery/undefined/view/...` routes; and `src/components/gallery/ViewerWrapper.svelte` currently closes the viewer twice on X-button exit (`closeOverlay()` calls `closeViewer()` before `pswp?.close()`, then `pswp.on('close')` calls `closeViewer()` again), matching the observed double-back to dialog list/root. Real-data logs additionally show a second `openViewer(..., { updateUrl: false })` after viewer navigation, making `pendingViewerRoute` the leading secondary suspect for video-specific empty-player behavior.
@@ -326,6 +328,7 @@
 - New Task 5 diagnosis from `mock.log` and `real.log`: (1) mock sample messages still miss `dialogId`, producing `#/gallery/undefined/view/...` URLs and preventing faithful mock route behavior; (2) viewer close is invoked twice on X-button close because `src/components/gallery/ViewerWrapper.svelte` calls `closeViewer()` in `closeOverlay()` and then PhotoSwipe fires `close` and calls `closeViewer()` again. Real-data logs also show an additional `openViewer(..., { updateUrl: false })` immediately after `router:navigate(viewer)`, which is likely the secondary cause of video-specific empty-player behavior.
 - Latest Task 5 partial fix resolved the mock `dialogId` issue and added an idempotent pending-viewer guard, but the X-button close path remains unresolved: removing the eager `closeViewer()` call makes `.viewer-ui` stay mounted too long in the short suite, so the accepted fix likely needs a single-close flow that hides app UI immediately while preventing the second browser-history back.
 - Follow-up Task 5 attempt confirmed that the pending-viewer one-shot change alone does not resolve the close regression: the required short suite still fails on the same X-button assertion, so the next fix must target the close path directly.
+- Mock acceptance is restored after close-path recovery iteration 2: the short suite is back to green, so further Task 5 work can now focus on real-data-only divergence instead of mock/viewer baseline breakage.
 
 ### Performance improvements  
 - Phase 3 speed investigation (FB008) identified unnecessary buffer copy in `cloneBufferToBlob` and missing progress throttling. Both optimizations have been implemented:
@@ -358,6 +361,12 @@
 - ℹ️ Historical references to `.kilo/status.md` remain in dated records by design and are not treated as active drift.
 
 ## Last Validation
+- 2026-04-18 16:10 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
+  - Result: passed with 0 errors, 0 warnings
+  - Main note: mock close-path recovery iteration 2 compiles cleanly.
+- 2026-04-18 16:11 +02:00 - `docker-compose -f docker-compose.test.yml up --build playwright`
+  - Result: passed (`32 passed`)
+  - Main note: mock close-path recovery iteration 2 restores the full short-suite baseline, clearing the mock acceptance gate for Task 5.
 - 2026-04-18 15:32 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
   - Result: passed with 0 errors, 0 warnings
   - Main note: pending-viewer one-shot follow-up compiles cleanly.
