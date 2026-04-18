@@ -724,6 +724,7 @@
 ## Recent Commit Log
 | Commit | Date | Description |
 |--------|------|-------------|
+| `70e0cd9` | 2026-04-18 | fix: reduce toast auto-close timeout to 1 second |
 | `0b12420` | 2026-04-18 | chore: create sub-plans for playful-otter tasks 7-10 and fix plan inconsistencies |
 | `7c7edb7` | 2026-04-18 | feat: add dialog metadata cache for faster reloads |
 | `20f7df9` | 2026-04-18 | docs: update STATUS.md and plan with Task 5 completion |
