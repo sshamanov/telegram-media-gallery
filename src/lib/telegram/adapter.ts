@@ -14,7 +14,7 @@ export interface TelegramAdapter {
   reconnect(session: string): Promise<boolean>
   logout(): Promise<void>
   getSession(): string | null
-  getDialogs(opts?: { limit?: number; offsetDate?: number }): Promise<Dialog[]>
+  getDialogs(opts?: { limit?: number; offsetDate?: number; forceRefresh?: boolean }): Promise<Dialog[]>
   getMessages(dialogId: string, opts: { limit: number; offset?: { id: number; date: number } | null }): Promise<MessagePage>
   downloadThumbnail(media: TgMedia): Promise<Uint8Array | null>
   downloadFull(media: TgMedia, onProgress?: (pct: number) => void, abortSignal?: AbortSignal): Promise<Uint8Array>

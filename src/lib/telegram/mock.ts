@@ -2,6 +2,7 @@ import type { Dialog, Message, TgMedia, UploadMode } from '../../types/telegram'
 import type { MessagePage, TelegramAdapter } from './adapter'
 import { debugLog, debugWarn, DEBUG_MEDIA_SIZES } from '../debug'
 import { emit } from '../events'
+import { readCachedDialogs, writeCachedDialogs } from '../cache/indexeddb'
 
 type SampleMedia = TgMedia & {
   sampleFileName?: string | null
@@ -256,15 +257,42 @@ export class MockTelegramAdapter implements TelegramAdapter {
     return this.session
   }
 
-  async getDialogs(opts?: { limit?: number; offsetDate?: number }): Promise<Dialog[]> {
+  async getDialogs(opts?: { limit?: number; offsetDate?: number; forceRefresh?: boolean }): Promise<Dialog[]> {
+    const CACHE_TTL = 5 * 60 * 1000
+    const now = Date.now()
+
+    // Helper to filter dialogs using mock's existing logic
+    const filterDialogs = (allDialogs: Dialog[], limit: number, offsetDate: number): Dialog[] => {
+      return allDialogs
+        .filter(dialog => !dialog.lastMessageDate || dialog.lastMessageDate > offsetDate)
+        .slice(0, limit)
+    }
+
+    if (!opts?.forceRefresh) {
+      const cached = await readCachedDialogs()
+      if (cached && now - cached.updatedAt < CACHE_TTL) {
+        debugLog('mock:getDialogs returning cached data', { count: cached.dialogs.length })
+        const limit = opts?.limit ?? cached.dialogs.length
+        const offsetDate = opts?.offsetDate ?? 0
+        return filterDialogs(cached.dialogs, limit, offsetDate)
+      }
+    }
+
+    // Cache miss: fetch fresh data with artificial delay
     await this.delay(800)
-    const dialogs = await loadDialogs()
-    const limit = opts?.limit ?? dialogs.length
+    const allDialogs = await loadDialogs()
+
+    // Store all dialogs in cache (ignore errors)
+    try {
+      await writeCachedDialogs(allDialogs)
+    } catch (error) {
+      debugWarn('Mock adapter: failed to write dialog cache', error)
+    }
+
+    // Return filtered result according to opts
+    const limit = opts?.limit ?? allDialogs.length
     const offsetDate = opts?.offsetDate ?? 0
-    
-    return dialogs
-      .filter(dialog => !dialog.lastMessageDate || dialog.lastMessageDate > offsetDate)
-      .slice(0, limit)
+    return filterDialogs(allDialogs, limit, offsetDate)
   }
 
   async getMessages(dialogId: string, opts: { limit: number; offset?: { id: number; date: number } | null }): Promise<MessagePage> {

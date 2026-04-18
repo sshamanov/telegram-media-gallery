@@ -17,6 +17,7 @@
   import { isOffline, pushToast } from '../../stores/ui'
   import { tooltip } from '../../lib/dom/tooltips'
   import { navigateToSettings, navigateToGallery } from '../../lib/routing'
+  import { clearDialogCache } from '../../lib/cache/indexeddb'
   import type { Dialog } from '../../types/telegram'
 
   let tab: 'galleries' | 'groups' | 'chats' = 'galleries'
@@ -56,22 +57,26 @@
     navigateToGallery(dialog.id)
   }
 
-  async function refreshDialogs(): Promise<void> {
+  async function loadDialogs(forceRefresh = false): Promise<void> {
     if ($isOffline) {
       return
     }
 
     try {
-      const dialogs = await getCurrentAdapter().getDialogs()
+      const dialogs = await getCurrentAdapter().getDialogs(forceRefresh ? { forceRefresh: true } : undefined)
       setDialogs(dialogs)
     } catch {
-      pushToast({ kind: 'error', text: 'Failed to refresh dialogs', dismissible: true })
+      pushToast({ kind: 'error', text: 'Failed to load dialogs', dismissible: true })
     }
+  }
+
+  async function refreshDialogs(): Promise<void> {
+    await loadDialogs(true)
   }
 
   function switchTab(nextTab: 'galleries' | 'groups' | 'chats'): void {
     tab = nextTab
-    void refreshDialogs()
+    void loadDialogs(false)  // cache‑first
   }
 
   function openSettings(): void {
@@ -83,6 +88,7 @@
     localStorage.removeItem('session')
     localStorage.removeItem('phone')
     clearDialogSnapshot()
+    void clearDialogCache()
     resetDialogsState()
     authState.set('idle')
     session.set({ session: null })

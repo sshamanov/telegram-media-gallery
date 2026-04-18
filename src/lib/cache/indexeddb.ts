@@ -1,9 +1,12 @@
+import type { Dialog } from '../../types/telegram'
+
 const DB_NAME = 'telegram-gallery-cache'
-const DB_VERSION = 1
+const DB_VERSION = 2
 const THUMBS = 'thumbnails'
 const FULL = 'full-media'
+const DIALOG_METADATA = 'dialog-metadata'
 
-type StoreName = typeof THUMBS | typeof FULL
+type StoreName = typeof THUMBS | typeof FULL | typeof DIALOG_METADATA
 
 interface CacheRow {
   id: string
@@ -25,6 +28,9 @@ function getDb(): Promise<IDBDatabase> {
         }
         if (!db.objectStoreNames.contains(FULL)) {
           db.createObjectStore(FULL, { keyPath: 'id' })
+        }
+        if (!db.objectStoreNames.contains(DIALOG_METADATA)) {
+          db.createObjectStore(DIALOG_METADATA, { keyPath: 'id' })
         }
       }
 
@@ -134,4 +140,38 @@ export async function clearAllCachedMedia(): Promise<void> {
     clearThumbnailCache(),
     clearFullMediaCache(),
   ])
+}
+
+export interface DialogCacheRow {
+  id: 'dialogs'  // single entry for the whole list
+  dialogs: Dialog[]
+  updatedAt: number
+}
+
+export async function readCachedDialogs(): Promise<DialogCacheRow | null> {
+  return withStore<DialogCacheRow | null>(DIALOG_METADATA, 'readonly', (store, resolve) => {
+    const request = store.get('dialogs')
+    request.onsuccess = () => resolve((request.result as DialogCacheRow | undefined) ?? null)
+    request.onerror = () => resolve(null)
+  })
+}
+
+export async function writeCachedDialogs(dialogs: Dialog[]): Promise<void> {
+  return withStore(DIALOG_METADATA, 'readwrite', (store, resolve, reject) => {
+    const request = store.put({
+      id: 'dialogs',
+      dialogs,
+      updatedAt: Date.now(),
+    } satisfies DialogCacheRow)
+    request.onsuccess = () => resolve(undefined)
+    request.onerror = () => reject(request.error ?? new Error('Failed to write dialog cache'))
+  })
+}
+
+export async function clearDialogCache(): Promise<void> {
+  await withStore(DIALOG_METADATA, 'readwrite', (store, resolve, reject) => {
+    const request = store.clear()
+    request.onsuccess = () => resolve(undefined)
+    request.onerror = () => reject(request.error ?? new Error('Failed to clear dialog cache'))
+  })
 }

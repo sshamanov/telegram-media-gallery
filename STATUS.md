@@ -75,7 +75,7 @@
 - `completed` Task 3: Fix masonry layout thumbnail sizing
 - `completed` Task 4: Fix settings title persistence
 - `completed` Task 5: Fix video preview exit behavior
-- `pending` Task 6: Implement Telegram data caching
+- `completed` Task 6: Implement Telegram data caching (plan: `.kilo/plans/1776487925900-task6-telegram-data-caching.md`)
 - `pending` Task 7: Add toast auto-close
 - `pending` Task 8: Remove author thumbnail background
 - `pending` Task 9: Refactor large modules
@@ -173,12 +173,13 @@
 - `completed` Task 20: UI refinements (Block 6.1) (FB006, FB007) (commit 715d7f5)
 
 ## Next Execution Order
-- **Phase 1**: Task 6: Implement Telegram data caching for faster reloads.
-- **Phase 2**: Task 7: Add toast auto-close (1 second default).
-- **Phase 3**: Task 8: Remove author thumbnail background.
-- **Phase 4**: Code Refactoring & Tests - 1. Split large modules (mtcute.ts, mock.ts, GalleryGrid.svelte, ViewerWrapper.svelte); 2. Write unit tests for refactored code and bug fixes.
+- **Phase 1**: Task 7: Add toast auto-close (1 second default).
+- **Phase 2**: Task 8: Remove author thumbnail background.
+- **Phase 3**: Code Refactoring & Tests - 1. Split large modules (mtcute.ts, mock.ts, GalleryGrid.svelte, ViewerWrapper.svelte); 2. Write unit tests for refactored code and bug fixes.
 
 ## Plan And Todo History
+- 2026-04-18 20:55 +02:00 - Completed Task 6 (Telegram data caching): implemented IndexedDB-based dialog metadata cache with 5-minute TTL in both mtcute and mock adapters. Updated TelegramAdapter interface with `forceRefresh` option, added dialog-metadata store to IndexedDB (version 2), integrated cache clearance with session lifecycle (logout, session expiry, adapter switch), and updated DialogList component to use cache-first loading. Validation passed: type check 0 errors/0 warnings; short suite 32/32.
+- 2026-04-18 20:12 +02:00 - Created detailed implementation plan for Task 6 (Telegram data caching) at `.kilo/plans/1776487925900-task6-telegram-data-caching.md`. Task status updated to in_progress.
 - 2026-04-18 19:51 +02:00 - Completed Task 5 real-data verification: video preview exit works as expected with actual Telegram adapter. Task 5 is fully completed.
 - 2026-04-18 16:11 +02:00 - Completed Task 5 mock recovery iteration 2: changed `src/components/gallery/ViewerWrapper.svelte` X-button close path to take ownership of the viewer exit by immediately clearing local viewer state, replacing the viewer URL with the gallery URL for the current dialog, and destroying PhotoSwipe directly. This preserved the mock close-button contract without reintroducing the double-back regression. Validation passed: type check 0 errors/0 warnings; short suite 32/32.
 - 2026-04-18 16:08 +02:00 - Started a Task 5 recovery plan after the second fix regression was reverted. Recovery order is now explicit: stabilize mock close behavior first using the smallest close-path change that satisfies the short suite, iterate until mock acceptance is restored, then hand off for real-data verification before resuming later plan items.
@@ -357,6 +358,9 @@
 - ℹ️ Historical references to `.kilo/status.md` remain in dated records by design and are not treated as active drift.
 
 ## Last Validation
+- 2026-04-18 20:55 +02:00 - Task 6 implementation validation: Telegram data caching with IndexedDB dialog-metadata store.
+  - Result: passed with 0 errors, 0 warnings
+  - Main note: Type check passes; short test suite passes 32/32; dialog caching implemented successfully.
 - 2026-04-18 19:51 +02:00 - Real-data verification: video preview exit works as expected with actual Telegram adapter.
   - Result: passed
   - Main note: Task 5 is fully completed; video preview exits cleanly to gallery without empty window.
