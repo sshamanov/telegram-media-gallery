@@ -177,6 +177,7 @@
 - **Future work**: Complete remaining refactoring (Task 9), implement unit test framework (Task 10), or begin new plan based on application priorities.
 
 ## Plan And Todo History
+- 2026-04-18 23:40 +02:00 - Continued Task 9 refactoring: extracted helper modules from mtcute.ts and mock.ts. Created mtcute-helpers.ts, mock-data module, and mock-delay.ts. Reduced mtcute.ts by 22% (516 to 401 lines) and mock.ts by 29% (512 to 366 lines). All validation passes: type check 0 errors/0 warnings, short test suite 32/32. (commit 833de7e)
 - 2026-04-18 23:25 +02:00 - Fixed inconsistent state: restored deleted cache-first.ts file and updated STATUS.md to correctly reflect Task 9 as partially_completed (cache-first logic extracted) and Task 10 as deferred. Validation passed: type check 0 errors/0 warnings, short test suite 32/32. (commit 1a06273)
 - 2026-04-18 22:28 +02:00 - Playful Otter plan execution completed: Tasks 7-8 fully implemented, Task 9 partially implemented (cache-first logic extracted), Task 10 deferred. All validation passes (type check 0 errors/0 warnings, short test suite 32/32).
 - 2026-04-18 22:28 +02:00 - Partially completed Task 9 (refactor large modules): extracted cache-first logic from mtcute.ts and mock.ts into shared utility `src/lib/telegram/utils/cache-first.ts`. Reduced duplication, preserved existing behavior. Validation passed: type check 0 errors/0 warnings; short suite 32/32.
@@ -734,6 +735,7 @@
 ## Recent Commit Log
 | Commit | Date | Description |
 |--------|------|-------------|
+| `833de7e` | 2026-04-18 | refactor: extract helper modules from mtcute.ts and mock.ts |
 | `1a06273` | 2026-04-18 | fix: restore cache-first.ts and update STATUS.md |
 | `a8599c5` | 2026-04-18 | refactor: extract cache-first logic into shared utility |
 | `41cd71f` | 2026-04-18 | style: remove author thumbnail background, use text overlay |
