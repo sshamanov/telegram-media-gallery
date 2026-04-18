@@ -119,6 +119,12 @@
   // Sync router with app state
   $effect(() => {
     if ($authState === 'connected') {
+      if ($router.type === 'dialog-list' || $router.type === 'settings') {
+        if ($currentDialog !== null) {
+          setActiveDialog(null)
+        }
+      }
+
       // When router changes to gallery route, set current dialog
       if ($router.type === 'gallery') {
         const dialog = [...$galleries, ...$allDialogs].find(d => d.id === $router.dialogId)
