@@ -1,6 +1,6 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-18 07:04 +02:00
+**Last Updated:** 2026-04-18 07:43 +02:00
 **Current Phase:** Playful Otter - Bug Fixes & Improvements
 **Active Plan:** `.kilo/plans/1776456580754-playful-otter.md`
 **Branch:** `main`
@@ -24,7 +24,7 @@
 - **Plan file:** `.kilo/plans/1776456580754-playful-otter.md`
 - **Goal:** Fix reported UI bugs, implement caching improvements, refactor large modules, and add unit tests.
 - **Execution strategy:** 4 phases: 1. Investigation & analysis; 2. Bug fixes (scroll position, grid columns, masonry thumbnails, settings title, video preview); 3. Improvements (Telegram data caching, toast auto-close, author thumbnail background); 4. Code refactoring & unit tests.
-- **Status:** pending activation
+- **Status:** in progress; Task 1 (scroll position preservation) implemented and under validation
 
 ## Completed Plans
 - **Plan file:** `.kilo/plans/1776410435637-clever-island.md`
@@ -68,6 +68,18 @@
 - **Status:** completed with commit `b28eb0b`
 
 ## Current Todo States
+
+### Playful Otter Plan (Bug Fixes & Improvements)
+- `completed` Task 1: Investigate scroll position loss and implement scroll position preservation when returning from preview
+- `pending` Task 2: Fix grid columns button functionality
+- `pending` Task 3: Fix masonry layout thumbnail sizing
+- `pending` Task 4: Fix settings title persistence
+- `pending` Task 5: Fix video preview exit behavior
+- `pending` Task 6: Implement Telegram data caching
+- `pending` Task 7: Add toast auto-close
+- `pending` Task 8: Remove author thumbnail background
+- `pending` Task 9: Refactor large modules
+- `pending` Task 10: Write unit tests
 
 ### Clever Island Plan (Stale plan cleanup & priority execution)
 - `completed` Task 44: Block 1.1 - Inventory stale plans
@@ -161,12 +173,13 @@
 - `completed` Task 20: UI refinements (Block 6.1) (FB006, FB007) (commit 715d7f5)
 
 ## Next Execution Order
-- **Phase 1**: Investigation & Analysis - Analyze each bug to understand root cause, identify affected components and stores, review current caching mechanisms.
-- **Phase 2**: Bug Fixes (Priority Order) - 1. Scroll position preservation; 2. Grid columns button functionality; 3. Masonry layout thumbnail sizing; 4. Settings title persistence; 5. Video preview exit behavior.
+- **Phase 1**: Continue investigation for remaining bug fixes after Task 1 root-cause confirmation.
+- **Phase 2**: Bug Fixes (Priority Order) - 2. Grid columns button functionality; 3. Masonry layout thumbnail sizing; 4. Settings title persistence; 5. Video preview exit behavior.
 - **Phase 3**: Improvements & Features - 1. Telegram data caching; 2. Toast auto-close; 3. Author thumbnail background removal.
 - **Phase 4**: Code Refactoring & Tests - 1. Split large modules (mtcute.ts, mock.ts, GalleryGrid.svelte, ViewerWrapper.svelte); 2. Write unit tests for refactored code and bug fixes.
 
 ## Plan And Todo History
+- 2026-04-18 07:43 +02:00 - Completed Playful Otter Task 1 (scroll position preservation): identified that `scrollPositions` persistence existed in `src/stores/gallery.ts` but was never read or written by the gallery UI. Updated `src/components/gallery/GalleryGrid.svelte` to persist scroll position during scroll events and restore it once per dialog when the gallery view becomes active again after preview close. Validation in progress.
 - 2026-04-18 07:04 +02:00 - Activated playful-otter plan for bug fixes and improvements. Plan file: `.kilo/plans/1776456580754-playful-otter.md`. Clever Island plan marked as completed. Committed as `85d4e58`.
 - 2026-04-18 07:04 +02:00 - Removed duplicate plan files already in archive. Committed as `d6bf20d`.
 - 2026-04-17 20:46 +02:00 - Completed Task 66 (Analyze bottlenecks) of clever-island plan: established baseline metrics - bundle size 1,437.26 kB (363.93 kB gzipped), CSS 44.44 kB (8.86 kB gzipped). Critical finding: main chunk >500 kB (actual 1.4 MB). Identified optimization backlog: 1) code splitting (high), 2) CSS syntax fixes (high), 3) parallel downloads (medium), 4) memory cleanup audit (low). Type check passes with 0 errors, 0 warnings.
@@ -330,6 +343,12 @@
 - ℹ️ Historical references to `.kilo/status.md` remain in dated records by design and are not treated as active drift.
 
 ## Last Validation
+- 2026-04-18 07:41 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run check`
+  - Result: passed with 0 errors, 0 warnings
+  - Main note: Playful Otter Task 1 validation - scroll position preservation changes compile cleanly.
+- 2026-04-18 07:42 +02:00 - `docker-compose -f docker-compose.test.yml up --build playwright`
+  - Result: passed (`32 passed`)
+  - Main note: Playful Otter Task 1 validation - no regressions in gallery/viewer baseline while adding scroll persistence.
 - 2026-04-17 21:10 +02:00 - `docker run --rm --network host -v "$(pwd)":/app -w /app node:24-alpine npm run build`
   - Result: built successfully with warnings
   - Main note: Block 5 final validation - bundle size: 1,273.13 kB (315.28 kB gzipped). Reduced from baseline 1,437.26 kB (363.93 kB gzipped) - reduction of 164.13 kB (48.65 kB gzipped). Code splitting and PhotoSwipe lazy-loading successful.

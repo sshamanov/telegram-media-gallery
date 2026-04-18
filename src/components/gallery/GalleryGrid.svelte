@@ -13,45 +13,47 @@
    import DesktopSidebar from '../layout/DesktopSidebar.svelte'
    import { trapFocus } from '../../lib/dom/focus-trap'
     import {
-     canDownloadMediaSelectionOffline,
-     currentDialog,
-     galleryViewMode,
-     hasMoreMedia,
-     isLoadingMore,
-     loadInitialMedia,
-     loadMoreMedia,
-     loadState,
-     mediaItems,
-     selectedFilter,
-     filteredMediaItems,
-     openViewer,
-     setGalleryViewMode,
-     totalMessageCount,
-     selectionMode,
-     selectedMediaIds,
-     selectionAnchorId,
-     enterSelectionMode,
-     exitSelectionMode,
-     toggleSelectedMedia,
-     selectMediaRange,
-     selectAllVisibleMedia,
-     downloadQueueState,
-     enqueueDownloads,
-     cancelDownloads,
-     forwardQueueState,
-     enqueueForwards,
-     cancelForwards,
-     shareQueueState,
-     enqueueShares,
-     cancelShares,
-     copyQueueState,
-     enqueueCopies,
-     cancelCopies,
-     uploadQueueState,
-     cancelUploadQueue,
-     cancelUploadQueueItem,
-     retryUploadQueueItem,
-   } from '../../stores/gallery'
+      canDownloadMediaSelectionOffline,
+      currentDialog,
+      galleryViewMode,
+      hasMoreMedia,
+      isLoadingMore,
+      loadInitialMedia,
+      loadMoreMedia,
+      loadState,
+      mediaItems,
+      selectedFilter,
+      filteredMediaItems,
+      openViewer,
+      setGalleryViewMode,
+      totalMessageCount,
+      selectionMode,
+      selectedMediaIds,
+      selectionAnchorId,
+      enterSelectionMode,
+      exitSelectionMode,
+      toggleSelectedMedia,
+      selectMediaRange,
+      selectAllVisibleMedia,
+      downloadQueueState,
+      enqueueDownloads,
+      cancelDownloads,
+      forwardQueueState,
+      enqueueForwards,
+      cancelForwards,
+      shareQueueState,
+      enqueueShares,
+      cancelShares,
+      copyQueueState,
+      enqueueCopies,
+      cancelCopies,
+      uploadQueueState,
+      cancelUploadQueue,
+      cancelUploadQueueItem,
+      retryUploadQueueItem,
+      storeScrollPosition,
+      scrollPositions,
+    } from '../../stores/gallery'
    import { galleryIds, toggleGallery } from '../../stores/dialogs'
    import { isOffline, pushToast } from '../../stores/ui'
    import type { GalleryFilterId, MediaItem, UploadMode as UploadModeType } from '../../types/telegram'
@@ -65,6 +67,7 @@
    let offlineDownloadReady = false
    let focusedItemIndex: number | null = null
    let selectedMediaItem: MediaItem | null = null
+   let restoredScrollDialogId: string | null = null
    
    // Focus trap for progress panels
    let downloadPanelElement: HTMLDivElement | null = null
@@ -211,17 +214,34 @@
   $: showPullIndicator = isPulling && pullDistance > 10
 
    $: if ($currentDialog?.id) {
-    showUploadSheet = false
-  }
+     showUploadSheet = false
+   }
+
+   $: if ($currentDialog?.id !== restoredScrollDialogId) {
+     restoredScrollDialogId = null
+   }
 
   $: {
     // Reset focus when items change
     focusedItemIndex = null
   }
 
-  $: if (!$selectionMode) {
+   $: if (!$selectionMode) {
     // Reset focus when exiting selection mode
     focusedItemIndex = null
+  }
+
+  // Restore once per dialog so viewer open/close does not reset scrolling.
+  $: if ($currentDialog?.id && scroller && restoredScrollDialogId !== $currentDialog.id) {
+    const dialogId = $currentDialog.id
+    const saved = $scrollPositions[dialogId] ?? 0
+    restoredScrollDialogId = dialogId
+
+    queueMicrotask(() => {
+      if (scroller && $currentDialog?.id === dialogId) {
+        scroller.scrollTop = saved
+      }
+    })
   }
 
   function countFilters(items: MediaItem[]): Record<GalleryFilterId, number> {
@@ -324,15 +344,31 @@
     showUploadSheet = false
   }
 
+  let scrollSaveTimeout: ReturnType<typeof setTimeout> | null = null
+
   async function handleScroll(): Promise<void> {
-    if (!scroller || $isLoadingMore || !$hasMoreMedia) {
+    if (!scroller) {
       return
     }
 
-    const threshold = 300
-    const distanceFromBottom = scroller.scrollHeight - (scroller.scrollTop + scroller.clientHeight)
-    if (distanceFromBottom <= threshold) {
-      await loadMoreMedia()
+    // Throttle scroll position saving
+    if (scrollSaveTimeout !== null) {
+      clearTimeout(scrollSaveTimeout)
+    }
+    scrollSaveTimeout = setTimeout(() => {
+      if ($currentDialog?.id && scroller) {
+        storeScrollPosition($currentDialog.id, scroller.scrollTop)
+      }
+      scrollSaveTimeout = null
+    }, 100)
+
+    // Load more media when near bottom
+    if (!$isLoadingMore && $hasMoreMedia) {
+      const threshold = 300
+      const distanceFromBottom = scroller.scrollHeight - (scroller.scrollTop + scroller.clientHeight)
+      if (distanceFromBottom <= threshold) {
+        await loadMoreMedia()
+      }
     }
   }
 
@@ -593,6 +629,10 @@
       scroller.removeEventListener('touchmove', handleTouchMove)
       scroller.removeEventListener('touchend', handleTouchEnd)
       scroller.removeEventListener('touchcancel', resetPullState)
+    }
+    // Clean up scroll save timeout
+    if (scrollSaveTimeout !== null) {
+      clearTimeout(scrollSaveTimeout)
     }
   })
 </script>
