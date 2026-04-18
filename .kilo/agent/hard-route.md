@@ -1,7 +1,7 @@
 ---
 description: Hard route for planning, debugging, and complex tasks
 mode: subagent
-model: openai/gpt-5.4
+model: deepseek/deepseek-reasoner
 variant: medium
 temperature: 0.1
 steps: 30
