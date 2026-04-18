@@ -70,10 +70,6 @@
     }
   }
 
-  async function refreshDialogs(): Promise<void> {
-    await loadDialogs(true)
-  }
-
   function switchTab(nextTab: 'galleries' | 'groups' | 'chats'): void {
     tab = nextTab
     void loadDialogs(false)  // cache‑first

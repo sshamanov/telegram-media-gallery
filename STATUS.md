@@ -76,10 +76,10 @@
 - `completed` Task 4: Fix settings title persistence
 - `completed` Task 5: Fix video preview exit behavior
 - `completed` Task 6: Implement Telegram data caching (plan: `.kilo/plans/1776487925900-task6-telegram-data-caching.md`)
-- `pending` Task 7: Add toast auto-close
-- `pending` Task 8: Remove author thumbnail background
-- `pending` Task 9: Refactor large modules
-- `pending` Task 10: Write unit tests
+- `pending` Task 7: Add toast auto-close (plan: `.kilo/plans/1776540483161-task7-toast-auto-close.md`)
+- `pending` Task 8: Remove author thumbnail background (plan: `.kilo/plans/1776540483162-task8-remove-author-thumbnail-background.md`)
+- `pending` Task 9: Refactor large modules (plan: `.kilo/plans/1776540483163-task9-refactor-large-modules.md`)
+- `pending` Task 10: Write unit tests (plan: `.kilo/plans/1776540483164-task10-write-unit-tests.md`)
 
 ### Clever Island Plan (Stale plan cleanup & priority execution)
 - `completed` Task 44: Block 1.1 - Inventory stale plans
@@ -178,6 +178,8 @@
 - **Phase 3**: Code Refactoring & Tests - 1. Split large modules (mtcute.ts, mock.ts, GalleryGrid.svelte, ViewerWrapper.svelte); 2. Write unit tests for refactored code and bug fixes.
 
 ## Plan And Todo History
+- 2026-04-18 21:42 +02:00 - Created detailed implementation plans for Tasks 7-10: toast auto-close (`.kilo/plans/1776540483161-task7-toast-auto-close.md`), author thumbnail background removal (`.kilo/plans/1776540483162-task8-remove-author-thumbnail-background.md`), large module refactoring (`.kilo/plans/1776540483163-task9-refactor-large-modules.md`), and unit tests (`.kilo/plans/1776540483164-task10-write-unit-tests.md`). Updated command/agent files to reference STATUS.md instead of .kilo/status.md.
+- 2026-04-18 21:42 +02:00 - Marked brave-river plan as completed and moved to archive; all plan inconsistencies resolved.
 - 2026-04-18 20:55 +02:00 - Completed Task 6 (Telegram data caching): implemented IndexedDB-based dialog metadata cache with 5-minute TTL in both mtcute and mock adapters. Updated TelegramAdapter interface with `forceRefresh` option, added dialog-metadata store to IndexedDB (version 2), integrated cache clearance with session lifecycle (logout, session expiry, adapter switch), and updated DialogList component to use cache-first loading. Validation passed: type check 0 errors/0 warnings; short suite 32/32.
 - 2026-04-18 20:12 +02:00 - Created detailed implementation plan for Task 6 (Telegram data caching) at `.kilo/plans/1776487925900-task6-telegram-data-caching.md`. Task status updated to in_progress.
 - 2026-04-18 19:51 +02:00 - Completed Task 5 real-data verification: video preview exit works as expected with actual Telegram adapter. Task 5 is fully completed.
@@ -358,6 +360,9 @@
 - ℹ️ Historical references to `.kilo/status.md` remain in dated records by design and are not treated as active drift.
 
 ## Last Validation
+- 2026-04-18 21:42 +02:00 - Witty Cabin plan validation: audit and preparation of unfinished tasks and plans.
+  - Result: passed with 0 errors, 0 warnings
+  - Main note: Type check passes; short test suite passes 32/32; all plan inconsistencies resolved, sub-plans created for tasks 7-10, command/agent files updated to reference STATUS.md.
 - 2026-04-18 20:55 +02:00 - Task 6 implementation validation: Telegram data caching with IndexedDB dialog-metadata store.
   - Result: passed with 0 errors, 0 warnings
   - Main note: Type check passes; short test suite passes 32/32; dialog caching implemented successfully.

@@ -11,8 +11,8 @@ You are a specialist in the `@mtcute/web` Telegram MTProto client library for br
 - Never install system tools
 - Temporary files go in `./tmp/` only
 - All builds via Docker with `--network host`
-- Read `APPLICATION_SPEC.md` and `.kilo/status.md` before non-trivial work
-- Record any adapter-related blocker, validation, or completed block in `.kilo/status.md`
+- Read `APPLICATION_SPEC.md` and `STATUS.md` before non-trivial work
+- Record any adapter-related blocker, validation, or completed block in `STATUS.md`
 
 ## mtcute-specific rules for this project
 1. All Telegram API calls go through `src/lib/telegram/adapter.ts`.
