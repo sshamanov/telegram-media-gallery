@@ -12,8 +12,7 @@
     markLoaded as markLoadedUtil
   } from './utils/photoswipe-integration'
   import {
-    revokeUrls,
-    replaceImageSource
+    revokeUrls
   } from './utils/object-url-lifecycle'
   import {
     closeViewer,
@@ -175,6 +174,39 @@
       content.slide.applyCurrentZoomPan()
       content.slide.updateContentSize(true)
     }
+  }
+
+  function replaceImageSource(
+    content: ViewerContent,
+    item: MediaItem,
+    image: HTMLImageElement,
+    fullUrl: string,
+    options: { revokePreviewOnLoad?: boolean } = {}
+  ): void {
+    const { revokePreviewOnLoad = false } = options
+    
+    // Revoke previous full URL if exists
+    if (typeof content.fullUrl === 'string') {
+      URL.revokeObjectURL(content.fullUrl)
+    }
+
+    if (revokePreviewOnLoad && typeof content.previewUrl === 'string') {
+      const previousPreviewUrl = content.previewUrl
+      image.onload = () => {
+        URL.revokeObjectURL(previousPreviewUrl)
+        content.previewUrl = null
+        // Update dimensions after full image loads
+        updateImageDimensions(content, item, image)
+      }
+    } else {
+      // Still need to update dimensions after full image loads
+      image.onload = () => {
+        updateImageDimensions(content, item, image)
+      }
+    }
+
+    content.fullUrl = fullUrl
+    image.src = fullUrl
   }
 
   async function handleContentLoad(content: ViewerContent, item: MediaItem, token: number, event: { content: { onLoaded: () => void }; preventDefault: () => void }): Promise<void> {

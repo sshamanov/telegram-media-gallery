@@ -84,7 +84,7 @@
   - `deferred` Task 10: Write unit tests (plan: `.kilo/plans/1776540483164-task10-write-unit-tests.md`) - requires test framework setup
 
 ### Happy Tiger Plan (Code Quality Hardening)
-- `pending` Block 1: Restore `replaceImageSource` correctness
+- `completed` Block 1: Restore `replaceImageSource` correctness
 - `pending` Block 2: Remove direct `console.warn`
 - `pending` Block 3: Prune dead utility surface
 - `pending` Block 4: Consolidate duplicated `ViewerContent` type
@@ -188,6 +188,7 @@
 - **Previous work**: Playful Otter plan completed, Task 10 deferred (unit test framework setup).
 
 ## Plan And Todo History
+- 2026-04-19 15:30 +02:00 - Completed Happy Tiger Block 1: restored `replaceImageSource` correctness by moving function back into `ViewerWrapper.svelte` with proper previous full URL revocation and image dimension updates after full image load. Type check passes: 0 errors, 0 warnings. Short test suite passes 32/32.
 - 2026-04-19 15:22 +02:00 - Activated Happy Tiger plan (`.kilo/plans/1776603239564-happy-tiger.md`): code quality hardening for gallery/viewer area. Plan registered, Block 1 pending.
 - 2026-04-19 14:56 +02:00 - Completed Task 9.2 (ViewerWrapper refactoring): removed unused imports (`initPhotoSwipe`, `destroyPhotoSwipe`, `attachPhotoSwipeEvents`, `createVideoContainer`, `SlideData` type), kept essential utilities (`createDataSource`, `createShell`, `markLoaded`, `revokeUrls`, `replaceImageSource`). Type check passes: 0 errors, 0 warnings. Short test suite passes 32/32. (commit f712304)
 - 2026-04-19 14:27 +02:00 - Partially completed Task 9.2 (ViewerWrapper refactoring): created utility modules for PhotoSwipe integration (`photoswipe-integration.ts`), video player handling (`video-player.ts`), and object-URL lifecycle management (`object-url-lifecycle.ts`). Partially integrated utilities into ViewerWrapper.svelte (revokeUrls, markLoaded, createShell functions replaced). Type check shows 5 unused import errors (utilities not fully integrated). (commit e84264d)
@@ -381,6 +382,9 @@
 - ℹ️ Historical references to `.kilo/status.md` remain in dated records by design and are not treated as active drift.
 
 ## Last Validation
+- 2026-04-19 15:30 +02:00 - Happy Tiger Block 1 validation: restored `replaceImageSource` correctness.
+  - Result: passed with 0 errors, 0 warnings
+  - Main note: Type check passes; short test suite passes 32/32; viewer image replacement logic now correctly revokes previous full URLs and updates dimensions after full image load.
 - 2026-04-19 14:56 +02:00 - Task 9.2 implementation validation: completed ViewerWrapper refactoring by removing unused imports and keeping essential utilities.
   - Result: passed with 0 errors, 0 warnings
   - Main note: Type check passes; short test suite passes 32/32; ViewerWrapper refactoring completed successfully.

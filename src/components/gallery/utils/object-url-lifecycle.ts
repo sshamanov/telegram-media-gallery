@@ -38,23 +38,3 @@ export function scheduleUrlRevocation(url: string, delayMs: number = 0): void {
   window.setTimeout(() => URL.revokeObjectURL(url), delayMs)
 }
 
-export function replaceImageSource(
-  content: ViewerContent,
-  _item: unknown,
-  image: HTMLImageElement,
-  fullUrl: string,
-  options: { revokePreviewOnLoad?: boolean } = {}
-): void {
-  const { revokePreviewOnLoad = false } = options
-  
-  if (revokePreviewOnLoad && typeof content.previewUrl === 'string') {
-    const previousPreviewUrl = content.previewUrl
-    image.onload = () => {
-      URL.revokeObjectURL(previousPreviewUrl)
-      content.previewUrl = null
-    }
-  }
-
-  content.fullUrl = fullUrl
-  image.src = fullUrl
-}
