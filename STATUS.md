@@ -1,10 +1,10 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-19 21:16 +02:00
+**Last Updated:** 2026-04-19 21:18 +02:00
 **Current Phase:** Brisk Harbor - Review Fixes (Completed)
 **Active Plan:** `.kilo/plans/1776619529000-brisk-harbor.md` (Completed)
 **Branch:** `main`
-**Ahead Of `origin/main`:** 124 commits
+**Ahead Of `origin/main`:** 125 commits
 
 ---
 
@@ -233,6 +233,7 @@
 - **Previous work**: Silent Knight plan completed; the latest review follow-up is now fully applied and validated.
 
 ## Plan And Todo History
+- 2026-04-19 21:18 +02:00 - Recorded Brisk Harbor Block 2 commit `eb4e335` (`chore: remove unused legacy root app files`) and closed the Brisk Harbor phase with a clean working tree target.
 - 2026-04-19 21:16 +02:00 - Completed Brisk Harbor Block 2: removed unused legacy root `main.js` and `style.css` files that were not referenced by the current `index.html` / `src/main.ts` Vite app entry. Type check passes: 0 errors, 0 warnings. Short test suite passes 32/32.
 - 2026-04-19 21:16 +02:00 - Recorded Brisk Harbor Block 1 commit `6362ea8` (`fix: avoid hijacking gallery control keyboard input`) and marked the Brisk Harbor phase as completed pending the final cleanup commit.
 - 2026-04-19 21:14 +02:00 - Completed Brisk Harbor Block 1: expanded gallery keyboard target guarding so interactive descendants (`button`, `a[href]`, `summary`, button/link roles, and text-entry elements) are ignored before any gallery shortcut handling. Type check passes: 0 errors, 0 warnings. Short test suite passes 32/32.
@@ -852,6 +853,7 @@
 ## Recent Commit Log
 | Commit | Date | Description |
 |--------|------|-------------|
+| `eb4e335` | 2026-04-19 | chore: remove unused legacy root app files |
 | `6362ea8` | 2026-04-19 | fix: avoid hijacking gallery control keyboard input |
 | `2ecb87e` | 2026-04-19 | refactor: tighten viewer event and content guards |
 | `0450c8f` | 2026-04-19 | refactor: unify viewer image load handling |
