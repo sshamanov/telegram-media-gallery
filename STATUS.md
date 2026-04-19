@@ -1,6 +1,6 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-20 00:30 +02:00
+**Last Updated:** 2026-04-20 00:31 +02:00
 **Current Phase:** Proud Comet - Unfinished Tasks and Plans Cleanup
 **Active Plan:** `.kilo/plans/1776629240701-proud-comet.md` (Active)
 **Branch:** `main`
@@ -24,7 +24,7 @@
 - **Plan file:** `.kilo/plans/1776629240701-proud-comet.md`
 - **Goal:** Audit unfinished tasks and plans, clean up stale plans, update spec to reflect implemented features, evaluate unit test framework, and prepare for next execution.
 - **Execution strategy:** 5 blocks: 1. Audit and clean up stale plans; 2. Update APPLICATION_SPEC.md; 3. Evaluate Task 10 (unit test framework); 4. Identify remaining Phase 3+ advanced offline media behavior; 5. Validation and commit.
-- **Status:** in_progress; Block 2 completed, Block 3 pending
+- **Status:** in_progress; Block 3 completed, Block 4 pending
 
 ## Completed Plans
 - **Plan file:** `.kilo/plans/1776619529000-brisk-harbor.md`
@@ -107,7 +107,7 @@
   - `completed` Task 9: Refactor large modules (plan: `.kilo/plans/1776540483163-task9-refactor-large-modules.md`) - GalleryGrid and ViewerWrapper refactored with utility modules
  - `completed` Task 9.1: Refactor GalleryGrid.svelte (plan: `.kilo/plans/1776578917940-task9-1-gallerygrid-refactor.md`)
   - `completed` Task 9.2: Refactor ViewerWrapper.svelte (plan: `.kilo/plans/1776578917940-task9-2-viewerwrapper-refactor.md`) - utilities integrated, type check passes, tests pass
-  - `deferred` Task 10: Write unit tests (plan: `.kilo/plans/1776540483164-task10-write-unit-tests.md`) - requires test framework setup
+  - `deferred` Task 10: Write unit tests (plan: `.kilo/plans/1776540483164-task10-write-unit-tests.md`) - deferred as low priority, framework not yet set up
 
 ### Happy Tiger Plan (Code Quality Hardening)
 - `completed` Block 1: Restore `replaceImageSource` correctness
@@ -229,10 +229,11 @@
 - `completed` Task 20: UI refinements (Block 6.1) (FB006, FB007) (commit 715d7f5)
 
 ## Next Execution Order
-- **Proud Comet plan active**: Block 3 - Evaluate Task 10 (unit test framework) feasibility and decide on next steps.
-- **Previous work**: Block 2 completed; APPLICATION_SPEC.md updated to reflect implemented Phase 3+ features.
+- **Proud Comet plan active**: Block 4 - Identify remaining Phase 3+ advanced offline media behavior gaps.
+- **Previous work**: Block 3 completed; Task 10 (unit test framework) deferred as low priority with framework not yet set up.
 
 ## Plan And Todo History
+- 2026-04-20 00:30 +02:00 - Completed Proud Comet Block 3: evaluated Task 10 (unit test framework). Decision: defer as low priority. Project has comprehensive Playwright e2e tests; adding vitest would require non-trivial setup effort. Task 10 status updated to "deferred as low priority, framework not yet set up". Type check passes: 0 errors, 0 warnings.
 - 2026-04-20 00:30 +02:00 - Recorded Proud Comet Block 2 commit `106acb6` (`docs: update APPLICATION_SPEC.md with implemented Phase 3+ features`).
 - 2026-04-20 00:29 +02:00 - Completed Proud Comet Block 2: updated APPLICATION_SPEC.md to reflect implemented Phase 3+ features. Changed "Phase 3+ (Advanced) - Planned" to "Partially Implemented" with masonry layout toggle, desktop variants, and light theme marked as implemented. Added mention of these features to "Current Supported State" section. Type check passes: 0 errors, 0 warnings.
 - 2026-04-20 00:29 +02:00 - Recorded STATUS.md update commit `d9c5d0b` (`docs: update STATUS.md with Block 1 completion and commit hash`).
