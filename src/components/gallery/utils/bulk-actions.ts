@@ -2,6 +2,19 @@ import type { MediaItem } from '../../../types/telegram'
 import type { ToastMessage } from '../../../types/telegram'
 import { debugWarn } from '../../../lib/debug'
 
+// Helper for repeated guard policy
+function hasSelection(selectedCount: number): boolean {
+  return selectedCount > 0
+}
+
+function createOfflineWarningToast(text: string): Omit<ToastMessage, 'id'> {
+  return {
+    kind: 'warning',
+    text,
+    dismissible: true,
+  }
+}
+
 export async function refreshOfflineSelectionState(
   items: MediaItem[],
   offline: boolean,
@@ -25,16 +38,14 @@ export interface BulkDownloadOptions {
 export async function handleBulkDownload(options: BulkDownloadOptions): Promise<void> {
   const { selectedCount, selectedItems, isOffline, pushToast, enqueueDownloads } = options
   
-  if (selectedCount === 0) {
+  if (!hasSelection(selectedCount)) {
     return
   }
 
   if (isOffline) {
-    pushToast({
-      kind: 'warning',
-      text: 'Downloads are unavailable offline unless the file is already open in the viewer cache.',
-      dismissible: true,
-    })
+    pushToast(createOfflineWarningToast(
+      'Downloads are unavailable offline unless the file is already open in the viewer cache.'
+    ))
     return
   }
 
@@ -67,16 +78,14 @@ export interface BulkForwardOptions {
 export function handleBulkForward(options: BulkForwardOptions): void {
   const { selectedCount, isOffline, pushToast, onShowDialogPicker } = options
   
-  if (selectedCount === 0) {
+  if (!hasSelection(selectedCount)) {
     return
   }
 
   if (isOffline) {
-    pushToast({
-      kind: 'warning',
-      text: 'Forwarding is unavailable offline until Telegram connectivity returns.',
-      dismissible: true,
-    })
+    pushToast(createOfflineWarningToast(
+      'Forwarding is unavailable offline until Telegram connectivity returns.'
+    ))
     return
   }
 
@@ -94,16 +103,14 @@ export interface BulkShareOptions {
 export async function handleBulkShare(options: BulkShareOptions): Promise<void> {
   const { selectedCount, selectedItems, isOffline, pushToast, enqueueShares } = options
   
-  if (selectedCount === 0) {
+  if (!hasSelection(selectedCount)) {
     return
   }
 
   if (isOffline) {
-    pushToast({
-      kind: 'warning',
-      text: 'Sharing is unavailable offline because uncached media cannot be fetched.',
-      dismissible: true,
-    })
+    pushToast(createOfflineWarningToast(
+      'Sharing is unavailable offline because uncached media cannot be fetched.'
+    ))
     return
   }
 
@@ -120,7 +127,7 @@ export interface BulkCopyOptions {
 export async function handleBulkCopy(options: BulkCopyOptions): Promise<void> {
   const { selectedCount, visibleItems, selectedMediaIds, enqueueCopies } = options
   
-  if (selectedCount === 0) {
+  if (!hasSelection(selectedCount)) {
     return
   }
 

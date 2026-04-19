@@ -103,8 +103,8 @@
 - `completed` Block 2: Harden keyboard navigation guard
 - `completed` Block 3: Centralize PhotoSwipe content/item casts in `ViewerWrapper`
 - `completed` Block 4: Harden image replacement event handling in `ViewerWrapper`
-- `in_progress` Block 5: Simplify duplicated guard policy in `bulk-actions.ts`
-- `pending` Block 6: Optional final polish
+- `completed` Block 5: Simplify duplicated guard policy in `bulk-actions.ts`
+- `in_progress` Block 6: Optional final polish
 
 ### Clever Island Plan (Stale plan cleanup & priority execution)
 - `completed` Task 44: Block 1.1 - Inventory stale plans
@@ -198,11 +198,12 @@
 - `completed` Task 20: UI refinements (Block 6.1) (FB006, FB007) (commit 715d7f5)
 
 ## Next Execution Order
-- **Kind Island plan Block 4 completed**: Hardened image replacement event handling in `ViewerWrapper`. Block 5 in progress (Simplify duplicated guard policy in `bulk-actions.ts`).
+- **Kind Island plan Block 5 completed**: Simplified duplicated guard policy in `bulk-actions.ts`. Block 6 in progress (Optional final polish).
 - **Previous work**: Happy Tiger plan completed with Blocks 1-4 implemented, Blocks 5-7 deferred. Playful Otter plan completed, Task 10 deferred (unit test framework setup).
 
 ## Plan And Todo History
-- 2026-04-19 16:25 +02:00 - Completed Kind Island Block 4: hardened image replacement event handling in `ViewerWrapper` by replacing direct `image.onload` assignment with one-shot event listeners and adding safety guard to check image still points to same URL. Type check passes: 0 errors, 0 warnings. Short test suite passes 32/32. Long test suite passes 12/12 (5 skipped).
+- 2026-04-19 16:30 +02:00 - Completed Kind Island Block 5: simplified duplicated guard policy in `bulk-actions.ts` by creating helpers `hasSelection` and `createOfflineWarningToast`. Reduced duplication in 4 handler functions. Type check passes: 0 errors, 0 warnings. Short test suite passes 32/32. Long validation skipped per plan (only `bulk-actions.ts` changes).
+- 2026-04-19 16:25 +02:00 - Completed Kind Island Block 4: hardened image replacement event handling in `ViewerWrapper` by replacing direct `image.onload` assignment with one-shot event listeners and adding safety guard to check image still points to same URL. Type check passes: 0 errors, 0 warnings. Short test suite passes 32/32. Long test suite passes 12/12 (5 skipped). (commit 08e599b)
 - 2026-04-19 16:20 +02:00 - Completed Kind Island Block 3: centralized PhotoSwipe content/item casts in `ViewerWrapper` by creating local helpers `getViewerContentItem`, `getSlideDataItem`, and `toViewerContent`. Replaced 4 duplicated type assertions. Type check passes: 0 errors, 0 warnings. Short test suite passes 32/32. Long test suite initially showed 1 flaky failure ("long-press enters selection mode on mobile") but passed on rerun (11 passed, 1 flaky, 5 skipped). (commit c7f391d)
 - 2026-04-19 16:15 +02:00 - Completed Kind Island Block 2: hardened keyboard navigation guard by adding `isTextEntryTarget` helper that checks for HTMLInputElement, HTMLTextAreaElement, HTMLSelectElement, and contenteditable elements. Type check passes: 0 errors, 0 warnings. Short test suite passes 32/32. Long test suite passes 12/12 (5 skipped). (commit 1b88f76)
 - 2026-04-19 16:10 +02:00 - Completed Kind Island Block 1: simplified `GalleryGrid` focus-trap setup by creating local helper `activatePanelFocusTrap` and replacing 5 repetitive reactive blocks with 5 one-line reactive calls. Type check passes: 0 errors, 0 warnings. Short test suite passes 32/32. Long test suite passes 12/12 (5 skipped). (commit 2dd4c62)
