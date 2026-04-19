@@ -36,21 +36,32 @@
 
    const shareLimitBytes = 200 * 1024 * 1024
 
-   // Local helpers for PhotoSwipe content/item type narrowing
-   function getViewerContentItem(content: unknown): MediaItem | null {
-     const c = content as { data?: unknown } | null | undefined
-     const data = c?.data as { item?: MediaItem } | null | undefined
-     return data?.item ?? null
-   }
+  type ViewerContentWithItem = ViewerContent & { data?: { item?: MediaItem } }
+  type SlideDataWithItem = { item?: MediaItem }
 
-   function getSlideDataItem(slideData: unknown): MediaItem | null {
-     const data = slideData as { item?: MediaItem } | null | undefined
-     return data?.item ?? null
-   }
+  const pendingImageLoadCleanup = new WeakMap<HTMLImageElement, () => void>()
 
-   function toViewerContent(content: unknown): ViewerContent | null {
-     return content && typeof content === 'object' ? content as ViewerContent : null
-   }
+  function clearPendingImageLoadHandler(image: HTMLImageElement): void {
+    pendingImageLoadCleanup.get(image)?.()
+    pendingImageLoadCleanup.delete(image)
+  }
+
+  // Local helpers for PhotoSwipe content/item type narrowing.
+  function toViewerContent(content: unknown): ViewerContentWithItem | null {
+    return content && typeof content === 'object' ? (content as ViewerContentWithItem) : null
+  }
+
+  function getViewerContentItem(content: ViewerContentWithItem | null | undefined): MediaItem | null {
+    return content?.data?.item ?? null
+  }
+
+  function toSlideData(slideData: unknown): SlideDataWithItem | null {
+    return slideData && typeof slideData === 'object' ? (slideData as SlideDataWithItem) : null
+  }
+
+  function getSlideDataItem(slideData: SlideDataWithItem | null | undefined): MediaItem | null {
+    return slideData?.item ?? null
+  }
 
   const activeItem: Readable<MediaItem | null> = derived([viewerItems, mediaItems, viewerIndex], ([$viewerItems, $mediaItems, $viewerIndex]) =>
     $viewerIndex === null ? null : ($viewerItems[$viewerIndex] ?? $mediaItems[$viewerIndex] ?? null),
@@ -182,13 +193,20 @@
     expectedUrl: string,
     handler: () => void,
   ): void {
+    clearPendingImageLoadHandler(image)
+
     const loadListener = () => {
+      pendingImageLoadCleanup.delete(image)
+
       if (image.src === expectedUrl) {
         handler()
       }
     }
 
     image.addEventListener('load', loadListener, { once: true })
+    pendingImageLoadCleanup.set(image, () => {
+      image.removeEventListener('load', loadListener)
+    })
   }
 
    function replaceImageSource(
@@ -396,7 +414,7 @@
       arrowNext: false,
       secondaryZoomLevel: 2,
        maxZoomLevel: (zoomLevelObject) => {
-         const item = getSlideDataItem(zoomLevelObject.itemData)
+         const item = getSlideDataItem(toSlideData(zoomLevelObject.itemData))
          return item && isImageItem(item) ? 4 : 1
        },
       wheelToZoom: true,
@@ -405,7 +423,7 @@
     })
 
      pswp.addFilter('isContentZoomable', (isZoomable, content) => {
-       const item = getViewerContentItem(content)
+       const item = getViewerContentItem(toViewerContent(content))
        return item ? isImageItem(item) : isZoomable
      })
 
@@ -439,6 +457,9 @@
      pswp.on('contentDestroy', (event) => {
        const content = toViewerContent(event.content)
        if (content) {
+         if (content.element instanceof HTMLImageElement) {
+           clearPendingImageLoadHandler(content.element)
+         }
          revokeUrls(content)
        }
      })

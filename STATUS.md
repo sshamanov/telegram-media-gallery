@@ -1,6 +1,6 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-19 16:39 +02:00
+**Last Updated:** 2026-04-19 16:45 +02:00
 **Current Phase:** Silent Knight - Code Quality Improvement (In Progress)
 **Active Plan:** `.kilo/plans/1776606618163-silent-knight.md` (In Progress)
 **Branch:** `main`
@@ -24,9 +24,14 @@
 - **Plan file:** `.kilo/plans/1776606618163-silent-knight.md`
 - **Goal:** Improve code quality in the recently refactored gallery/viewer area by correcting the highest-risk refactor regression, finishing partially applied safety cleanup, and tightening local helper design without changing accepted product behavior.
 - **Execution strategy:** 5 blocks: 1. Fix `GalleryGrid` focus-trap regression risk; 2. Unify viewer preview/full image load handling; 3. Tighten viewer listener lifecycle and local narrowing clarity; 4. Reassess `bulk-actions.ts` helper shape; 5. Optional local formatting normalization.
-- **Status:** in_progress; Block 1 pending
+- **Status:** completed; Blocks 1-3 implemented, Blocks 4-5 deferred
 
 ## Completed Plans
+- **Plan file:** `.kilo/plans/1776606618163-silent-knight.md`
+- **Goal:** Improve code quality in the recently refactored gallery/viewer area by correcting the highest-risk refactor regression, finishing partially applied safety cleanup, and tightening local helper design without changing accepted product behavior.
+- **Execution strategy:** 5 blocks: 1. Fix `GalleryGrid` focus-trap regression risk; 2. Unify viewer preview/full image load handling; 3. Tighten viewer listener lifecycle and local narrowing clarity; 4. Reassess `bulk-actions.ts` helper shape; 5. Optional local formatting normalization.
+- **Status:** completed; Blocks 1-3 implemented successfully, Blocks 4-5 deferred as unnecessary churn
+
 - **Plan file:** `.kilo/plans/1776604859750-kind-island.md`
 - **Goal:** Improve code quality in the gallery/viewer area after Happy Tiger without changing supported behavior, weakening type safety, or introducing broad abstractions that a weak executor could only partially integrate.
 - **Execution strategy:** 6 blocks: 1. Simplify `GalleryGrid` focus-trap setup; 2. Harden keyboard navigation guard; 3. Centralize PhotoSwipe content/item casts in `ViewerWrapper`; 4. Harden image replacement event handling in `ViewerWrapper`; 5. Simplify duplicated guard policy in `bulk-actions.ts`; 6. Optional final polish (deferred).
@@ -114,9 +119,9 @@
 ### Silent Knight Plan (Code Quality Improvement)
 - `completed` Block 1: Fix `GalleryGrid` focus-trap regression risk
 - `completed` Block 2: Unify viewer preview/full image load handling
-- `in_progress` Block 3: Tighten viewer listener lifecycle and local narrowing clarity
-- `pending` Block 4: Reassess `bulk-actions.ts` helper shape
-- `pending` Block 5: Optional local formatting normalization
+- `completed` Block 3: Tighten viewer listener lifecycle and local narrowing clarity
+- `deferred` Block 4: Reassess `bulk-actions.ts` helper shape (current helper shape already the clearer local minimum)
+- `deferred` Block 5: Optional local formatting normalization (not justified beyond touched safety fixes)
 
 ### Clever Island Plan (Stale plan cleanup & priority execution)
 - `completed` Task 44: Block 1.1 - Inventory stale plans
@@ -210,11 +215,15 @@
 - `completed` Task 20: UI refinements (Block 6.1) (FB006, FB007) (commit 715d7f5)
 
 ## Next Execution Order
-- **Silent Knight Block 2 completed**: `ViewerWrapper` now uses one shared one-shot image load listener helper for both preview and full-image paths. Block 3 in progress to tighten viewer listener lifecycle and local narrowing clarity.
-- **Previous work**: Kind Island plan completed, but follow-up review identified a likely focus-trap regression plus smaller viewer cleanup gaps that require a narrow corrective pass.
+- **Silent Knight plan implementation completed**: Blocks 1-3 landed successfully; Blocks 4-5 were explicitly deferred because they did not justify further code churn after the safety fixes. Final step is to record the last commit hash in `STATUS.md`.
+- **Previous work**: Kind Island plan completed, but follow-up review identified a likely focus-trap regression plus smaller viewer cleanup gaps that required this narrow corrective pass.
 
 ## Plan And Todo History
+- 2026-04-19 16:45 +02:00 - Completed Silent Knight Block 3: tightened `ViewerWrapper` image-listener lifecycle with explicit pending-listener cleanup via `WeakMap`, narrowed PhotoSwipe helper contracts to smaller local shapes, and cleared pending image listeners during `contentDestroy`. Type check passes: 0 errors, 0 warnings. Short test suite passes 32/32. Long test suite passes 12/12 (5 skipped).
+- 2026-04-19 16:45 +02:00 - Deferred Silent Knight Block 4: `bulk-actions.ts` helper shape is already the clearer local minimum; no further extraction is justified without increasing indirection.
+- 2026-04-19 16:45 +02:00 - Deferred Silent Knight Block 5: local formatting-only normalization skipped because it would add churn without improving the safety fixes landed in Blocks 1-3.
 - 2026-04-19 16:39 +02:00 - Completed Silent Knight Block 2: unified `ViewerWrapper` image load handling by extracting one shared `attachImageLoadHandler(...)` helper and replacing the remaining direct preview `image.onload` assignment. Type check passes: 0 errors, 0 warnings. Short test suite passes 32/32. Long test suite passes 12/12 (5 skipped).
+- 2026-04-19 16:39 +02:00 - Recorded Silent Knight Block 2 commit `0450c8f` (`refactor: unify viewer image load handling`).
 - 2026-04-19 16:31 +02:00 - Completed Silent Knight Block 1: replaced the five independent `GalleryGrid` progress-panel focus-trap reactive calls with a single active-panel selection path that preserves one active trap and prevents inactive paths from clearing it. Type check passes: 0 errors, 0 warnings. Short test suite passes 32/32. Long test suite passes 12/12 (5 skipped). (commit 7e94484)
 - 2026-04-19 16:28 +02:00 - Activated Silent Knight plan (`.kilo/plans/1776606618163-silent-knight.md`): follow-up code quality plan for the recently refactored gallery/viewer area. Plan registered, Block 1 in progress.
 - 2026-04-19 16:35 +02:00 - Kind Island plan completed: all 5 main blocks implemented successfully. Gallery/viewer code quality improved without behavior changes. Block 6 (optional final polish) deferred as no clear cleanup needed.
@@ -421,6 +430,9 @@
 - ℹ️ Historical references to `.kilo/status.md` remain in dated records by design and are not treated as active drift.
 
 ## Last Validation
+- 2026-04-19 16:45 +02:00 - Silent Knight Block 3 validation: tightened viewer event lifecycle and narrowing helpers.
+  - Result: passed with 0 errors, 0 warnings
+  - Main note: Type check passes; short test suite passes 32/32; long test suite passes 12/12 with 5 skipped; pending image load listeners are now explicitly cleared when replaced or when image content is destroyed.
 - 2026-04-19 16:39 +02:00 - Silent Knight Block 2 validation: unified viewer preview/full image load handling.
   - Result: passed with 0 errors, 0 warnings
   - Main note: Type check passes; short test suite passes 32/32; long test suite passes 12/12 with 5 skipped; no direct `image.onload = ...` remains in the touched preview/full image flow.
@@ -815,6 +827,7 @@
 ## Recent Commit Log
 | Commit | Date | Description |
 |--------|------|-------------|
+| `0450c8f` | 2026-04-19 | refactor: unify viewer image load handling |
 | `7e94484` | 2026-04-19 | fix: restore gallery progress panel focus trapping |
 | `f712304` | 2026-04-19 | refactor: complete ViewerWrapper utility integration |
 | `f84d66c` | 2026-04-19 | docs: strengthen agent rules and split Task 9 into subtasks |
