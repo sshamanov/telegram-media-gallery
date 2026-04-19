@@ -1,18 +1,4 @@
-export interface ViewerContent {
-  element?: HTMLElement
-  data?: { item?: unknown }
-  previewUrl?: string | null
-  fullUrl?: string | null
-  width?: number
-  height?: number
-  slide?: {
-    width: number
-    height: number
-    updateContentSize: (force?: boolean) => void
-    zoomAndPanToInitial: () => void
-    applyCurrentZoomPan: () => void
-  }
-}
+import type { ViewerContent } from './viewer-types'
 
 export function revokeUrls(content: ViewerContent): void {
   if (typeof content.previewUrl === 'string') {

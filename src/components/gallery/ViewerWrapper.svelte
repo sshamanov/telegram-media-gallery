@@ -27,22 +27,7 @@
   import InfoPanel from './InfoPanel.svelte'
   import type { MediaItem } from '../../types/telegram'
   import type PhotoSwipe from 'photoswipe'
-
-  type ViewerContent = Record<string, unknown> & {
-    element?: HTMLElement
-    data?: { item?: MediaItem }
-    previewUrl?: string | null
-    fullUrl?: string | null
-    width?: number
-    height?: number
-    slide?: {
-      width: number
-      height: number
-      updateContentSize: (force?: boolean) => void
-      zoomAndPanToInitial: () => void
-      applyCurrentZoomPan: () => void
-    }
-  }
+  import type { ViewerContent } from './utils/viewer-types'
 
   let showInfo = false
   let pswp: PhotoSwipe | null = null

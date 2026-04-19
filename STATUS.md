@@ -87,7 +87,7 @@
 - `completed` Block 1: Restore `replaceImageSource` correctness
 - `completed` Block 2: Remove direct `console.warn`
 - `completed` Block 3: Prune dead utility surface
-- `pending` Block 4: Consolidate duplicated `ViewerContent` type
+- `completed` Block 4: Consolidate duplicated `ViewerContent` type
 - `pending` Block 5: Reduce repetitive focus-trap logic in `GalleryGrid`
 - `pending` Block 6: Harden keyboard navigation guard
 - `pending` Block 7: Optional cleanup of `bulk-actions.ts`
@@ -188,6 +188,7 @@
 - **Previous work**: Playful Otter plan completed, Task 10 deferred (unit test framework setup).
 
 ## Plan And Todo History
+- 2026-04-19 16:00 +02:00 - Completed Happy Tiger Block 4: consolidated duplicated `ViewerContent` type by creating shared `viewer-types.ts` file, removing unused definition from `photoswipe-integration.ts`, updating `object-url-lifecycle.ts` to import shared type, and updating `ViewerWrapper.svelte` to use shared type instead of local duplicate. Type check passes: 0 errors, 0 warnings. Short test suite passes 32/32.
 - 2026-04-19 15:50 +02:00 - Completed Happy Tiger Block 3: pruned dead utility surface - removed unused exports `initPhotoSwipe`, `destroyPhotoSwipe`, `attachPhotoSwipeEvents` from `photoswipe-integration.ts`, deleted entire unused `video-player.ts` file, removed unused `createObjectUrl`, `revokeObjectUrl`, `scheduleUrlRevocation` from `object-url-lifecycle.ts`. Type check passes: 0 errors, 0 warnings. Short test suite passes 32/32.
 - 2026-04-19 15:40 +02:00 - Completed Happy Tiger Block 2: replaced direct `console.warn` calls in `video-player.ts` and `bulk-actions.ts` with project-approved `debugWarn` utility. Type check passes: 0 errors, 0 warnings. Short test suite passes 32/32.
 - 2026-04-19 15:30 +02:00 - Completed Happy Tiger Block 1: restored `replaceImageSource` correctness by moving function back into `ViewerWrapper.svelte` with proper previous full URL revocation and image dimension updates after full image load. Type check passes: 0 errors, 0 warnings. Short test suite passes 32/32.
@@ -384,6 +385,9 @@
 - ℹ️ Historical references to `.kilo/status.md` remain in dated records by design and are not treated as active drift.
 
 ## Last Validation
+- 2026-04-19 16:00 +02:00 - Happy Tiger Block 4 validation: consolidated viewer content typing.
+  - Result: passed with 0 errors, 0 warnings
+  - Main note: Type check passes; short test suite passes 32/32; exactly one authoritative active `ViewerContent` definition exists, no duplicate type copies remain.
 - 2026-04-19 15:50 +02:00 - Happy Tiger Block 3 validation: pruned dead utility exports.
   - Result: passed with 0 errors, 0 warnings
   - Main note: Type check passes; short test suite passes 32/32; unused exports removed, utility modules now have clear, truthful purpose.

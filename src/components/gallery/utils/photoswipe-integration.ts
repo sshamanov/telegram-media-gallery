@@ -2,21 +2,7 @@ import type { SlideData } from 'photoswipe'
 import type { MediaItem } from '../../../types/telegram'
 import { isImageItem, isVideoItem, isPdfItem, isTextItem, isAudioItem } from '../../../lib/media'
 
-export interface ViewerContent {
-  element?: HTMLElement
-  data?: { item?: MediaItem }
-  previewUrl?: string | null
-  fullUrl?: string | null
-  width?: number
-  height?: number
-  slide?: {
-    width: number
-    height: number
-    updateContentSize: (force?: boolean) => void
-    zoomAndPanToInitial: () => void
-    applyCurrentZoomPan: () => void
-  }
-}
+
 
 export function createDataSource(items: MediaItem[]): SlideData[] {
   return items.map((item) => ({
