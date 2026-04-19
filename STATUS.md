@@ -1,10 +1,10 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-19 16:45 +02:00
-**Current Phase:** Silent Knight - Code Quality Improvement (In Progress)
-**Active Plan:** `.kilo/plans/1776606618163-silent-knight.md` (In Progress)
+**Last Updated:** 2026-04-19 16:48 +02:00
+**Current Phase:** Silent Knight - Code Quality Improvement (Completed)
+**Active Plan:** `.kilo/plans/1776606618163-silent-knight.md` (Completed)
 **Branch:** `main`
-**Ahead Of `origin/main`:** 120 commits
+**Ahead Of `origin/main`:** 122 commits
 
 ---
 
@@ -215,10 +215,11 @@
 - `completed` Task 20: UI refinements (Block 6.1) (FB006, FB007) (commit 715d7f5)
 
 ## Next Execution Order
-- **Silent Knight plan implementation completed**: Blocks 1-3 landed successfully; Blocks 4-5 were explicitly deferred because they did not justify further code churn after the safety fixes. Final step is to record the last commit hash in `STATUS.md`.
+- **Silent Knight plan completed**: Blocks 1-3 landed successfully; Blocks 4-5 were explicitly deferred because they did not justify further code churn after the safety fixes.
 - **Previous work**: Kind Island plan completed, but follow-up review identified a likely focus-trap regression plus smaller viewer cleanup gaps that required this narrow corrective pass.
 
 ## Plan And Todo History
+- 2026-04-19 16:48 +02:00 - Recorded Silent Knight Block 3 commit `2ecb87e` (`refactor: tighten viewer event and content guards`) and marked the Silent Knight phase as completed.
 - 2026-04-19 16:45 +02:00 - Completed Silent Knight Block 3: tightened `ViewerWrapper` image-listener lifecycle with explicit pending-listener cleanup via `WeakMap`, narrowed PhotoSwipe helper contracts to smaller local shapes, and cleared pending image listeners during `contentDestroy`. Type check passes: 0 errors, 0 warnings. Short test suite passes 32/32. Long test suite passes 12/12 (5 skipped).
 - 2026-04-19 16:45 +02:00 - Deferred Silent Knight Block 4: `bulk-actions.ts` helper shape is already the clearer local minimum; no further extraction is justified without increasing indirection.
 - 2026-04-19 16:45 +02:00 - Deferred Silent Knight Block 5: local formatting-only normalization skipped because it would add churn without improving the safety fixes landed in Blocks 1-3.
@@ -827,6 +828,7 @@
 ## Recent Commit Log
 | Commit | Date | Description |
 |--------|------|-------------|
+| `2ecb87e` | 2026-04-19 | refactor: tighten viewer event and content guards |
 | `0450c8f` | 2026-04-19 | refactor: unify viewer image load handling |
 | `7e94484` | 2026-04-19 | fix: restore gallery progress panel focus trapping |
 | `f712304` | 2026-04-19 | refactor: complete ViewerWrapper utility integration |
