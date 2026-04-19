@@ -180,7 +180,7 @@
 - **Future work**: Execute Task 9.1 or 9.2 refactoring, implement unit test framework (Task 10), or begin new plan based on application priorities.
 
 ## Plan And Todo History
-- 2026-04-19 13:22 +02:00 - Activated Neon Canyon plan (`.kilo/plans/1776578917940-neon-canyon.md`): strengthened AGENTS.md rules with explicit Agent Responsibilities section, added unit test policy to TESTING_STRATEGY.md, split Task 9 into subtasks 9.1 (GalleryGrid refactoring) and 9.2 (ViewerWrapper refactoring). Updated parent Task 9 plan status to partially_completed. Validation deferred (documentation-only work).
+- 2026-04-19 13:22 +02:00 - Activated Neon Canyon plan (`.kilo/plans/1776578917940-neon-canyon.md`): strengthened AGENTS.md rules with explicit Agent Responsibilities section, added unit test policy to TESTING_STRATEGY.md, split Task 9 into subtasks 9.1 (GalleryGrid refactoring) and 9.2 (ViewerWrapper refactoring). Updated parent Task 9 plan status to partially_completed. Type check passes: 0 errors, 0 warnings. (commit f84d66c)
 - 2026-04-18 23:40 +02:00 - Continued Task 9 refactoring: extracted helper modules from mtcute.ts and mock.ts. Created mtcute-helpers.ts, mock-data module, and mock-delay.ts. Reduced mtcute.ts by 22% (516 to 401 lines) and mock.ts by 29% (512 to 366 lines). All validation passes: type check 0 errors/0 warnings, short test suite 32/32. (commit 833de7e)
 - 2026-04-18 23:25 +02:00 - Fixed inconsistent state: restored deleted cache-first.ts file and updated STATUS.md to correctly reflect Task 9 as partially_completed (cache-first logic extracted) and Task 10 as deferred. Validation passed: type check 0 errors/0 warnings, short test suite 32/32. (commit 1a06273)
 - 2026-04-18 22:28 +02:00 - Playful Otter plan execution completed: Tasks 7-8 fully implemented, Task 9 partially implemented (cache-first logic extracted), Task 10 deferred. All validation passes (type check 0 errors/0 warnings, short test suite 32/32).
@@ -742,6 +742,7 @@
 ## Recent Commit Log
 | Commit | Date | Description |
 |--------|------|-------------|
+| `f84d66c` | 2026-04-19 | docs: strengthen agent rules and split Task 9 into subtasks |
 | `833de7e` | 2026-04-18 | refactor: extract helper modules from mtcute.ts and mock.ts |
 | `1a06273` | 2026-04-18 | fix: restore cache-first.ts and update STATUS.md |
 | `a8599c5` | 2026-04-18 | refactor: extract cache-first logic into shared utility |
