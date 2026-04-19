@@ -26,15 +26,5 @@ export function revokeUrls(content: ViewerContent): void {
   }
 }
 
-export function createObjectUrl(blob: Blob): string {
-  return URL.createObjectURL(blob)
-}
 
-export function revokeObjectUrl(url: string): void {
-  URL.revokeObjectURL(url)
-}
-
-export function scheduleUrlRevocation(url: string, delayMs: number = 0): void {
-  window.setTimeout(() => URL.revokeObjectURL(url), delayMs)
-}
 
