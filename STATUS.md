@@ -1,6 +1,6 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-18 22:28 +02:00
+**Last Updated:** 2026-04-19 13:22 +02:00
 **Current Phase:** Playful Otter - Bug Fixes & Improvements
 **Active Plan:** `.kilo/plans/1776456580754-playful-otter.md`
 **Branch:** `main`
@@ -78,8 +78,10 @@
 - `completed` Task 6: Implement Telegram data caching (plan: `.kilo/plans/1776487925900-task6-telegram-data-caching.md`)
 - `completed` Task 7: Add toast auto-close (plan: `.kilo/plans/1776540483161-task7-toast-auto-close.md`)
 - `completed` Task 8: Remove author thumbnail background (plan: `.kilo/plans/1776540483162-task8-remove-author-thumbnail-background.md`)
-- `partially_completed` Task 9: Refactor large modules (plan: `.kilo/plans/1776540483163-task9-refactor-large-modules.md`) - cache-first logic extracted
-- `deferred` Task 10: Write unit tests (plan: `.kilo/plans/1776540483164-task10-write-unit-tests.md`) - requires test framework setup
+ - `partially_completed` Task 9: Refactor large modules (plan: `.kilo/plans/1776540483163-task9-refactor-large-modules.md`) - phases 0-2 completed
+ - `pending` Task 9.1: Refactor GalleryGrid.svelte (plan: `.kilo/plans/1776578917940-task9-1-gallerygrid-refactor.md`)
+ - `pending` Task 9.2: Refactor ViewerWrapper.svelte (plan: `.kilo/plans/1776578917940-task9-2-viewerwrapper-refactor.md`)
+ - `deferred` Task 10: Write unit tests (plan: `.kilo/plans/1776540483164-task10-write-unit-tests.md`) - requires test framework setup
 
 ### Clever Island Plan (Stale plan cleanup & priority execution)
 - `completed` Task 44: Block 1.1 - Inventory stale plans
@@ -173,10 +175,12 @@
 - `completed` Task 20: UI refinements (Block 6.1) (FB006, FB007) (commit 715d7f5)
 
 ## Next Execution Order
-- **Playful Otter plan substantially completed**: Tasks 1-8 fully implemented, Task 9 partially implemented (cache-first logic extracted), Task 10 deferred (unit test framework setup).
-- **Future work**: Complete remaining refactoring (Task 9), implement unit test framework (Task 10), or begin new plan based on application priorities.
+- **Playful Otter plan substantially completed**: Tasks 1-8 fully implemented, Task 9 partially implemented (phases 0-2 completed), Task 10 deferred (unit test framework setup).
+- **Task 9 subtasks ready**: Task 9.1 (GalleryGrid refactoring) and Task 9.2 (ViewerWrapper refactoring) are defined with detailed plans.
+- **Future work**: Execute Task 9.1 or 9.2 refactoring, implement unit test framework (Task 10), or begin new plan based on application priorities.
 
 ## Plan And Todo History
+- 2026-04-19 13:22 +02:00 - Activated Neon Canyon plan (`.kilo/plans/1776578917940-neon-canyon.md`): strengthened AGENTS.md rules with explicit Agent Responsibilities section, added unit test policy to TESTING_STRATEGY.md, split Task 9 into subtasks 9.1 (GalleryGrid refactoring) and 9.2 (ViewerWrapper refactoring). Updated parent Task 9 plan status to partially_completed. Validation deferred (documentation-only work).
 - 2026-04-18 23:40 +02:00 - Continued Task 9 refactoring: extracted helper modules from mtcute.ts and mock.ts. Created mtcute-helpers.ts, mock-data module, and mock-delay.ts. Reduced mtcute.ts by 22% (516 to 401 lines) and mock.ts by 29% (512 to 366 lines). All validation passes: type check 0 errors/0 warnings, short test suite 32/32. (commit 833de7e)
 - 2026-04-18 23:25 +02:00 - Fixed inconsistent state: restored deleted cache-first.ts file and updated STATUS.md to correctly reflect Task 9 as partially_completed (cache-first logic extracted) and Task 10 as deferred. Validation passed: type check 0 errors/0 warnings, short test suite 32/32. (commit 1a06273)
 - 2026-04-18 22:28 +02:00 - Playful Otter plan execution completed: Tasks 7-8 fully implemented, Task 9 partially implemented (cache-first logic extracted), Task 10 deferred. All validation passes (type check 0 errors/0 warnings, short test suite 32/32).
@@ -365,6 +369,9 @@
 - ℹ️ Historical references to `.kilo/status.md` remain in dated records by design and are not treated as active drift.
 
 ## Last Validation
+- 2026-04-19 13:22 +02:00 - Neon Canyon plan documentation updates: strengthened AGENTS.md rules, added unit test policy, split Task 9.
+  - Result: passed with 0 errors, 0 warnings
+  - Main note: Type check passes; documentation-only work completed successfully.
 - 2026-04-18 22:28 +02:00 - Task 9 partial implementation validation: extracted cache-first logic.
   - Result: passed with 0 errors, 0 warnings
   - Main note: Type check passes; short test suite passes 32/32; cache-first logic successfully extracted into shared utility.

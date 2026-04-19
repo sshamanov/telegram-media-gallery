@@ -12,38 +12,47 @@ The codebase contains several files exceeding 400 lines, which makes navigation 
 
 1. **Analyze** each target file to identify logical seams.
 2. **Extract** helper functions, constants, and sub‑components into separate files.
-3. **Preserve** existing public interfaces – no change in external behavior.
-4. **Validate** that all existing functionality works unchanged.
+ 3. **Preserve** existing public interfaces – no change in external behavior.
+ 4. **Validate** that all existing functionality works unchanged.
 
-## Execution Order
+ **Note:** Phases 0‑2 completed; remaining work delegated to subtasks 9.1 and 9.2.
 
-### Phase 0: Analysis & Planning
-1. Examine each target file, noting exports, imports, and internal dependencies.
-2. Identify extraction candidates (pure functions, constants, internal types, reusable UI blocks).
-3. Decide on new file names and locations.
+ ## Execution Order
 
-### Phase 1: Refactor `src/lib/telegram/mtcute.ts` (457 lines)
-- Extract pure helper functions (`errorMessage`, `isPasswordRequired`, `documentDimensions`, `documentDuration`, `fileLikeName`, `mapPeer`, `mapMessage`, `downloadMedia`).
-- Move constants (size limits, default delays) to a separate module.
-- Keep the `MtcuteAdapter` class intact; import extracted helpers.
+### Phase 0: Analysis & Planning ✓ COMPLETED
+1. ✓ Examined each target file, noting exports, imports, and internal dependencies.
+2. ✓ Identified extraction candidates (pure functions, constants, internal types, reusable UI blocks).
+3. ✓ Decided on new file names and locations.
 
-### Phase 2: Refactor `src/lib/telegram/mock.ts` (457 lines)
-- Extract sample data loading (`loadDialogs`, `loadMedia`, `loadMessages`) to `mock-data.ts`.
-- Extract artificial delay simulation to `mock-delay.ts`.
-- Extract cache‑first logic (already shared with mtcute) to a shared utility.
-- Keep the `MockAdapter` class; import extracted modules.
+### Phase 1: Refactor `src/lib/telegram/mtcute.ts` (421 lines) ✓ PARTIALLY COMPLETED
+- ✓ Extracted pure helper functions to `mtcute-helpers.ts` (`errorMessage`, `isPasswordRequired`, `documentDimensions`, `documentDuration`, `fileLikeName`, `fileLikeDimensions`, `fileLikeDuration`, `mapPeer`, `mapMessage`).
+- ✓ Constants already in separate module (`src/lib/telegram/constants.ts`).
+- ✓ `downloadMedia` function remains in mtcute.ts (needs analysis for extraction).
+- ✓ `MtcuteAdapter` class intact; imports extracted helpers.
+- **Remaining**: Analyze if `downloadMedia` can be extracted (complex with progress callbacks).
 
-### Phase 3: Refactor `src/components/gallery/GalleryGrid.svelte` (~500 lines)
+### Phase 2: Refactor `src/lib/telegram/mock.ts` (337 lines) ✓ COMPLETED
+- ✓ Extracted sample data loading to `mock-data/index.ts` (`loadDialogs`, `loadMedia`, `loadMessages`).
+- ✓ Extracted artificial delay simulation to `mock-delay.ts`.
+- ✓ Extracted cache‑first logic to shared `cache-first.ts`.
+- ✓ `MockAdapter` class intact; imports extracted modules.
+- **Status**: Phase 2 fully completed.
+
+### Phase 3: Refactor `src/components/gallery/GalleryGrid.svelte` (1468 lines) ➡️ DELEGATED TO TASK 9.1
+- **Subtasks:** See `.kilo/plans/1776578917940-task9-1-gallerygrid-refactor.md`
 - Extract masonry layout CSS and detection logic to `masonry.ts`.
 - Extract keyboard navigation helpers to `keyboard-navigation.ts`.
 - Extract selection mode helpers to `selection-helpers.ts`.
 - Consider splitting the grid header (search, filter, layout toggle) into a separate `GalleryHeader.svelte` component (optional).
+- **Status:** Delegated to Task 9.1
 
-### Phase 4: Refactor `src/components/gallery/ViewerWrapper.svelte` (~400 lines)
+### Phase 4: Refactor `src/components/gallery/ViewerWrapper.svelte` (873 lines) ➡️ DELEGATED TO TASK 9.2
+- **Subtasks:** See `.kilo/plans/1776578917940-task9-2-viewerwrapper-refactor.md`
 - Extract PhotoSwipe initialization and event handling to `photoswipe‑integration.ts`.
 - Extract video player handling (play/pause, fullscreen) to `video‑player.ts`.
 - Extract object‑URL lifecycle management to `object‑url‑lifecycle.ts`.
 - Keep the main component as coordinator.
+- **Status:** Delegated to Task 9.2
 
 ### Phase 5: Validation
 1. Type check (`npm run check`).

@@ -55,11 +55,29 @@ After every logical block that changes executable behavior, test files, or valid
 3. run the relevant long suite only if the touched advanced flow is implemented and currently claimed as supported
 4. record the result in `STATUS.md`
 
-### Documentation-Only Blocks
+ ### Documentation-Only Blocks
 When the work is limited to markdown/process truth alignment and intentionally does not change code, tests, selectors, or supported executable behavior:
 1. do not invent validation that was not run
 2. record the validation deferral in `STATUS.md`
 3. do not claim restored product behavior from documentation edits alone
+
+## Unit Test Policy (When Implemented)
+
+When the unit test framework (vitest) is established (Task 10), follow these rules:
+
+### Scope
+- **Unit tests**: Pure functions, adapter methods, store utilities, component logic (tested via @testing-library/svelte).
+- **Playwright e2e**: UI rendering, browser behavior, complete user flows, mobile responsiveness.
+
+### Execution
+- Run unit tests: `npm run test:unit`
+- Unit tests are part of the validation gate for code-changing work.
+- Maintain existing Playwright coverage; unit tests complement, don't replace, e2e tests.
+
+### Framework
+- Use `vitest` with `jsdom` environment.
+- Test files co‑located with source: `*.test.ts` or `*.spec.ts`.
+- Mock external dependencies (`@mtcute/web`, `photoswipe`) with `vi.mock`.
 
 ## Suite Definitions
 

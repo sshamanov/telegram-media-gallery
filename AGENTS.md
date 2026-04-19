@@ -57,8 +57,14 @@ These rules override everything else. No exceptions. No creative interpretations
     Example: `lsof -ti:5173 | xargs kill -9 2>/dev/null || true`
 
 
+## Agent Responsibilities
 
-## Commit discipline
+- **STATUS.md updates**: Must update STATUS.md before starting work, when todo state changes, after validation runs, and after commits.
+- **Type checks**: Run `npm run check` after every logical block that modifies code (not required for documentation-only work).
+- **Validation gates**: Follow TESTING_STRATEGY.md validation requirements; never skip required tests.
+- **Truthful reporting**: Record blockers, failed attempts, and deferrals immediately in STATUS.md.
+
+## Commit discipline (Mandatory for Agents)
 
 **Commit after every logical block of work. Do not batch multiple features into one commit.**
 
@@ -89,8 +95,9 @@ Never use `--no-verify`.
 7. **No console.log in production**: use `src/lib/debug.ts` (stripped in prod build).
  8. **URL lifecycle**: every `URL.createObjectURL()` must pair with `URL.revokeObjectURL()`.
  9. **No alert/confirm**: use the Toast store and component.
-10. **TypeScript strict**: no `any`, no type assertions outside adapter files.
-11. **Progressive jpeg**: every commit is a working, usable app. No stubs.
+ 10. **TypeScript strict**: no `any`, no type assertions outside adapter files.
+ 11. **Progressive jpeg**: every commit is a working, usable app. No stubs.
+ 12. **Unit test usage**: When unit test framework exists, write unit tests for new pure functions and utilities. Maintain existing Playwright coverage for UI flows.
 
 ## Required workflow documents
 
