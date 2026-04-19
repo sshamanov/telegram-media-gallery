@@ -1,5 +1,6 @@
 import type { MediaItem } from '../../../types/telegram'
 import type { ToastMessage } from '../../../types/telegram'
+import { debugWarn } from '../../../lib/debug'
 
 export async function refreshOfflineSelectionState(
   items: MediaItem[],
@@ -48,7 +49,7 @@ export async function handleBulkDownload(options: BulkDownloadOptions): Promise<
       })
     } catch (error) {
       if (!(error instanceof DOMException && error.name === 'AbortError')) {
-        console.warn('Failed to request directory, falling back to per-file downloads:', error)
+        debugWarn('Failed to request directory, falling back to per-file downloads:', error)
       }
     }
   }

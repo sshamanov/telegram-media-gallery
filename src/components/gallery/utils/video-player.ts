@@ -1,3 +1,5 @@
+import { debugWarn } from '../../../lib/debug'
+
 export function createVideoPlayer(
   container: HTMLElement,
   mediaUrl: string,
@@ -53,7 +55,7 @@ export function createVideoPlayer(
     try {
       await video.play()
     } catch (error) {
-      console.warn('Video play failed:', error)
+      debugWarn('Video play failed:', error)
     }
   }
 
