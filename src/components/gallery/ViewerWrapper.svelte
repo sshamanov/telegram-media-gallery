@@ -177,6 +177,20 @@
     }
   }
 
+  function attachImageLoadHandler(
+    image: HTMLImageElement,
+    expectedUrl: string,
+    handler: () => void,
+  ): void {
+    const loadListener = () => {
+      if (image.src === expectedUrl) {
+        handler()
+      }
+    }
+
+    image.addEventListener('load', loadListener, { once: true })
+  }
+
    function replaceImageSource(
      content: ViewerContent,
      item: MediaItem,
@@ -191,31 +205,20 @@
        URL.revokeObjectURL(content.fullUrl)
      }
 
-     // Helper to attach one-shot load handler with safety guard
-     const attachLoadHandler = (handler: () => void) => {
-       const loadListener = () => {
-         // Safety guard: only run handler if image still points to the same URL
-         if (image.src === fullUrl) {
-           handler()
-         }
-       }
-       image.addEventListener('load', loadListener, { once: true })
-     }
-
-     if (revokePreviewOnLoad && typeof content.previewUrl === 'string') {
-       const previousPreviewUrl = content.previewUrl
-       attachLoadHandler(() => {
-         URL.revokeObjectURL(previousPreviewUrl)
-         content.previewUrl = null
-         // Update dimensions after full image loads
-         updateImageDimensions(content, item, image)
-       })
-     } else {
-       // Still need to update dimensions after full image loads
-       attachLoadHandler(() => {
-         updateImageDimensions(content, item, image)
-       })
-     }
+      if (revokePreviewOnLoad && typeof content.previewUrl === 'string') {
+        const previousPreviewUrl = content.previewUrl
+        attachImageLoadHandler(image, fullUrl, () => {
+          URL.revokeObjectURL(previousPreviewUrl)
+          content.previewUrl = null
+          // Update dimensions after full image loads
+          updateImageDimensions(content, item, image)
+        })
+      } else {
+        // Still need to update dimensions after full image loads
+        attachImageLoadHandler(image, fullUrl, () => {
+          updateImageDimensions(content, item, image)
+        })
+      }
 
      content.fullUrl = fullUrl
      image.src = fullUrl
@@ -277,7 +280,9 @@
           URL.revokeObjectURL(content.previewUrl)
         }
         content.previewUrl = previewUrl
-        image.onload = () => updateImageDimensions(content, item, image)
+        attachImageLoadHandler(image, previewUrl, () => {
+          updateImageDimensions(content, item, image)
+        })
         image.src = previewUrl
         markLoadedUtil(event)
       }

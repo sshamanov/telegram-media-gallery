@@ -1,10 +1,10 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-19 16:28 +02:00
+**Last Updated:** 2026-04-19 16:39 +02:00
 **Current Phase:** Silent Knight - Code Quality Improvement (In Progress)
 **Active Plan:** `.kilo/plans/1776606618163-silent-knight.md` (In Progress)
 **Branch:** `main`
-**Ahead Of `origin/main`:** 57 commits
+**Ahead Of `origin/main`:** 120 commits
 
 ---
 
@@ -113,8 +113,8 @@
 
 ### Silent Knight Plan (Code Quality Improvement)
 - `completed` Block 1: Fix `GalleryGrid` focus-trap regression risk
-- `in_progress` Block 2: Unify viewer preview/full image load handling
-- `pending` Block 3: Tighten viewer listener lifecycle and local narrowing clarity
+- `completed` Block 2: Unify viewer preview/full image load handling
+- `in_progress` Block 3: Tighten viewer listener lifecycle and local narrowing clarity
 - `pending` Block 4: Reassess `bulk-actions.ts` helper shape
 - `pending` Block 5: Optional local formatting normalization
 
@@ -210,11 +210,12 @@
 - `completed` Task 20: UI refinements (Block 6.1) (FB006, FB007) (commit 715d7f5)
 
 ## Next Execution Order
-- **Silent Knight Block 1 completed**: `GalleryGrid` now selects one active progress-panel trap in a single reactive block, preventing inactive reactive paths from clearing an active trap. Block 2 in progress to unify viewer preview/full image load handling.
+- **Silent Knight Block 2 completed**: `ViewerWrapper` now uses one shared one-shot image load listener helper for both preview and full-image paths. Block 3 in progress to tighten viewer listener lifecycle and local narrowing clarity.
 - **Previous work**: Kind Island plan completed, but follow-up review identified a likely focus-trap regression plus smaller viewer cleanup gaps that require a narrow corrective pass.
 
 ## Plan And Todo History
-- 2026-04-19 16:31 +02:00 - Completed Silent Knight Block 1: replaced the five independent `GalleryGrid` progress-panel focus-trap reactive calls with a single active-panel selection path that preserves one active trap and prevents inactive paths from clearing it. Type check passes: 0 errors, 0 warnings. Short test suite passes 32/32. Long test suite passes 12/12 (5 skipped).
+- 2026-04-19 16:39 +02:00 - Completed Silent Knight Block 2: unified `ViewerWrapper` image load handling by extracting one shared `attachImageLoadHandler(...)` helper and replacing the remaining direct preview `image.onload` assignment. Type check passes: 0 errors, 0 warnings. Short test suite passes 32/32. Long test suite passes 12/12 (5 skipped).
+- 2026-04-19 16:31 +02:00 - Completed Silent Knight Block 1: replaced the five independent `GalleryGrid` progress-panel focus-trap reactive calls with a single active-panel selection path that preserves one active trap and prevents inactive paths from clearing it. Type check passes: 0 errors, 0 warnings. Short test suite passes 32/32. Long test suite passes 12/12 (5 skipped). (commit 7e94484)
 - 2026-04-19 16:28 +02:00 - Activated Silent Knight plan (`.kilo/plans/1776606618163-silent-knight.md`): follow-up code quality plan for the recently refactored gallery/viewer area. Plan registered, Block 1 in progress.
 - 2026-04-19 16:35 +02:00 - Kind Island plan completed: all 5 main blocks implemented successfully. Gallery/viewer code quality improved without behavior changes. Block 6 (optional final polish) deferred as no clear cleanup needed.
 - 2026-04-19 16:30 +02:00 - Completed Kind Island Block 5: simplified duplicated guard policy in `bulk-actions.ts` by creating helpers `hasSelection` and `createOfflineWarningToast`. Reduced duplication in 4 handler functions. Type check passes: 0 errors, 0 warnings. Short test suite passes 32/32. Long validation skipped per plan (only `bulk-actions.ts` changes). (commit a617cf2)
@@ -420,6 +421,9 @@
 - ℹ️ Historical references to `.kilo/status.md` remain in dated records by design and are not treated as active drift.
 
 ## Last Validation
+- 2026-04-19 16:39 +02:00 - Silent Knight Block 2 validation: unified viewer preview/full image load handling.
+  - Result: passed with 0 errors, 0 warnings
+  - Main note: Type check passes; short test suite passes 32/32; long test suite passes 12/12 with 5 skipped; no direct `image.onload = ...` remains in the touched preview/full image flow.
 - 2026-04-19 16:31 +02:00 - Silent Knight Block 1 validation: restored reliable gallery progress-panel focus trapping.
   - Result: passed with 0 errors, 0 warnings
   - Main note: Type check passes; short test suite passes 32/32; long test suite passes 12/12 with 5 skipped; `GalleryGrid` now installs at most one active panel trap from a single reactive path.
@@ -811,6 +815,7 @@
 ## Recent Commit Log
 | Commit | Date | Description |
 |--------|------|-------------|
+| `7e94484` | 2026-04-19 | fix: restore gallery progress panel focus trapping |
 | `f712304` | 2026-04-19 | refactor: complete ViewerWrapper utility integration |
 | `f84d66c` | 2026-04-19 | docs: strengthen agent rules and split Task 9 into subtasks |
 | `833de7e` | 2026-04-18 | refactor: extract helper modules from mtcute.ts and mock.ts |
