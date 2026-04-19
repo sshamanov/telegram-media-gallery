@@ -102,35 +102,44 @@
    let isPulling = false
    let isRefreshing = false
    
-    // Local helper for focus trap management
-    function activatePanelFocusTrap(active: boolean, element: HTMLElement | null, onEscape: () => void): void {
-      // Clear existing traps
+    function getActivePanelTrapConfig(): { element: HTMLElement | null; onEscape: () => void } | null {
+      // Preserve prior effective precedence if multiple panels are active at once.
+      if ($uploadQueueState.active) {
+        return { element: uploadPanelElement, onEscape: cancelUploadQueue }
+      }
+
+      if ($copyQueueState.active) {
+        return { element: copyPanelElement, onEscape: cancelCopies }
+      }
+
+      if ($shareQueueState.active) {
+        return { element: sharePanelElement, onEscape: cancelShares }
+      }
+
+      if ($forwardQueueState.active) {
+        return { element: forwardPanelElement, onEscape: cancelForwards }
+      }
+
+      if ($downloadQueueState.active) {
+        return { element: downloadPanelElement, onEscape: cancelDownloads }
+      }
+
+      return null
+    }
+
+    $: {
+      const activePanelTrapConfig = getActivePanelTrapConfig()
+
       cleanupFocusTraps.forEach(fn => fn())
       cleanupFocusTraps = []
-      
-      // Install new trap if active and element exists
-      if (active && element) {
-        const cleanup = trapFocus(element, {
-          onEscape,
-          hideOtherContent: false
+
+      if (activePanelTrapConfig?.element) {
+        const cleanup = trapFocus(activePanelTrapConfig.element, {
+          onEscape: activePanelTrapConfig.onEscape,
+          hideOtherContent: false,
         })
         cleanupFocusTraps.push(cleanup)
       }
-    }
-    
-    // Manage focus traps for active progress panels
-    $: activatePanelFocusTrap($downloadQueueState.active, downloadPanelElement, cancelDownloads)
-    $: activatePanelFocusTrap($forwardQueueState.active, forwardPanelElement, cancelForwards)
-    $: activatePanelFocusTrap($shareQueueState.active, sharePanelElement, cancelShares)
-    $: activatePanelFocusTrap($copyQueueState.active, copyPanelElement, cancelCopies)
-    $: activatePanelFocusTrap($uploadQueueState.active, uploadPanelElement, cancelUploadQueue)
-    
-    // Clean up focus traps when panels become inactive
-    $: if (!$downloadQueueState.active && !$forwardQueueState.active && 
-           !$shareQueueState.active && !$copyQueueState.active && 
-           !$uploadQueueState.active) {
-      cleanupFocusTraps.forEach(fn => fn())
-      cleanupFocusTraps = []
     }
     
     onDestroy(() => {
