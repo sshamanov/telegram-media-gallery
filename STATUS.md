@@ -233,6 +233,7 @@
 - **Previous work**: Block 2 completed; APPLICATION_SPEC.md updated to reflect implemented Phase 3+ features.
 
 ## Plan And Todo History
+- 2026-04-20 00:30 +02:00 - Recorded Proud Comet Block 2 commit `106acb6` (`docs: update APPLICATION_SPEC.md with implemented Phase 3+ features`).
 - 2026-04-20 00:29 +02:00 - Completed Proud Comet Block 2: updated APPLICATION_SPEC.md to reflect implemented Phase 3+ features. Changed "Phase 3+ (Advanced) - Planned" to "Partially Implemented" with masonry layout toggle, desktop variants, and light theme marked as implemented. Added mention of these features to "Current Supported State" section. Type check passes: 0 errors, 0 warnings.
 - 2026-04-20 00:29 +02:00 - Recorded STATUS.md update commit `d9c5d0b` (`docs: update STATUS.md with Block 1 completion and commit hash`).
 - 2026-04-20 00:28 +02:00 - Recorded Proud Comet Block 1 commit `798e0ec` (`chore: complete Proud Comet Block 1 - audit and clean up stale plans`).
