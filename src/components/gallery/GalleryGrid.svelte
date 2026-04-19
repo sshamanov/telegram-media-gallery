@@ -7,11 +7,30 @@
  import MediaListRow from './MediaListRow.svelte'
  import AuthorFilter from './AuthorFilter.svelte'
    import DialogPicker from './DialogPicker.svelte'
-   import { tooltip } from '../../lib/dom/tooltips'
-   import { navigateToDialogList } from '../../lib/routing'
-    import { effectiveDesktopLayout } from '../../lib/dom/desktop-detection'
-   import DesktopSidebar from '../layout/DesktopSidebar.svelte'
-   import { trapFocus } from '../../lib/dom/focus-trap'
+    import { tooltip } from '../../lib/dom/tooltips'
+    import { navigateToDialogList } from '../../lib/routing'
+     import { effectiveDesktopLayout } from '../../lib/dom/desktop-detection'
+    import DesktopSidebar from '../layout/DesktopSidebar.svelte'
+    import { trapFocus } from '../../lib/dom/focus-trap'
+    import {
+      analyzeMediaForMasonry,
+      getMasonryLayoutClass,
+      shouldUseMasonryLayout,
+      getNextLayoutMode,
+      getLayoutModeTooltip
+    } from './utils/masonry'
+    import {
+      handleGalleryKeyDown as handleGalleryKeyDownUtil,
+      scrollFocusedItemIntoView
+    } from './utils/keyboard-navigation'
+
+    import {
+      refreshOfflineSelectionState as refreshOfflineSelectionStateUtil,
+      handleBulkDownload as handleBulkDownloadUtil,
+      handleBulkForward as handleBulkForwardUtil,
+      handleBulkShare as handleBulkShareUtil,
+      handleBulkCopy as handleBulkCopyUtil
+    } from './utils/bulk-actions'
     import {
       canDownloadMediaSelectionOffline,
       currentDialog,
@@ -158,9 +177,9 @@
   $: selectedItems = visibleItems.filter((item) => $selectedMediaIds.has(item.id))
     $: effectiveColumns = $settings.gridColumns
    $: gridTemplate = `repeat(${effectiveColumns}, minmax(0, 1fr))`
-   $: layoutMode = $settings.layoutMode
-   $: shouldUseMasonry = layoutMode === 'masonry' && $galleryViewMode === 'grid'
-   $: gridClass = shouldUseMasonry ? 'masonry-grid' : 'grid'
+    $: layoutMode = $settings.layoutMode
+    $: shouldUseMasonry = shouldUseMasonryLayout(layoutMode, $galleryViewMode)
+    $: gridClass = getMasonryLayoutClass(shouldUseMasonry)
    $: desktopLayoutClass = $effectiveDesktopLayout ? `desktop-${$effectiveDesktopLayout}` : ''
   
   // Auto-detection for masonry layout
@@ -184,22 +203,7 @@
    
    let hasShownMasonrySuggestion = false
   
-  function analyzeMediaForMasonry(items: MediaItem[]): boolean {
-    if (items.length === 0) return false
-    
-    // Analyze first 100 items
-    const sample = items.slice(0, Math.min(100, items.length))
-    let visualCount = 0
-    
-    for (const item of sample) {
-      if (item.type === 'photo' || item.type === 'video' || item.type === 'document-image') {
-        visualCount++
-      }
-    }
-    
-    // Suggest masonry if ≥90% visual content
-    return visualCount / sample.length >= 0.9
-  }
+
   $: selectedCount = $selectedMediaIds.size
   $: galleryStatusText = $isOffline
     ? 'Offline - cached thumbnails remain visible, cached full media still opens, and uncached items fall back to placeholders.'
@@ -371,146 +375,52 @@
   }
 
    function handleKeyDown(event: KeyboardEvent): void {
-    if (event.key === 'Escape' && $selectionMode) {
-      exitSelectionMode()
-      return
-    }
+    const result = handleGalleryKeyDownUtil(event, {
+      mediaItems: visibleItems,
+      focusedIndex: focusedItemIndex,
+      isSelectionMode: $selectionMode,
+      galleryViewMode: $galleryViewMode,
+      effectiveColumns: effectiveColumns,
+      onOpenItem: openById,
+      onToggleSelection: toggleSelectedMedia,
+      onExitSelectionMode: exitSelectionMode
+    })
 
-    // Don't handle keyboard navigation if we're in a form element
-    if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
-      return
-    }
-
-    // Handle arrow key navigation
-    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter', ' '].includes(event.key)) {
-      event.preventDefault()
-    }
-
-    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
-      handleArrowNavigation(event.key)
-    } else if (event.key === 'Enter' && focusedItemIndex !== null) {
-      // Enter opens the focused item
-      const item = visibleItems[focusedItemIndex]
-      if (item) {
-        openById(item.id)
-      }
-    } else if (event.key === ' ' && focusedItemIndex !== null) {
-      // Space toggles selection of focused item
-      const item = visibleItems[focusedItemIndex]
-      if (item) {
-        toggleSelectedMedia(item.id)
-      }
-    }
-  }
-
-  function handleArrowNavigation(key: string): void {
-    if (visibleItems.length === 0) {
-      focusedItemIndex = null
-      return
-    }
-
-    const columns = effectiveColumns
-    const totalItems = visibleItems.length
-
-    if (focusedItemIndex === null) {
-      // Start navigation from first item
-      focusedItemIndex = 0
-      return
-    }
-
-    let newIndex = focusedItemIndex
-
-    if ($galleryViewMode === 'grid') {
-      // Grid navigation
-      if (key === 'ArrowRight') {
-        newIndex = (focusedItemIndex + 1) % totalItems
-      } else if (key === 'ArrowLeft') {
-        newIndex = focusedItemIndex === 0 ? totalItems - 1 : focusedItemIndex - 1
-      } else if (key === 'ArrowDown') {
-        newIndex = Math.min(focusedItemIndex + columns, totalItems - 1)
-      } else if (key === 'ArrowUp') {
-        newIndex = Math.max(focusedItemIndex - columns, 0)
-      }
-    } else {
-      // List navigation (single column)
-      if (key === 'ArrowDown') {
-        newIndex = Math.min(focusedItemIndex + 1, totalItems - 1)
-      } else if (key === 'ArrowUp') {
-        newIndex = Math.max(focusedItemIndex - 1, 0)
-      } else if (key === 'ArrowRight' || key === 'ArrowLeft') {
-        // In list view, left/right don't navigate between items
-        return
-      }
-    }
-
-    focusedItemIndex = newIndex
-
-    // Scroll focused item into view
-    setTimeout(() => {
-      const focusedElement = document.querySelector(`[data-item-id="${visibleItems[focusedItemIndex!]?.id}"]`)
-      if (focusedElement) {
-        focusedElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
-      }
-    }, 0)
-  }
-
-  async function refreshOfflineSelectionState(items: MediaItem[], offline: boolean): Promise<void> {
-    if (!offline) {
-      offlineDownloadReady = false
-      return
-    }
-
-    offlineDownloadReady = await canDownloadMediaSelectionOffline(items)
-  }
-
-  async function handleBulkDownload(): Promise<void> {
-    if (selectedCount === 0) {
-      return
-    }
-
-    if ($isOffline) {
-      pushToast({
-        kind: 'warning',
-        text: 'Downloads are unavailable offline unless the file is already open in the viewer cache.',
-        dismissible: true,
-      })
-      return
-    }
-
-    let directoryHandle: FileSystemDirectoryHandle | null = null
-
-    // Try to use File System Access API on desktop
-    if ('showDirectoryPicker' in window && window.showDirectoryPicker) {
-      try {
-        directoryHandle = await window.showDirectoryPicker({
-          mode: 'readwrite',
-          startIn: 'downloads',
-        })
-      } catch (error) {
-        if (!(error instanceof DOMException && error.name === 'AbortError')) {
-          console.warn('Failed to request directory, falling back to per-file downloads:', error)
+    if (result.handled) {
+      if (result.newFocusedIndex !== undefined) {
+        focusedItemIndex = result.newFocusedIndex
+        if (focusedItemIndex !== null && visibleItems[focusedItemIndex]) {
+          scrollFocusedItemIntoView(visibleItems[focusedItemIndex].id)
         }
       }
     }
+  }
 
-    await enqueueDownloads(selectedItems, directoryHandle)
+  async function refreshOfflineSelectionState(items: MediaItem[], offline: boolean): Promise<void> {
+    offlineDownloadReady = await refreshOfflineSelectionStateUtil(
+      items,
+      offline,
+      canDownloadMediaSelectionOffline
+    )
+  }
+
+  async function handleBulkDownload(): Promise<void> {
+    await handleBulkDownloadUtil({
+      selectedCount,
+      selectedItems,
+      isOffline: $isOffline,
+      pushToast,
+      enqueueDownloads
+    })
   }
 
   function handleForward(): void {
-    if (selectedCount === 0) {
-      return
-    }
-
-    if ($isOffline) {
-      pushToast({
-        kind: 'warning',
-        text: 'Forwarding is unavailable offline until Telegram connectivity returns.',
-        dismissible: true,
-      })
-      return
-    }
-
-    showDialogPicker = true
+    handleBulkForwardUtil({
+      selectedCount,
+      isOffline: $isOffline,
+      pushToast,
+      onShowDialogPicker: () => { showDialogPicker = true }
+    })
   }
 
   async function handleForwardToDialog(dialogId: string, _dialogTitle: string): Promise<void> {
@@ -522,29 +432,22 @@
   }
 
   async function handleShare(): Promise<void> {
-    if (selectedCount === 0) {
-      return
-    }
-
-    if ($isOffline) {
-      pushToast({
-        kind: 'warning',
-        text: 'Sharing is unavailable offline because uncached media cannot be fetched.',
-        dismissible: true,
-      })
-      return
-    }
-
-    await enqueueShares(selectedItems)
+    await handleBulkShareUtil({
+      selectedCount,
+      selectedItems,
+      isOffline: $isOffline,
+      pushToast,
+      enqueueShares
+    })
   }
 
   async function handleCopy(): Promise<void> {
-    if (selectedCount === 0) {
-      return
-    }
-
-    const selectedItems = visibleItems.filter((item) => $selectedMediaIds.has(item.id))
-    await enqueueCopies(selectedItems)
+    await handleBulkCopyUtil({
+      selectedCount,
+      visibleItems,
+      selectedMediaIds: $selectedMediaIds,
+      enqueueCopies
+    })
   }
 
    function handleTouchStart(event: TouchEvent): void {
@@ -966,12 +869,12 @@
             <button
               class="button secondary"
               type="button"
-              on:click={() => {
-                const nextMode: GalleryLayoutMode = layoutMode === 'grid' ? 'masonry' : 'grid'
-                $settings = { ...$settings, layoutMode: nextMode }
-              }}
-              aria-label="Toggle layout mode"
-              use:tooltip={{ text: layoutMode === 'grid' ? 'Switch to masonry layout' : 'Switch to grid layout' }}
+               on:click={() => {
+                 const nextMode: GalleryLayoutMode = getNextLayoutMode(layoutMode)
+                 $settings = { ...$settings, layoutMode: nextMode }
+               }}
+               aria-label="Toggle layout mode"
+               use:tooltip={{ text: getLayoutModeTooltip(layoutMode) }}
               data-testid="gallery-layout-toggle"
             >
               {layoutMode === 'grid' ? 'Masonry' : 'Grid'}
