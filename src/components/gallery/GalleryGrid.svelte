@@ -102,74 +102,41 @@
    let isPulling = false
    let isRefreshing = false
    
-   // Manage focus traps for active progress panels
-   $: if ($downloadQueueState.active && downloadPanelElement) {
-     cleanupFocusTraps.forEach(fn => fn())
-     cleanupFocusTraps = []
-     
-     const cleanup = trapFocus(downloadPanelElement, {
-       onEscape: cancelDownloads,
-       hideOtherContent: false
-     })
-     cleanupFocusTraps.push(cleanup)
-   }
-   
-   $: if ($forwardQueueState.active && forwardPanelElement) {
-     cleanupFocusTraps.forEach(fn => fn())
-     cleanupFocusTraps = []
-     
-     const cleanup = trapFocus(forwardPanelElement, {
-       onEscape: cancelForwards,
-       hideOtherContent: false
-     })
-     cleanupFocusTraps.push(cleanup)
-   }
-   
-   $: if ($shareQueueState.active && sharePanelElement) {
-     cleanupFocusTraps.forEach(fn => fn())
-     cleanupFocusTraps = []
-     
-     const cleanup = trapFocus(sharePanelElement, {
-       onEscape: cancelShares,
-       hideOtherContent: false
-     })
-     cleanupFocusTraps.push(cleanup)
-   }
-   
-   $: if ($copyQueueState.active && copyPanelElement) {
-     cleanupFocusTraps.forEach(fn => fn())
-     cleanupFocusTraps = []
-     
-     const cleanup = trapFocus(copyPanelElement, {
-       onEscape: cancelCopies,
-       hideOtherContent: false
-     })
-     cleanupFocusTraps.push(cleanup)
-   }
-   
-   $: if ($uploadQueueState.active && uploadPanelElement) {
-     cleanupFocusTraps.forEach(fn => fn())
-     cleanupFocusTraps = []
-     
-     const cleanup = trapFocus(uploadPanelElement, {
-       onEscape: cancelUploadQueue,
-       hideOtherContent: false
-     })
-     cleanupFocusTraps.push(cleanup)
-   }
-   
-   // Clean up focus traps when panels become inactive
-   $: if (!$downloadQueueState.active && !$forwardQueueState.active && 
-          !$shareQueueState.active && !$copyQueueState.active && 
-          !$uploadQueueState.active) {
-     cleanupFocusTraps.forEach(fn => fn())
-     cleanupFocusTraps = []
-   }
-   
-   onDestroy(() => {
-     cleanupFocusTraps.forEach(fn => fn())
-     cleanupFocusTraps = []
-   })
+    // Local helper for focus trap management
+    function activatePanelFocusTrap(active: boolean, element: HTMLElement | null, onEscape: () => void): void {
+      // Clear existing traps
+      cleanupFocusTraps.forEach(fn => fn())
+      cleanupFocusTraps = []
+      
+      // Install new trap if active and element exists
+      if (active && element) {
+        const cleanup = trapFocus(element, {
+          onEscape,
+          hideOtherContent: false
+        })
+        cleanupFocusTraps.push(cleanup)
+      }
+    }
+    
+    // Manage focus traps for active progress panels
+    $: activatePanelFocusTrap($downloadQueueState.active, downloadPanelElement, cancelDownloads)
+    $: activatePanelFocusTrap($forwardQueueState.active, forwardPanelElement, cancelForwards)
+    $: activatePanelFocusTrap($shareQueueState.active, sharePanelElement, cancelShares)
+    $: activatePanelFocusTrap($copyQueueState.active, copyPanelElement, cancelCopies)
+    $: activatePanelFocusTrap($uploadQueueState.active, uploadPanelElement, cancelUploadQueue)
+    
+    // Clean up focus traps when panels become inactive
+    $: if (!$downloadQueueState.active && !$forwardQueueState.active && 
+           !$shareQueueState.active && !$copyQueueState.active && 
+           !$uploadQueueState.active) {
+      cleanupFocusTraps.forEach(fn => fn())
+      cleanupFocusTraps = []
+    }
+    
+    onDestroy(() => {
+      cleanupFocusTraps.forEach(fn => fn())
+      cleanupFocusTraps = []
+    })
 
    $: hiddenFilters = $settings.defaultHiddenFilters ?? []
   $: counts = countFilters($mediaItems)
