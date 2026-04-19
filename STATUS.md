@@ -1,8 +1,8 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-19 14:56 +02:00
-**Current Phase:** Playful Otter - Bug Fixes & Improvements (Completed)
-**Active Plan:** `.kilo/plans/1776456580754-playful-otter.md` (Completed)
+**Last Updated:** 2026-04-19 15:22 +02:00
+**Current Phase:** Happy Tiger - Code Quality Hardening
+**Active Plan:** `.kilo/plans/1776603239564-happy-tiger.md` (in progress)
 **Branch:** `main`
 **Ahead Of `origin/main`:** 57 commits
 
@@ -21,10 +21,10 @@
 - This ledger must stay stricter than historical claims and must not overstate completion.
 
 ## Active Plan
-- **Plan file:** `.kilo/plans/1776456580754-playful-otter.md`
-- **Goal:** Fix reported UI bugs, implement caching improvements, refactor large modules, and add unit tests.
-- **Execution strategy:** 4 phases: 1. Investigation & analysis; 2. Bug fixes (scroll position, grid columns, masonry thumbnails, settings title, video preview); 3. Improvements (Telegram data caching, toast auto-close, author thumbnail background); 4. Code refactoring & unit tests.
-- **Status:** in progress; Tasks 1-4 completed and validated, Task 5 mock close-path recovery is validated and ready for real-data verification
+- **Plan file:** `.kilo/plans/1776603239564-happy-tiger.md`
+- **Goal:** Improve code quality in the recently refactored gallery/viewer area without introducing behavior drift, speculative abstraction, or partial cleanups that leave the codebase in a more confusing state.
+- **Execution strategy:** 7 blocks: 1. Restore `replaceImageSource` correctness; 2. Remove direct `console.warn`; 3. Prune dead utility surface; 4. Consolidate duplicated `ViewerContent` type; 5. Reduce repetitive focus-trap logic in `GalleryGrid`; 6. Harden keyboard navigation guard; 7. Optional cleanup of `bulk-actions.ts`.
+- **Status:** in progress; Block 1 pending
 
 ## Completed Plans
 - **Plan file:** `.kilo/plans/1776410435637-clever-island.md`
@@ -81,7 +81,16 @@
   - `completed` Task 9: Refactor large modules (plan: `.kilo/plans/1776540483163-task9-refactor-large-modules.md`) - GalleryGrid and ViewerWrapper refactored with utility modules
  - `completed` Task 9.1: Refactor GalleryGrid.svelte (plan: `.kilo/plans/1776578917940-task9-1-gallerygrid-refactor.md`)
   - `completed` Task 9.2: Refactor ViewerWrapper.svelte (plan: `.kilo/plans/1776578917940-task9-2-viewerwrapper-refactor.md`) - utilities integrated, type check passes, tests pass
- - `deferred` Task 10: Write unit tests (plan: `.kilo/plans/1776540483164-task10-write-unit-tests.md`) - requires test framework setup
+  - `deferred` Task 10: Write unit tests (plan: `.kilo/plans/1776540483164-task10-write-unit-tests.md`) - requires test framework setup
+
+### Happy Tiger Plan (Code Quality Hardening)
+- `pending` Block 1: Restore `replaceImageSource` correctness
+- `pending` Block 2: Remove direct `console.warn`
+- `pending` Block 3: Prune dead utility surface
+- `pending` Block 4: Consolidate duplicated `ViewerContent` type
+- `pending` Block 5: Reduce repetitive focus-trap logic in `GalleryGrid`
+- `pending` Block 6: Harden keyboard navigation guard
+- `pending` Block 7: Optional cleanup of `bulk-actions.ts`
 
 ### Clever Island Plan (Stale plan cleanup & priority execution)
 - `completed` Task 44: Block 1.1 - Inventory stale plans
@@ -175,10 +184,11 @@
 - `completed` Task 20: UI refinements (Block 6.1) (FB006, FB007) (commit 715d7f5)
 
 ## Next Execution Order
-- **Playful Otter plan completed**: Tasks 1-9 fully implemented, Task 10 deferred (unit test framework setup).
-- **Future work**: Implement unit test framework (Task 10), or begin new plan based on application priorities.
+- **Happy Tiger plan activated**: Execute Block 1 (Restore `replaceImageSource` correctness), Block 2 (Remove direct `console.warn`), Block 3 (Prune dead utility surface), Block 4 (Consolidate duplicated `ViewerContent` type), Block 5 (Reduce repetitive focus-trap logic in `GalleryGrid`), Block 6 (Harden keyboard navigation guard), Block 7 (Optional cleanup of `bulk-actions.ts`).
+- **Previous work**: Playful Otter plan completed, Task 10 deferred (unit test framework setup).
 
 ## Plan And Todo History
+- 2026-04-19 15:22 +02:00 - Activated Happy Tiger plan (`.kilo/plans/1776603239564-happy-tiger.md`): code quality hardening for gallery/viewer area. Plan registered, Block 1 pending.
 - 2026-04-19 14:56 +02:00 - Completed Task 9.2 (ViewerWrapper refactoring): removed unused imports (`initPhotoSwipe`, `destroyPhotoSwipe`, `attachPhotoSwipeEvents`, `createVideoContainer`, `SlideData` type), kept essential utilities (`createDataSource`, `createShell`, `markLoaded`, `revokeUrls`, `replaceImageSource`). Type check passes: 0 errors, 0 warnings. Short test suite passes 32/32. (commit f712304)
 - 2026-04-19 14:27 +02:00 - Partially completed Task 9.2 (ViewerWrapper refactoring): created utility modules for PhotoSwipe integration (`photoswipe-integration.ts`), video player handling (`video-player.ts`), and object-URL lifecycle management (`object-url-lifecycle.ts`). Partially integrated utilities into ViewerWrapper.svelte (revokeUrls, markLoaded, createShell functions replaced). Type check shows 5 unused import errors (utilities not fully integrated). (commit e84264d)
 - 2026-04-19 13:37 +02:00 - Completed Task 9.1 (GalleryGrid refactoring): extracted masonry layout logic to `src/components/gallery/utils/masonry.ts`, keyboard navigation to `keyboard-navigation.ts`, selection helpers to `selection-helpers.ts`, and bulk actions to `bulk-actions.ts`. Reduced GalleryGrid.svelte from 1468 to 1371 lines (6.6% reduction). Type check passes: 0 errors, 0 warnings. Short test suite passes 31/32 (one unrelated auth test failure with Vite error overlay). (commit e84264d)
