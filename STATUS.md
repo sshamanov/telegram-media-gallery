@@ -1,10 +1,10 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-19 16:48 +02:00
-**Current Phase:** Silent Knight - Code Quality Improvement (Completed)
-**Active Plan:** `.kilo/plans/1776606618163-silent-knight.md` (Completed)
+**Last Updated:** 2026-04-19 21:14 +02:00
+**Current Phase:** Brisk Harbor - Review Fixes (In Progress)
+**Active Plan:** `.kilo/plans/1776619529000-brisk-harbor.md` (In Progress)
 **Branch:** `main`
-**Ahead Of `origin/main`:** 122 commits
+**Ahead Of `origin/main`:** 123 commits
 
 ---
 
@@ -21,12 +21,17 @@
 - This ledger must stay stricter than historical claims and must not overstate completion.
 
 ## Active Plan
+- **Plan file:** `.kilo/plans/1776619529000-brisk-harbor.md`
+- **Goal:** Apply the high-confidence fixes from the latest branch review without broadening scope beyond the reviewed files.
+- **Execution strategy:** 2 blocks: 1. Fix gallery keyboard handling so interactive descendants are not hijacked; 2. Remove unused legacy root `main.js` / `style.css` files.
+- **Status:** in_progress; Block 1 pending
+
+## Completed Plans
 - **Plan file:** `.kilo/plans/1776606618163-silent-knight.md`
 - **Goal:** Improve code quality in the recently refactored gallery/viewer area by correcting the highest-risk refactor regression, finishing partially applied safety cleanup, and tightening local helper design without changing accepted product behavior.
 - **Execution strategy:** 5 blocks: 1. Fix `GalleryGrid` focus-trap regression risk; 2. Unify viewer preview/full image load handling; 3. Tighten viewer listener lifecycle and local narrowing clarity; 4. Reassess `bulk-actions.ts` helper shape; 5. Optional local formatting normalization.
-- **Status:** completed; Blocks 1-3 implemented, Blocks 4-5 deferred
+- **Status:** completed; Blocks 1-3 implemented successfully, Blocks 4-5 deferred as unnecessary churn
 
-## Completed Plans
 - **Plan file:** `.kilo/plans/1776606618163-silent-knight.md`
 - **Goal:** Improve code quality in the recently refactored gallery/viewer area by correcting the highest-risk refactor regression, finishing partially applied safety cleanup, and tightening local helper design without changing accepted product behavior.
 - **Execution strategy:** 5 blocks: 1. Fix `GalleryGrid` focus-trap regression risk; 2. Unify viewer preview/full image load handling; 3. Tighten viewer listener lifecycle and local narrowing clarity; 4. Reassess `bulk-actions.ts` helper shape; 5. Optional local formatting normalization.
@@ -123,6 +128,10 @@
 - `deferred` Block 4: Reassess `bulk-actions.ts` helper shape (current helper shape already the clearer local minimum)
 - `deferred` Block 5: Optional local formatting normalization (not justified beyond touched safety fixes)
 
+### Brisk Harbor Plan (Review Fixes)
+- `completed` Block 1: Fix gallery keyboard handling so interactive descendants are not hijacked
+- `in_progress` Block 2: Remove unused legacy root `main.js` / `style.css` files
+
 ### Clever Island Plan (Stale plan cleanup & priority execution)
 - `completed` Task 44: Block 1.1 - Inventory stale plans
 - `completed` Task 45: Block 1.2 - Update plan statuses
@@ -215,10 +224,12 @@
 - `completed` Task 20: UI refinements (Block 6.1) (FB006, FB007) (commit 715d7f5)
 
 ## Next Execution Order
-- **Silent Knight plan completed**: Blocks 1-3 landed successfully; Blocks 4-5 were explicitly deferred because they did not justify further code churn after the safety fixes.
-- **Previous work**: Kind Island plan completed, but follow-up review identified a likely focus-trap regression plus smaller viewer cleanup gaps that required this narrow corrective pass.
+- **Brisk Harbor Block 1 completed**: Gallery keyboard shortcuts now ignore focused interactive descendants before any shortcut handling. Block 2 in progress to remove the unused legacy root app files.
+- **Previous work**: Silent Knight plan completed; the latest review identified one remaining keyboard handling bug and one repo-hygiene cleanup for legacy root files.
 
 ## Plan And Todo History
+- 2026-04-19 21:14 +02:00 - Completed Brisk Harbor Block 1: expanded gallery keyboard target guarding so interactive descendants (`button`, `a[href]`, `summary`, button/link roles, and text-entry elements) are ignored before any gallery shortcut handling. Type check passes: 0 errors, 0 warnings. Short test suite passes 32/32.
+- 2026-04-19 21:09 +02:00 - Activated Brisk Harbor plan (`.kilo/plans/1776619529000-brisk-harbor.md`): apply high-confidence fixes from the latest branch review. Plan registered, Block 1 in progress.
 - 2026-04-19 16:48 +02:00 - Recorded Silent Knight Block 3 commit `2ecb87e` (`refactor: tighten viewer event and content guards`) and marked the Silent Knight phase as completed.
 - 2026-04-19 16:45 +02:00 - Completed Silent Knight Block 3: tightened `ViewerWrapper` image-listener lifecycle with explicit pending-listener cleanup via `WeakMap`, narrowed PhotoSwipe helper contracts to smaller local shapes, and cleared pending image listeners during `contentDestroy`. Type check passes: 0 errors, 0 warnings. Short test suite passes 32/32. Long test suite passes 12/12 (5 skipped).
 - 2026-04-19 16:45 +02:00 - Deferred Silent Knight Block 4: `bulk-actions.ts` helper shape is already the clearer local minimum; no further extraction is justified without increasing indirection.
@@ -431,6 +442,9 @@
 - ℹ️ Historical references to `.kilo/status.md` remain in dated records by design and are not treated as active drift.
 
 ## Last Validation
+- 2026-04-19 21:14 +02:00 - Brisk Harbor Block 1 validation: stop hijacking interactive descendant keyboard input.
+  - Result: passed with 0 errors, 0 warnings
+  - Main note: Type check passes; short test suite passes 32/32; gallery keyboard shortcuts now bail out before handling keys when focus is inside another interactive descendant.
 - 2026-04-19 16:45 +02:00 - Silent Knight Block 3 validation: tightened viewer event lifecycle and narrowing helpers.
   - Result: passed with 0 errors, 0 warnings
   - Main note: Type check passes; short test suite passes 32/32; long test suite passes 12/12 with 5 skipped; pending image load listeners are now explicitly cleared when replaced or when image content is destroyed.

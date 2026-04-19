@@ -37,20 +37,32 @@ function isTextEntryTarget(target: EventTarget | null): boolean {
   return false
 }
 
+function isInteractiveTarget(target: EventTarget | null): boolean {
+  if (!target || !(target instanceof HTMLElement)) {
+    return false
+  }
+
+  if (isTextEntryTarget(target)) {
+    return true
+  }
+
+  return Boolean(target.closest('button, a[href], summary, [role="button"], [role="link"]'))
+}
+
 export function handleGalleryKeyDown(
   event: KeyboardEvent,
   options: KeyboardNavigationOptions
 ): KeyboardNavigationResult {
   const { mediaItems, focusedIndex, isSelectionMode, galleryViewMode, effectiveColumns, onOpenItem, onToggleSelection, onExitSelectionMode } = options
 
+  // Don't hijack input intended for interactive descendants inside the gallery.
+  if (isInteractiveTarget(event.target)) {
+    return { handled: false }
+  }
+
   if (event.key === 'Escape' && isSelectionMode) {
     onExitSelectionMode()
     return { handled: true, action: 'exit' }
-  }
-
-  // Don't handle keyboard navigation if we're in a text entry element
-  if (isTextEntryTarget(event.target)) {
-    return { handled: false }
   }
 
   // Handle arrow key navigation
