@@ -21,6 +21,9 @@ Browser-based photo/video gallery using Telegram as a storage backend. Client-on
 - Offline gallery/viewer behavior is limited to the current cache stack: already-loaded gallery items can reuse cached thumbnails in-session, offline viewer playback/rendering works only for full media already cached in OPFS or IndexedDB fallback, and uncached full media shows an explicit offline placeholder instead of a broken load.
 - Thumbnail loading is bandwidth-efficient: thumbnails are only downloaded when available from Telegram (trying 's', 'm', 'x' sizes); if no thumbnail is available, the UI shows a file-type glyph instead of downloading full media.
 - While offline, download, forward, and share affordances are intentionally disabled so the UI does not imply unavailable export or Telegram relay behavior.
+- Gallery supports masonry layout toggle with auto-detection for visual content and manual override in settings.
+- Desktop layout variants (wide grid, sidebar, dual pane) are available for screen widths >1024px.
+- Light theme support is implemented with comprehensive CSS variable system.
 
 ## Core Architecture
 
@@ -299,11 +302,11 @@ src/components/
 - Offline gallery thumbnail reuse and viewer cached-media rendering with explicit uncached placeholder behavior
 - Offline guards for download, forward, and share actions so unsupported offline export/relay paths are disabled truthfully
 
-### Phase 3+ (Advanced) - Planned
-- Broader service-worker/offline media behavior beyond the current app-shell precache, dialog snapshot bootstrap, cached thumbnail reuse, and cached full-media viewer support
-- Masonry layout toggle
-- Desktop layout variants
-- Light theme support
+### Phase 3+ (Advanced) - Partially Implemented
+- Masonry layout toggle – implemented
+- Desktop layout variants – implemented  
+- Light theme support – implemented
+- Broader service-worker/offline media behavior beyond the current app-shell precache, dialog snapshot bootstrap, cached thumbnail reuse, and cached full-media viewer support – planned
 
 ## Known Issues And Accepted Gaps
 1. Upload mode selector (Send as media vs Send as file) now auto‑adjusts for large files: files exceeding Telegram size limits for their media type (photo >10 MB, video >1 GB, audio >200 MB) are automatically sent as documents, with a user‑visible warning toast.

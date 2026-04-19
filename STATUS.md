@@ -1,6 +1,6 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-20 00:29 +02:00
+**Last Updated:** 2026-04-20 00:30 +02:00
 **Current Phase:** Proud Comet - Unfinished Tasks and Plans Cleanup
 **Active Plan:** `.kilo/plans/1776629240701-proud-comet.md` (Active)
 **Branch:** `main`
@@ -24,7 +24,7 @@
 - **Plan file:** `.kilo/plans/1776629240701-proud-comet.md`
 - **Goal:** Audit unfinished tasks and plans, clean up stale plans, update spec to reflect implemented features, evaluate unit test framework, and prepare for next execution.
 - **Execution strategy:** 5 blocks: 1. Audit and clean up stale plans; 2. Update APPLICATION_SPEC.md; 3. Evaluate Task 10 (unit test framework); 4. Identify remaining Phase 3+ advanced offline media behavior; 5. Validation and commit.
-- **Status:** in_progress; Block 1 completed, Block 2 pending
+- **Status:** in_progress; Block 2 completed, Block 3 pending
 
 ## Completed Plans
 - **Plan file:** `.kilo/plans/1776619529000-brisk-harbor.md`
@@ -229,10 +229,12 @@
 - `completed` Task 20: UI refinements (Block 6.1) (FB006, FB007) (commit 715d7f5)
 
 ## Next Execution Order
-- **Proud Comet plan active**: Block 2 - Update APPLICATION_SPEC.md to reflect implemented Phase 3+ features (masonry layout, desktop variants, light theme).
-- **Previous work**: Block 1 completed; stale plans audited and cleaned up.
+- **Proud Comet plan active**: Block 3 - Evaluate Task 10 (unit test framework) feasibility and decide on next steps.
+- **Previous work**: Block 2 completed; APPLICATION_SPEC.md updated to reflect implemented Phase 3+ features.
 
 ## Plan And Todo History
+- 2026-04-20 00:29 +02:00 - Completed Proud Comet Block 2: updated APPLICATION_SPEC.md to reflect implemented Phase 3+ features. Changed "Phase 3+ (Advanced) - Planned" to "Partially Implemented" with masonry layout toggle, desktop variants, and light theme marked as implemented. Added mention of these features to "Current Supported State" section. Type check passes: 0 errors, 0 warnings.
+- 2026-04-20 00:29 +02:00 - Recorded STATUS.md update commit `d9c5d0b` (`docs: update STATUS.md with Block 1 completion and commit hash`).
 - 2026-04-20 00:28 +02:00 - Recorded Proud Comet Block 1 commit `798e0ec` (`chore: complete Proud Comet Block 1 - audit and clean up stale plans`).
 - 2026-04-20 00:28 +02:00 - Completed Proud Comet Block 1: audited and cleaned up stale plans. Marked `neon‑canyon.md` and `eager‑meadow.md` as completed (goals already implemented per STATUS.md). Verified `brave‑river.md` already archived. Type check passes: 0 errors, 0 warnings.
 - 2026-04-20 00:28 +02:00 - Activated Proud Comet plan (`.kilo/plans/1776629240701-proud-comet.md`): audit unfinished tasks and plans, clean up stale plans, update spec to reflect implemented features, evaluate unit test framework, and prepare for next execution. Plan registered, Block 1 in progress.
