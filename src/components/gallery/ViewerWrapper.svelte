@@ -29,12 +29,28 @@
   import type PhotoSwipe from 'photoswipe'
   import type { ViewerContent } from './utils/viewer-types'
 
-  let showInfo = false
-  let pswp: PhotoSwipe | null = null
-  let pswpOpenToken = 0
-  let loadProgress = 0
+   let showInfo = false
+   let pswp: PhotoSwipe | null = null
+   let pswpOpenToken = 0
+   let loadProgress = 0
 
-  const shareLimitBytes = 200 * 1024 * 1024
+   const shareLimitBytes = 200 * 1024 * 1024
+
+   // Local helpers for PhotoSwipe content/item type narrowing
+   function getViewerContentItem(content: unknown): MediaItem | null {
+     const c = content as { data?: unknown } | null | undefined
+     const data = c?.data as { item?: MediaItem } | null | undefined
+     return data?.item ?? null
+   }
+
+   function getSlideDataItem(slideData: unknown): MediaItem | null {
+     const data = slideData as { item?: MediaItem } | null | undefined
+     return data?.item ?? null
+   }
+
+   function toViewerContent(content: unknown): ViewerContent | null {
+     return content && typeof content === 'object' ? content as ViewerContent : null
+   }
 
   const activeItem: Readable<MediaItem | null> = derived([viewerItems, mediaItems, viewerIndex], ([$viewerItems, $mediaItems, $viewerIndex]) =>
     $viewerIndex === null ? null : ($viewerItems[$viewerIndex] ?? $mediaItems[$viewerIndex] ?? null),
@@ -363,19 +379,19 @@
       arrowPrev: false,
       arrowNext: false,
       secondaryZoomLevel: 2,
-      maxZoomLevel: (zoomLevelObject) => {
-        const item = zoomLevelObject.itemData.item as MediaItem | undefined
-        return item && isImageItem(item) ? 4 : 1
-      },
+       maxZoomLevel: (zoomLevelObject) => {
+         const item = getSlideDataItem(zoomLevelObject.itemData)
+         return item && isImageItem(item) ? 4 : 1
+       },
       wheelToZoom: true,
       imageClickAction: 'zoom-or-close',
       paddingFn: () => ({ top: 88, right: 24, bottom: 92, left: 24 }),
     })
 
-    pswp.addFilter('isContentZoomable', (isZoomable, content) => {
-      const item = (content.data as { item?: MediaItem } | undefined)?.item
-      return item ? isImageItem(item) : isZoomable
-    })
+     pswp.addFilter('isContentZoomable', (isZoomable, content) => {
+       const item = getViewerContentItem(content)
+       return item ? isImageItem(item) : isZoomable
+     })
 
     pswp.on('change', () => {
       if (pswp) {
@@ -394,19 +410,22 @@
       closeViewer()
     })
 
-    pswp.on('contentLoad', (event) => {
-      const content = event.content as ViewerContent
-      const item = content.data?.item ?? null
-      if (!item) {
-        return
-      }
+     pswp.on('contentLoad', (event) => {
+       const content = toViewerContent(event.content)
+       const item = content ? getViewerContentItem(content) : null
+       if (!content || !item) {
+         return
+       }
 
-      void handleContentLoad(content, item, token, event)
-    })
+       void handleContentLoad(content, item, token, event)
+     })
 
-    pswp.on('contentDestroy', (event) => {
-      revokeUrls(event.content as ViewerContent)
-    })
+     pswp.on('contentDestroy', (event) => {
+       const content = toViewerContent(event.content)
+       if (content) {
+         revokeUrls(content)
+       }
+     })
 
     pswp.on('destroy', () => {
       if (DEBUG_VIEWER) {
