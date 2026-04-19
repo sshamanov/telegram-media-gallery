@@ -233,6 +233,7 @@
 - **Previous work**: Block 3 completed; Task 10 (unit test framework) deferred as low priority with framework not yet set up.
 
 ## Plan And Todo History
+- 2026-04-20 00:31 +02:00 - Recorded Proud Comet Block 3 commit `e5d62f7` (`docs: update STATUS.md with Task 10 evaluation and Block 3 completion`).
 - 2026-04-20 00:30 +02:00 - Completed Proud Comet Block 3: evaluated Task 10 (unit test framework). Decision: defer as low priority. Project has comprehensive Playwright e2e tests; adding vitest would require non-trivial setup effort. Task 10 status updated to "deferred as low priority, framework not yet set up". Type check passes: 0 errors, 0 warnings.
 - 2026-04-20 00:30 +02:00 - Recorded Proud Comet Block 2 commit `106acb6` (`docs: update APPLICATION_SPEC.md with implemented Phase 3+ features`).
 - 2026-04-20 00:29 +02:00 - Completed Proud Comet Block 2: updated APPLICATION_SPEC.md to reflect implemented Phase 3+ features. Changed "Phase 3+ (Advanced) - Planned" to "Partially Implemented" with masonry layout toggle, desktop variants, and light theme marked as implemented. Added mention of these features to "Current Supported State" section. Type check passes: 0 errors, 0 warnings.
