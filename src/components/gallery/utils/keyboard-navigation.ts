@@ -17,6 +17,26 @@ export interface KeyboardNavigationResult {
   action?: 'open' | 'toggle' | 'exit'
 }
 
+function isTextEntryTarget(target: EventTarget | null): boolean {
+  if (!target || !(target instanceof HTMLElement)) {
+    return false
+  }
+  
+  // Check for form elements
+  if (target instanceof HTMLInputElement ||
+      target instanceof HTMLTextAreaElement ||
+      target instanceof HTMLSelectElement) {
+    return true
+  }
+  
+  // Check for contenteditable elements
+  if (target.isContentEditable) {
+    return true
+  }
+  
+  return false
+}
+
 export function handleGalleryKeyDown(
   event: KeyboardEvent,
   options: KeyboardNavigationOptions
@@ -28,8 +48,8 @@ export function handleGalleryKeyDown(
     return { handled: true, action: 'exit' }
   }
 
-  // Don't handle keyboard navigation if we're in a form element
-  if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
+  // Don't handle keyboard navigation if we're in a text entry element
+  if (isTextEntryTarget(event.target)) {
     return { handled: false }
   }
 

@@ -100,8 +100,8 @@
 
 ### Kind Island Plan (Follow-up Code Quality Improvement)
 - `completed` Block 1: Simplify `GalleryGrid` focus-trap setup
-- `in_progress` Block 2: Harden keyboard navigation guard
-- `pending` Block 3: Centralize PhotoSwipe content/item casts in `ViewerWrapper`
+- `completed` Block 2: Harden keyboard navigation guard
+- `in_progress` Block 3: Centralize PhotoSwipe content/item casts in `ViewerWrapper`
 - `pending` Block 4: Harden image replacement event handling in `ViewerWrapper`
 - `pending` Block 5: Simplify duplicated guard policy in `bulk-actions.ts`
 - `pending` Block 6: Optional final polish
@@ -198,11 +198,12 @@
 - `completed` Task 20: UI refinements (Block 6.1) (FB006, FB007) (commit 715d7f5)
 
 ## Next Execution Order
-- **Kind Island plan Block 1 completed**: Simplified `GalleryGrid` focus-trap setup. Block 2 in progress (Harden keyboard navigation guard).
+- **Kind Island plan Block 2 completed**: Hardened keyboard navigation guard. Block 3 in progress (Centralize PhotoSwipe content/item casts in `ViewerWrapper`).
 - **Previous work**: Happy Tiger plan completed with Blocks 1-4 implemented, Blocks 5-7 deferred. Playful Otter plan completed, Task 10 deferred (unit test framework setup).
 
 ## Plan And Todo History
-- 2026-04-19 16:10 +02:00 - Completed Kind Island Block 1: simplified `GalleryGrid` focus-trap setup by creating local helper `activatePanelFocusTrap` and replacing 5 repetitive reactive blocks with 5 one-line reactive calls. Type check passes: 0 errors, 0 warnings. Short test suite passes 32/32. Long test suite passes 12/12 (5 skipped).
+- 2026-04-19 16:15 +02:00 - Completed Kind Island Block 2: hardened keyboard navigation guard by adding `isTextEntryTarget` helper that checks for HTMLInputElement, HTMLTextAreaElement, HTMLSelectElement, and contenteditable elements. Type check passes: 0 errors, 0 warnings. Short test suite passes 32/32. Long test suite passes 12/12 (5 skipped).
+- 2026-04-19 16:10 +02:00 - Completed Kind Island Block 1: simplified `GalleryGrid` focus-trap setup by creating local helper `activatePanelFocusTrap` and replacing 5 repetitive reactive blocks with 5 one-line reactive calls. Type check passes: 0 errors, 0 warnings. Short test suite passes 32/32. Long test suite passes 12/12 (5 skipped). (commit 2dd4c62)
 - 2026-04-19 16:05 +02:00 - Activated Kind Island plan (`.kilo/plans/1776604859750-kind-island.md`): follow-up code quality improvement for gallery/viewer area. Plan registered, Block 1 in progress.
 - 2026-04-19 16:00 +02:00 - Completed Happy Tiger Block 4: consolidated duplicated `ViewerContent` type by creating shared `viewer-types.ts` file, removing unused definition from `photoswipe-integration.ts`, updating `object-url-lifecycle.ts` to import shared type, and updating `ViewerWrapper.svelte` to use shared type instead of local duplicate. Type check passes: 0 errors, 0 warnings. Short test suite passes 32/32.
 - 2026-04-19 15:50 +02:00 - Completed Happy Tiger Block 3: pruned dead utility surface - removed unused exports `initPhotoSwipe`, `destroyPhotoSwipe`, `attachPhotoSwipeEvents` from `photoswipe-integration.ts`, deleted entire unused `video-player.ts` file, removed unused `createObjectUrl`, `revokeObjectUrl`, `scheduleUrlRevocation` from `object-url-lifecycle.ts`. Type check passes: 0 errors, 0 warnings. Short test suite passes 32/32.
