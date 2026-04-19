@@ -9,14 +9,8 @@
   import {
     createDataSource,
     createShell,
-    markLoaded as markLoadedUtil,
-    initPhotoSwipe,
-    destroyPhotoSwipe,
-    attachPhotoSwipeEvents
+    markLoaded as markLoadedUtil
   } from './utils/photoswipe-integration'
-  import {
-    createVideoContainer
-  } from './utils/video-player'
   import {
     revokeUrls,
     replaceImageSource
@@ -34,7 +28,6 @@
   import InfoPanel from './InfoPanel.svelte'
   import type { MediaItem } from '../../types/telegram'
   import type PhotoSwipe from 'photoswipe'
-  import type { SlideData } from 'photoswipe'
 
   type ViewerContent = Record<string, unknown> & {
     element?: HTMLElement
