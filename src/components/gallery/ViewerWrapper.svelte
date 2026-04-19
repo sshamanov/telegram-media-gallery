@@ -177,38 +177,49 @@
     }
   }
 
-  function replaceImageSource(
-    content: ViewerContent,
-    item: MediaItem,
-    image: HTMLImageElement,
-    fullUrl: string,
-    options: { revokePreviewOnLoad?: boolean } = {}
-  ): void {
-    const { revokePreviewOnLoad = false } = options
-    
-    // Revoke previous full URL if exists
-    if (typeof content.fullUrl === 'string') {
-      URL.revokeObjectURL(content.fullUrl)
-    }
+   function replaceImageSource(
+     content: ViewerContent,
+     item: MediaItem,
+     image: HTMLImageElement,
+     fullUrl: string,
+     options: { revokePreviewOnLoad?: boolean } = {}
+   ): void {
+     const { revokePreviewOnLoad = false } = options
+     
+     // Revoke previous full URL if exists
+     if (typeof content.fullUrl === 'string') {
+       URL.revokeObjectURL(content.fullUrl)
+     }
 
-    if (revokePreviewOnLoad && typeof content.previewUrl === 'string') {
-      const previousPreviewUrl = content.previewUrl
-      image.onload = () => {
-        URL.revokeObjectURL(previousPreviewUrl)
-        content.previewUrl = null
-        // Update dimensions after full image loads
-        updateImageDimensions(content, item, image)
-      }
-    } else {
-      // Still need to update dimensions after full image loads
-      image.onload = () => {
-        updateImageDimensions(content, item, image)
-      }
-    }
+     // Helper to attach one-shot load handler with safety guard
+     const attachLoadHandler = (handler: () => void) => {
+       const loadListener = () => {
+         // Safety guard: only run handler if image still points to the same URL
+         if (image.src === fullUrl) {
+           handler()
+         }
+       }
+       image.addEventListener('load', loadListener, { once: true })
+     }
 
-    content.fullUrl = fullUrl
-    image.src = fullUrl
-  }
+     if (revokePreviewOnLoad && typeof content.previewUrl === 'string') {
+       const previousPreviewUrl = content.previewUrl
+       attachLoadHandler(() => {
+         URL.revokeObjectURL(previousPreviewUrl)
+         content.previewUrl = null
+         // Update dimensions after full image loads
+         updateImageDimensions(content, item, image)
+       })
+     } else {
+       // Still need to update dimensions after full image loads
+       attachLoadHandler(() => {
+         updateImageDimensions(content, item, image)
+       })
+     }
+
+     content.fullUrl = fullUrl
+     image.src = fullUrl
+   }
 
   async function handleContentLoad(content: ViewerContent, item: MediaItem, token: number, event: { content: { onLoaded: () => void }; preventDefault: () => void }): Promise<void> {
     event.preventDefault()
