@@ -7,6 +7,21 @@
   import { createGallerySwipeGestures } from '../../lib/dom/swipe-gestures'
   import { debugLog, debugWarn, DEBUG_VIEWER } from '../../lib/debug'
   import {
+    createDataSource,
+    createShell,
+    markLoaded as markLoadedUtil,
+    initPhotoSwipe,
+    destroyPhotoSwipe,
+    attachPhotoSwipeEvents
+  } from './utils/photoswipe-integration'
+  import {
+    createVideoContainer
+  } from './utils/video-player'
+  import {
+    revokeUrls,
+    replaceImageSource
+  } from './utils/object-url-lifecycle'
+  import {
     closeViewer,
     mediaItems,
     setViewerIndex,
@@ -62,39 +77,13 @@
     }).then((blob) => (token === pswpOpenToken ? blob : null))
   }
 
-  function revokeUrls(content: ViewerContent): void {
-    if (typeof content.previewUrl === 'string') {
-      URL.revokeObjectURL(content.previewUrl)
-      content.previewUrl = null
-    }
 
-    if (typeof content.fullUrl === 'string') {
-      URL.revokeObjectURL(content.fullUrl)
-      content.fullUrl = null
-    }
-  }
 
-  function createDataSource(items: MediaItem[]): SlideData[] {
-    return items.map((item) => ({
-      type: isImageItem(item) ? 'image' : 'html',
-      html: isImageItem(item) ? undefined : '<div class="pswp__content"></div>',
-      src: isImageItem(item) ? 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==' : undefined,
-      width: item.width || (isVideoItem(item) ? 1280 : isPdfItem(item) || isTextItem(item) || isAudioItem(item) ? 960 : 1600),
-      height: item.height || (isVideoItem(item) ? 720 : isPdfItem(item) || isTextItem(item) || isAudioItem(item) ? 720 : 1200),
-      alt: item.filename,
-      item,
-    }))
-  }
 
-  function createShell(className: string): HTMLDivElement {
-    const wrapper = document.createElement('div')
-    wrapper.className = className
-    return wrapper
-  }
 
-  function markLoaded(event: { content: { onLoaded: () => void } }): void {
-    event.content.onLoaded()
-  }
+
+
+
 
   function renderOfflinePlaceholder(content: ViewerContent): void {
     const wrapper = createShell('viewer-fallback viewer-offline')
@@ -110,25 +99,7 @@
     content.element = wrapper
   }
 
-  function replaceImageSource(content: ViewerContent, item: MediaItem, image: HTMLImageElement, nextUrl: string, options?: {
-    revokePreviewOnLoad?: boolean
-  }): void {
-    const previousFullUrl = typeof content.fullUrl === 'string' ? content.fullUrl : null
-    image.onload = () => {
-      updateImageDimensions(content, item, image)
 
-      if (options?.revokePreviewOnLoad && typeof content.previewUrl === 'string') {
-        URL.revokeObjectURL(content.previewUrl)
-        content.previewUrl = null
-      }
-
-      if (previousFullUrl && previousFullUrl !== nextUrl) {
-        URL.revokeObjectURL(previousFullUrl)
-      }
-    }
-    content.fullUrl = nextUrl
-    image.src = nextUrl
-  }
 
   function renderDownloadOnly(content: ViewerContent, item: MediaItem): void {
     const wrapper = createShell('viewer-fallback')
@@ -232,7 +203,7 @@
       const cachedFullBlob = await getCachedBlob(item, 'full')
       if (!cachedFullBlob) {
         renderOfflinePlaceholder(content)
-        markLoaded(event)
+        markLoadedUtil(event)
         return
       }
     }
@@ -245,13 +216,13 @@
 
       renderText(content, fullBlob)
       loadProgress = 100
-      markLoaded(event)
+      markLoadedUtil(event)
       return
     }
 
     if (isDownloadOnlyItem(item)) {
       renderDownloadOnly(content, item)
-      markLoaded(event)
+      markLoadedUtil(event)
       loadProgress = 100
       return
     }
@@ -271,7 +242,7 @@
         content.previewUrl = previewUrl
         image.onload = () => updateImageDimensions(content, item, image)
         image.src = previewUrl
-        markLoaded(event)
+        markLoadedUtil(event)
       }
 
       const fullBlob = await getCachedOrDownloadedBlob(item, 'full', token)
@@ -282,7 +253,7 @@
       const fullUrl = URL.createObjectURL(fullBlob)
       replaceImageSource(content, item, image, fullUrl, { revokePreviewOnLoad: true })
       loadProgress = 100
-      markLoaded(event)
+      markLoadedUtil(event)
       return
     }
 
@@ -295,7 +266,7 @@
       wrapper.appendChild(video)
       content.element = wrapper
 
-      markLoaded(event)
+      markLoadedUtil(event)
 
       const fullBlob = await getCachedOrDownloadedBlob(item, 'full', token)
       if (!fullBlob || token !== pswpOpenToken) {
@@ -323,7 +294,7 @@
       }
       video.src = fullUrl
       loadProgress = 100
-      markLoaded(event)
+      markLoadedUtil(event)
       return
     }
 
@@ -341,7 +312,7 @@
     }
 
     loadProgress = 100
-    markLoaded(event)
+    markLoadedUtil(event)
   }
 
   async function attachPhotoSwipe(): Promise<void> {

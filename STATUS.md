@@ -80,7 +80,7 @@
 - `completed` Task 8: Remove author thumbnail background (plan: `.kilo/plans/1776540483162-task8-remove-author-thumbnail-background.md`)
  - `partially_completed` Task 9: Refactor large modules (plan: `.kilo/plans/1776540483163-task9-refactor-large-modules.md`) - phases 0-2 completed
  - `completed` Task 9.1: Refactor GalleryGrid.svelte (plan: `.kilo/plans/1776578917940-task9-1-gallerygrid-refactor.md`)
- - `pending` Task 9.2: Refactor ViewerWrapper.svelte (plan: `.kilo/plans/1776578917940-task9-2-viewerwrapper-refactor.md`)
+ - `partially_completed` Task 9.2: Refactor ViewerWrapper.svelte (plan: `.kilo/plans/1776578917940-task9-2-viewerwrapper-refactor.md`) - utilities created but not fully integrated
  - `deferred` Task 10: Write unit tests (plan: `.kilo/plans/1776540483164-task10-write-unit-tests.md`) - requires test framework setup
 
 ### Clever Island Plan (Stale plan cleanup & priority execution)
@@ -180,7 +180,8 @@
 - **Future work**: Execute Task 9.1 or 9.2 refactoring, implement unit test framework (Task 10), or begin new plan based on application priorities.
 
 ## Plan And Todo History
-- 2026-04-19 13:37 +02:00 - Completed Task 9.1 (GalleryGrid refactoring): extracted masonry layout logic to `src/components/gallery/utils/masonry.ts`, keyboard navigation to `keyboard-navigation.ts`, selection helpers to `selection-helpers.ts`, and bulk actions to `bulk-actions.ts`. Reduced GalleryGrid.svelte from 1468 to 1371 lines (6.6% reduction). Type check passes: 0 errors, 0 warnings. Short test suite passes 31/32 (one unrelated auth test failure with Vite error overlay). (commit pending)
+- 2026-04-19 14:27 +02:00 - Partially completed Task 9.2 (ViewerWrapper refactoring): created utility modules for PhotoSwipe integration (`photoswipe-integration.ts`), video player handling (`video-player.ts`), and object-URL lifecycle management (`object-url-lifecycle.ts`). Partially integrated utilities into ViewerWrapper.svelte (revokeUrls, markLoaded, createShell functions replaced). Type check shows 5 unused import errors (utilities not fully integrated). (commit pending)
+- 2026-04-19 13:37 +02:00 - Completed Task 9.1 (GalleryGrid refactoring): extracted masonry layout logic to `src/components/gallery/utils/masonry.ts`, keyboard navigation to `keyboard-navigation.ts`, selection helpers to `selection-helpers.ts`, and bulk actions to `bulk-actions.ts`. Reduced GalleryGrid.svelte from 1468 to 1371 lines (6.6% reduction). Type check passes: 0 errors, 0 warnings. Short test suite passes 31/32 (one unrelated auth test failure with Vite error overlay). (commit e84264d)
 - 2026-04-19 13:22 +02:00 - Activated Neon Canyon plan (`.kilo/plans/1776578917940-neon-canyon.md`): strengthened AGENTS.md rules with explicit Agent Responsibilities section, added unit test policy to TESTING_STRATEGY.md, split Task 9 into subtasks 9.1 (GalleryGrid refactoring) and 9.2 (ViewerWrapper refactoring). Updated parent Task 9 plan status to partially_completed. Type check passes: 0 errors, 0 warnings. (commit f84d66c)
 - 2026-04-18 23:40 +02:00 - Continued Task 9 refactoring: extracted helper modules from mtcute.ts and mock.ts. Created mtcute-helpers.ts, mock-data module, and mock-delay.ts. Reduced mtcute.ts by 22% (516 to 401 lines) and mock.ts by 29% (512 to 366 lines). All validation passes: type check 0 errors/0 warnings, short test suite 32/32. (commit 833de7e)
 - 2026-04-18 23:25 +02:00 - Fixed inconsistent state: restored deleted cache-first.ts file and updated STATUS.md to correctly reflect Task 9 as partially_completed (cache-first logic extracted) and Task 10 as deferred. Validation passed: type check 0 errors/0 warnings, short test suite 32/32. (commit 1a06273)
