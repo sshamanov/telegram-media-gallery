@@ -1,10 +1,10 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-19 21:14 +02:00
-**Current Phase:** Brisk Harbor - Review Fixes (In Progress)
-**Active Plan:** `.kilo/plans/1776619529000-brisk-harbor.md` (In Progress)
+**Last Updated:** 2026-04-19 21:16 +02:00
+**Current Phase:** Brisk Harbor - Review Fixes (Completed)
+**Active Plan:** `.kilo/plans/1776619529000-brisk-harbor.md` (Completed)
 **Branch:** `main`
-**Ahead Of `origin/main`:** 123 commits
+**Ahead Of `origin/main`:** 124 commits
 
 ---
 
@@ -24,9 +24,14 @@
 - **Plan file:** `.kilo/plans/1776619529000-brisk-harbor.md`
 - **Goal:** Apply the high-confidence fixes from the latest branch review without broadening scope beyond the reviewed files.
 - **Execution strategy:** 2 blocks: 1. Fix gallery keyboard handling so interactive descendants are not hijacked; 2. Remove unused legacy root `main.js` / `style.css` files.
-- **Status:** in_progress; Block 1 pending
+- **Status:** completed; Blocks 1-2 implemented
 
 ## Completed Plans
+- **Plan file:** `.kilo/plans/1776619529000-brisk-harbor.md`
+- **Goal:** Apply the high-confidence fixes from the latest branch review without broadening scope beyond the reviewed files.
+- **Execution strategy:** 2 blocks: 1. Fix gallery keyboard handling so interactive descendants are not hijacked; 2. Remove unused legacy root `main.js` / `style.css` files.
+- **Status:** completed; both review-fix blocks implemented successfully
+
 - **Plan file:** `.kilo/plans/1776606618163-silent-knight.md`
 - **Goal:** Improve code quality in the recently refactored gallery/viewer area by correcting the highest-risk refactor regression, finishing partially applied safety cleanup, and tightening local helper design without changing accepted product behavior.
 - **Execution strategy:** 5 blocks: 1. Fix `GalleryGrid` focus-trap regression risk; 2. Unify viewer preview/full image load handling; 3. Tighten viewer listener lifecycle and local narrowing clarity; 4. Reassess `bulk-actions.ts` helper shape; 5. Optional local formatting normalization.
@@ -130,7 +135,7 @@
 
 ### Brisk Harbor Plan (Review Fixes)
 - `completed` Block 1: Fix gallery keyboard handling so interactive descendants are not hijacked
-- `in_progress` Block 2: Remove unused legacy root `main.js` / `style.css` files
+- `completed` Block 2: Remove unused legacy root `main.js` / `style.css` files
 
 ### Clever Island Plan (Stale plan cleanup & priority execution)
 - `completed` Task 44: Block 1.1 - Inventory stale plans
@@ -224,10 +229,12 @@
 - `completed` Task 20: UI refinements (Block 6.1) (FB006, FB007) (commit 715d7f5)
 
 ## Next Execution Order
-- **Brisk Harbor Block 1 completed**: Gallery keyboard shortcuts now ignore focused interactive descendants before any shortcut handling. Block 2 in progress to remove the unused legacy root app files.
-- **Previous work**: Silent Knight plan completed; the latest review identified one remaining keyboard handling bug and one repo-hygiene cleanup for legacy root files.
+- **Brisk Harbor plan completed**: Gallery keyboard shortcuts no longer hijack interactive descendants, and the unused legacy root app files have been removed from the active tree.
+- **Previous work**: Silent Knight plan completed; the latest review follow-up is now fully applied and validated.
 
 ## Plan And Todo History
+- 2026-04-19 21:16 +02:00 - Completed Brisk Harbor Block 2: removed unused legacy root `main.js` and `style.css` files that were not referenced by the current `index.html` / `src/main.ts` Vite app entry. Type check passes: 0 errors, 0 warnings. Short test suite passes 32/32.
+- 2026-04-19 21:16 +02:00 - Recorded Brisk Harbor Block 1 commit `6362ea8` (`fix: avoid hijacking gallery control keyboard input`) and marked the Brisk Harbor phase as completed pending the final cleanup commit.
 - 2026-04-19 21:14 +02:00 - Completed Brisk Harbor Block 1: expanded gallery keyboard target guarding so interactive descendants (`button`, `a[href]`, `summary`, button/link roles, and text-entry elements) are ignored before any gallery shortcut handling. Type check passes: 0 errors, 0 warnings. Short test suite passes 32/32.
 - 2026-04-19 21:09 +02:00 - Activated Brisk Harbor plan (`.kilo/plans/1776619529000-brisk-harbor.md`): apply high-confidence fixes from the latest branch review. Plan registered, Block 1 in progress.
 - 2026-04-19 16:48 +02:00 - Recorded Silent Knight Block 3 commit `2ecb87e` (`refactor: tighten viewer event and content guards`) and marked the Silent Knight phase as completed.
@@ -442,6 +449,9 @@
 - ℹ️ Historical references to `.kilo/status.md` remain in dated records by design and are not treated as active drift.
 
 ## Last Validation
+- 2026-04-19 21:16 +02:00 - Brisk Harbor Block 2 validation: remove unused legacy root app files.
+  - Result: passed with 0 errors, 0 warnings
+  - Main note: Type check passes; short test suite passes 32/32; deleting `main.js` and `style.css` does not affect the active Vite/Svelte app entry.
 - 2026-04-19 21:14 +02:00 - Brisk Harbor Block 1 validation: stop hijacking interactive descendant keyboard input.
   - Result: passed with 0 errors, 0 warnings
   - Main note: Type check passes; short test suite passes 32/32; gallery keyboard shortcuts now bail out before handling keys when focus is inside another interactive descendant.
@@ -842,6 +852,7 @@
 ## Recent Commit Log
 | Commit | Date | Description |
 |--------|------|-------------|
+| `6362ea8` | 2026-04-19 | fix: avoid hijacking gallery control keyboard input |
 | `2ecb87e` | 2026-04-19 | refactor: tighten viewer event and content guards |
 | `0450c8f` | 2026-04-19 | refactor: unify viewer image load handling |
 | `7e94484` | 2026-04-19 | fix: restore gallery progress panel focus trapping |
