@@ -1,6 +1,6 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-20 19:32 +02:00
+**Last Updated:** 2026-04-20 19:34 +02:00
 **Current Phase:** Pull‑to‑Refresh Implementation
 **Active Plan:** `.kilo/plans/1776688389000-pull-to-refresh.md`
 **Branch:** `main`
@@ -250,6 +250,7 @@ Plan: `.kilo/plans/1776687189000‑review‑deferred‑tasks.md`
 - **Execution order**: 1. Analyze current refresh flow; 2. Research pull‑to‑refresh patterns; 3. Design implementation; 4. Create component structure.
 
 ## Plan And Todo History
+- 2026-04-20 19:34 +02:00 - Recorded workflow-scope fix commit `74d8b1b` (`fix: scope GHCR workflow to image publish`). Production GHCR workflow now excludes type-check and Playwright dev/test validation steps by design.
 - 2026-04-20 19:32 +02:00 - Confirmed workflow-scope drift: GitHub Actions publish workflow still contained type-check and Playwright short-test steps even though this pipeline should only publish the production GHCR image. Removed type-check, Playwright install, and short-test steps so dev/test validation remains outside the production image workflow.
 - 2026-04-20 19:27 +02:00 - Diagnosed GitHub Actions failure in run `#5`: published image succeeded, but `Run type check` failed because validation containers invoked project-local npm scripts without first installing dependencies. Updated workflow to run `npm ci` inside the type-check, Playwright install, dev-server, and short-test containers.
 - 2026-04-20 19:05 +02:00 - Updated `Dockerfile.prod` and `.github/workflows/docker-build-push.yml` to bake `VITE_TELEGRAM_API_ID` and `VITE_TELEGRAM_API_HASH` from GitHub Actions secrets into the Vite build so published GHCR images no longer depend on runtime container env for these frontend values.
@@ -929,6 +930,7 @@ Plan: `.kilo/plans/1776687189000‑review‑deferred‑tasks.md`
 ## Recent Commit Log
 | Commit | Date | Description |
 |--------|------|-------------|
+| `74d8b1b` | 2026-04-20 | fix: scope GHCR workflow to image publish |
 | `eb4e335` | 2026-04-19 | chore: remove unused legacy root app files |
 | `6362ea8` | 2026-04-19 | fix: avoid hijacking gallery control keyboard input |
 | `2ecb87e` | 2026-04-19 | refactor: tighten viewer event and content guards |
