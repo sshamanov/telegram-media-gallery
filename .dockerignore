@@ -1,3 +1,57 @@
-# Only exclude kilo/agentic/readme files as requested
-.kilo/agentic/
-README.md
+# Filter files as requested - minimal filtering for Docker build context
+# MD files in root
+*.md
+
+# YML files  
+*.yml
+*.yaml
+
+# Specific dotfiles
+.env
+.env.*
+.git/
+.gitignore
+.gitattributes
+.kilo/
+
+# tmp directory
+tmp/
+
+# kilo.jsonc file
+kilo.jsonc
+
+# code-workspace file
+*.code-workspace
+
+# Test and sample files
+tests/
+samples/
+playwright-report/
+playwright.config.ts
+coverage/
+
+# Build artifacts
+dist/
+tsconfig.tsbuildinfo
+node_modules/
+
+# Documentation and config files
+AGENTS.md
+APPLICATION_SPEC.md
+STATUS.md
+TESTING_STRATEGY.md
+telegram-gallery.code-workspace
+
+# Docker compose files
+docker-compose*.yml
+
+# Keep only files needed for Dockerfile.prod build
+!package.json
+!package-lock.json
+!vite.config.ts
+!tsconfig.json
+!index.html
+!src/
+!public/
+!scripts/
+!.dockerignore
