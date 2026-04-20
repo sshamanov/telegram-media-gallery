@@ -1,6 +1,6 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-20 17:33 +02:00
+**Last Updated:** 2026-04-20 19:05 +02:00
 **Current Phase:** Pull‑to‑Refresh Implementation
 **Active Plan:** `.kilo/plans/1776688389000-pull-to-refresh.md`
 **Branch:** `main`
@@ -243,11 +243,13 @@ Plan: `.kilo/plans/1776687189000‑review‑deferred‑tasks.md`
 - `completed` Task 20: UI refinements (Block 6.1) (FB006, FB007) (commit 715d7f5)
 
 ## Next Execution Order
+- **GitHub Actions secret bake-in update in progress**: pass `VITE_TELEGRAM_API_ID` and `VITE_TELEGRAM_API_HASH` into `Dockerfile.prod` at build time for GHCR images.
 - **Hardened Docker build plan completed**: Dockerfile.prod created for restricted environments.
 - **Pull‑to‑refresh plan reactivated**: Resume Phase 1 (research & planning).
 - **Execution order**: 1. Analyze current refresh flow; 2. Research pull‑to‑refresh patterns; 3. Design implementation; 4. Create component structure.
 
 ## Plan And Todo History
+- 2026-04-20 19:05 +02:00 - Updated `Dockerfile.prod` and `.github/workflows/docker-build-push.yml` to bake `VITE_TELEGRAM_API_ID` and `VITE_TELEGRAM_API_HASH` from GitHub Actions secrets into the Vite build so published GHCR images no longer depend on runtime container env for these frontend values.
 - 2026-04-20 17:39 +02:00 - Activated hardened Docker build plan (`.kilo/plans/1776688389002‑hardened‑docker‑build.md`): create Dockerfile.prod for restricted environments with non-root user support. Plan registered, Block 1 in progress.
 - 2026-04-20 17:40 +02:00 - Completed hardened Docker build Block 1: updated STATUS.md with plan registration, created plan file, updated Next Execution Order. Block 2 in progress.
 - 2026-04-20 17:41 +02:00 - Completed hardened Docker build Block 2: created `Dockerfile.prod` with non-root user support (UID/GID 1001), minimal runtime, proper permissions, and security hardening. Block 3 in progress.
@@ -509,6 +511,9 @@ Plan: `.kilo/plans/1776687189000‑review‑deferred‑tasks.md`
 - ℹ️ Historical references to `.kilo/status.md` remain in dated records by design and are not treated as active drift.
 
 ## Last Validation
+- 2026-04-20 19:05 +02:00 - GHCR frontend config bake-in validation: verified build-time config wiring changes remain type-safe.
+  - Result: passed with 0 errors, 0 warnings
+  - Main note: `npm run check` passes after wiring GitHub Actions secrets into `Dockerfile.prod` build args and builder-stage env for Vite.
 - 2026-04-20 16:25 +02:00 - Offline‑media browsing Phase 5 validation: comprehensive validation of all offline features.
   - Result: passed with 0 errors, 0 warnings
   - Main note: Type check passes; short test suite passes 32/32; long test suite passes 12/12 (5 skipped); all offline features (background sync, pre‑fetching, cache management, offline search) validated.
