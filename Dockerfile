@@ -1,8 +1,8 @@
 # Production Dockerfile for Telegram Gallery
-# Based on node:20-alpine as per project decision
+# Based on node:24-alpine for consistency with development environment
 
 # Build stage
-FROM node:20-alpine AS builder
+FROM node:24-alpine AS builder
 
 WORKDIR /app
 
@@ -19,7 +19,7 @@ COPY . .
 RUN npm run build
 
 # Runtime stage
-FROM node:20-alpine AS runtime
+FROM node:24-alpine AS runtime
 
 WORKDIR /app
 

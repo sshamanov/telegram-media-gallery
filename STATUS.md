@@ -243,12 +243,17 @@ Plan: `.kilo/plans/1776687189000‑review‑deferred‑tasks.md`
 - `completed` Task 20: UI refinements (Block 6.1) (FB006, FB007) (commit 715d7f5)
 
 ## Next Execution Order
-- **Review deferred tasks plan completed**: All phases implemented. Next work identified: pull‑to‑refresh.
-- **Pull‑to‑refresh plan activated**: Phase 1 (research & planning) ready to start.
+- **GitHub Actions CI/CD plan completed**: Docker build and push workflow implemented.
+- **Pull‑to‑refresh plan reactivated**: Resume Phase 1 (research & planning).
 - **Execution order**: 1. Analyze current refresh flow; 2. Research pull‑to‑refresh patterns; 3. Design implementation; 4. Create component structure.
 
 ## Plan And Todo History
-- 2026-04-20 17:33 +02:00 - Activated pull‑to‑refresh plan (`.kilo/plans/1776688389000‑pull‑to‑refresh.md`): implement pull‑to‑refresh gesture for gallery. Plan registered, Phase 1 pending.
+- 2026-04-20 17:23 +02:00 - Activated GitHub Actions CI/CD plan (`.kilo/plans/1776688389001‑github‑actions‑ci‑cd.md`): implement Docker build and push to GitHub Package Registry. Plan registered, Block 1 in progress.
+- 2026-04-20 17:25 +02:00 - Completed GitHub Actions CI/CD Block 1: updated STATUS.md with plan registration, created plan file, updated Next Execution Order. Block 2 in progress.
+- 2026-04-20 17:26 +02:00 - Completed GitHub Actions CI/CD Block 2: created GitHub Actions workflow `.github/workflows/docker-build-push.yml` with Docker build, push to GitHub Package Registry, and validation steps. Block 3 in progress.
+- 2026-04-20 17:27 +02:00 - Completed GitHub Actions CI/CD Block 3: updated Dockerfile to use node:24-alpine for consistency with development environment. Docker build test successful. Block 4 in progress.
+- 2026-04-20 17:28 +02:00 - Completed GitHub Actions CI/CD Block 4: ran validation checks - type check passes (0 errors, 0 warnings), Docker build succeeds, updated workflow to include Playwright browser installation. Plan completed successfully.
+- 2026-04-20 17:33 +02:00 - Activated pull‑to‑refresh plan (`.kilo/plans/1776688389000‑pull‑to‑refresh.md`): implement pull‑to‑refresh gesture for gallery. Plan registered, Phase 1 pending (temporarily deferred).
 - 2026-04-20 17:33 +02:00 - Completed review‑deferred‑tasks Phase 2 (implementation planning): created detailed pull‑to‑refresh implementation plan. Review‑deferred‑tasks plan now complete.
 - 2026-04-20 17:10 +02:00 - Completed review‑deferred‑tasks Phase 1 (inventory and prioritization). All deferred tasks reviewed: Task 10 (unit tests) remains deferred (low priority, high effort); Happy Tiger Blocks 5‑7 already implemented; Kind Island Block 6 correctly deferred; Silent Knight Blocks 4‑5 correctly deferred. Updated APPLICATION_SPEC.md to remove implemented features from "Still Planned" list.
 - 2026-04-20 16:53 +02:00 - Activated review‑deferred‑tasks plan (`.kilo/plans/1776687189000‑review‑deferred‑tasks.md`): review all deferred tasks, evaluate priority, identify next high‑priority work. Plan registered, Phase 1 pending.
