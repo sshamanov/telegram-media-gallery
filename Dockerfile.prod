@@ -1,0 +1,76 @@
+# Hardened Production Dockerfile for Telegram Gallery
+# Designed for restricted environments with non-root user support
+# Based on node:24-alpine for consistency
+
+# Build stage - includes all build tools
+FROM node:24-alpine AS builder
+
+WORKDIR /app
+
+# Copy package files first for better layer caching
+COPY package.json package-lock.json* ./
+
+# Install all dependencies (including dev) for building
+RUN npm ci
+
+# Copy source code
+COPY . .
+
+# Build the application
+RUN npm run build
+
+# Production stage - minimal runtime with non-root user
+FROM node:24-alpine AS runtime
+
+# Create non-root user with configurable UID/GID
+ARG USER_ID=1001
+ARG GROUP_ID=1001
+RUN addgroup -g ${GROUP_ID} appuser && \
+    adduser -S -u ${USER_ID} -G appuser appuser
+
+WORKDIR /app
+
+# Install runtime dependencies only
+# Add any required system packages here (none needed for basic Node.js app)
+# RUN apk add --no-cache <packages>
+
+# Copy built assets and scripts from builder stage
+COPY --from=builder --chown=appuser:appuser /app/dist ./dist
+COPY --from=builder --chown=appuser:appuser /app/package.json ./package.json
+COPY --from=builder --chown=appuser:appuser /app/package-lock.json ./package-lock.json
+COPY --from=builder --chown=appuser:appuser /app/scripts ./scripts
+
+# Install only production dependencies
+RUN npm ci --only=production --omit=dev
+
+# Create directory for runtime files with proper permissions
+RUN mkdir -p /tmp/telegram-gallery && \
+    chown -R appuser:appuser /tmp/telegram-gallery
+
+# Switch to non-root user
+USER appuser
+
+# Expose port (Vite preview uses 4173 by default)
+EXPOSE 4173
+
+# Health check using wget (lightweight)
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:4173/ || exit 1
+
+# Default environment variables
+ENV NODE_ENV=production \
+    PORT=4173 \
+    HOST=0.0.0.0
+
+# Use exec form for better signal handling
+# Use custom Node.js server instead of vite preview (vite is dev dependency)
+CMD ["npm", "run", "serve:dist", "--", "--host", "0.0.0.0", "--port", "4173"]
+
+# Security hardening notes:
+# 1. Runs as non-root user (appuser, UID 1001 by default)
+# 2. Configurable UID/GID via build args
+# 3. Minimal dependencies in runtime stage
+# 4. No build tools or source code in final image
+# 5. Proper file ownership and permissions
+# 6. Health check for container orchestration
+# 7. Exec form CMD for proper signal handling

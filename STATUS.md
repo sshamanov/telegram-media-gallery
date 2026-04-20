@@ -243,11 +243,17 @@ Plan: `.kilo/plans/1776687189000‑review‑deferred‑tasks.md`
 - `completed` Task 20: UI refinements (Block 6.1) (FB006, FB007) (commit 715d7f5)
 
 ## Next Execution Order
-- **GitHub Actions CI/CD plan completed**: Docker build and push workflow implemented.
+- **Hardened Docker build plan completed**: Dockerfile.prod created for restricted environments.
 - **Pull‑to‑refresh plan reactivated**: Resume Phase 1 (research & planning).
 - **Execution order**: 1. Analyze current refresh flow; 2. Research pull‑to‑refresh patterns; 3. Design implementation; 4. Create component structure.
 
 ## Plan And Todo History
+- 2026-04-20 17:39 +02:00 - Activated hardened Docker build plan (`.kilo/plans/1776688389002‑hardened‑docker‑build.md`): create Dockerfile.prod for restricted environments with non-root user support. Plan registered, Block 1 in progress.
+- 2026-04-20 17:40 +02:00 - Completed hardened Docker build Block 1: updated STATUS.md with plan registration, created plan file, updated Next Execution Order. Block 2 in progress.
+- 2026-04-20 17:41 +02:00 - Completed hardened Docker build Block 2: created `Dockerfile.prod` with non-root user support (UID/GID 1001), minimal runtime, proper permissions, and security hardening. Block 3 in progress.
+- 2026-04-20 17:42 +02:00 - Completed hardened Docker build Block 3: updated GitHub Actions workflow to build from `Dockerfile.prod` with configurable UID/GID build arguments. Block 4 in progress.
+- 2026-04-20 17:43 +02:00 - Completed hardened Docker build Block 4: tested `Dockerfile.prod` build - builds successfully, runs as non-root user (UID 1001), serves HTTP 200 response. Fixed CMD to use custom Node.js server instead of vite preview. Block 5 in progress.
+- 2026-04-20 17:44 +02:00 - Completed hardened Docker build Block 5: ran validation checks - type check passes (0 errors, 0 warnings). Plan completed successfully.
 - 2026-04-20 17:23 +02:00 - Activated GitHub Actions CI/CD plan (`.kilo/plans/1776688389001‑github‑actions‑ci‑cd.md`): implement Docker build and push to GitHub Package Registry. Plan registered, Block 1 in progress.
 - 2026-04-20 17:25 +02:00 - Completed GitHub Actions CI/CD Block 1: updated STATUS.md with plan registration, created plan file, updated Next Execution Order. Block 2 in progress.
 - 2026-04-20 17:26 +02:00 - Completed GitHub Actions CI/CD Block 2: created GitHub Actions workflow `.github/workflows/docker-build-push.yml` with Docker build, push to GitHub Package Registry, and validation steps. Block 3 in progress.
