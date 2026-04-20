@@ -12,8 +12,13 @@ COPY package.json package-lock.json* ./
 # Install all dependencies (including dev) for building
 RUN npm ci
 
-# Copy source code
-COPY . .
+# Copy source code and configuration files needed for build
+COPY src/ ./src/
+COPY scripts/ ./scripts/
+COPY public/ ./public/
+COPY vite.config.ts ./
+COPY tsconfig.json ./
+COPY index.html ./
 
 # Build the application
 RUN npm run build
@@ -27,10 +32,11 @@ WORKDIR /app
 # (Add any required system packages here as discovered)
 # RUN apk add --no-cache <packages>
 
-# Copy built assets and package files from builder
+# Copy built assets, package files, and scripts from builder
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/package-lock.json ./package-lock.json
+COPY --from=builder /app/scripts ./scripts
 
 # Install only production dependencies for runtime
 RUN npm ci --only=production
@@ -42,5 +48,5 @@ EXPOSE 4173
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:4173/ || exit 1
 
-# Serve static files using Vite preview (production server)
-CMD ["npm", "run", "preview", "--", "--host", "0.0.0.0", "--port", "4173"]
+# Serve static files using custom Node.js server (vite is dev dependency)
+CMD ["npm", "run", "serve:dist", "--", "--host", "0.0.0.0", "--port", "4173"]
