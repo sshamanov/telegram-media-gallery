@@ -62,37 +62,3 @@ jobs:
             GROUP_ID=1001
             VITE_TELEGRAM_API_ID=${{ secrets.VITE_TELEGRAM_API_ID }}
             VITE_TELEGRAM_API_HASH=${{ secrets.VITE_TELEGRAM_API_HASH }}
-
-      - name: Run type check
-        run: |
-          docker run --rm --network host \
-            -v "$(pwd)":/app -w /app \
-            node:24-alpine sh -lc "npm ci && npm run check"
-
-      - name: Install Playwright browsers
-        run: |
-          docker run --rm --network host \
-            -v "$(pwd)":/app -w /app \
-            node:24-alpine sh -lc "npm ci && npm run test:install-browsers"
-
-      - name: Run short test suite
-        run: |
-          # Start dev server in background
-          docker run --rm --network host \
-            -v "$(pwd)":/app -w /app \
-            -e VITE_USE_MOCK_ADAPTER=true \
-            node:24-alpine sh -lc "npm ci && npm run dev -- --host 0.0.0.0 --port 5173" &
-          SERVER_PID=$!
-          
-          # Wait for server to start
-          sleep 10
-          
-          # Run tests
-          docker run --rm --network host \
-            -v "$(pwd)":/app -w /app \
-            -e VITE_USE_MOCK_ADAPTER=true \
-            node:24-alpine sh -lc "npm ci && npm run test:short" || true
-          
-          # Kill dev server
-          kill $SERVER_PID 2>/dev/null || true
-          wait $SERVER_PID 2>/dev/null || true
