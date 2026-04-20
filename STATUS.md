@@ -1,6 +1,6 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-20 19:05 +02:00
+**Last Updated:** 2026-04-20 19:27 +02:00
 **Current Phase:** Pull‑to‑Refresh Implementation
 **Active Plan:** `.kilo/plans/1776688389000-pull-to-refresh.md`
 **Branch:** `main`
@@ -243,12 +243,14 @@ Plan: `.kilo/plans/1776687189000‑review‑deferred‑tasks.md`
 - `completed` Task 20: UI refinements (Block 6.1) (FB006, FB007) (commit 715d7f5)
 
 ## Next Execution Order
+- **GitHub Actions validation container fix in progress**: install dependencies inside CI validation/test containers before invoking project-local npm scripts.
 - **GitHub Actions secret bake-in update in progress**: pass `VITE_TELEGRAM_API_ID` and `VITE_TELEGRAM_API_HASH` into `Dockerfile.prod` at build time for GHCR images.
 - **Hardened Docker build plan completed**: Dockerfile.prod created for restricted environments.
 - **Pull‑to‑refresh plan reactivated**: Resume Phase 1 (research & planning).
 - **Execution order**: 1. Analyze current refresh flow; 2. Research pull‑to‑refresh patterns; 3. Design implementation; 4. Create component structure.
 
 ## Plan And Todo History
+- 2026-04-20 19:27 +02:00 - Diagnosed GitHub Actions failure in run `#5`: published image succeeded, but `Run type check` failed because validation containers invoked project-local npm scripts without first installing dependencies. Updated workflow to run `npm ci` inside the type-check, Playwright install, dev-server, and short-test containers.
 - 2026-04-20 19:05 +02:00 - Updated `Dockerfile.prod` and `.github/workflows/docker-build-push.yml` to bake `VITE_TELEGRAM_API_ID` and `VITE_TELEGRAM_API_HASH` from GitHub Actions secrets into the Vite build so published GHCR images no longer depend on runtime container env for these frontend values.
 - 2026-04-20 17:39 +02:00 - Activated hardened Docker build plan (`.kilo/plans/1776688389002‑hardened‑docker‑build.md`): create Dockerfile.prod for restricted environments with non-root user support. Plan registered, Block 1 in progress.
 - 2026-04-20 17:40 +02:00 - Completed hardened Docker build Block 1: updated STATUS.md with plan registration, created plan file, updated Next Execution Order. Block 2 in progress.
@@ -511,6 +513,9 @@ Plan: `.kilo/plans/1776687189000‑review‑deferred‑tasks.md`
 - ℹ️ Historical references to `.kilo/status.md` remain in dated records by design and are not treated as active drift.
 
 ## Last Validation
+- 2026-04-20 19:27 +02:00 - GitHub Actions validation-container fix: verified workflow changes remain locally type-safe after adding dependency installation to CI helper containers.
+  - Result: passed with 0 errors, 0 warnings
+  - Main note: local `npm run check` passes; workflow now uses `npm ci && ...` for type-check, Playwright install, dev-server, and short-test container commands to match project-local binary expectations.
 - 2026-04-20 19:05 +02:00 - GHCR frontend config bake-in validation: verified build-time config wiring changes remain type-safe.
   - Result: passed with 0 errors, 0 warnings
   - Main note: `npm run check` passes after wiring GitHub Actions secrets into `Dockerfile.prod` build args and builder-stage env for Vite.
