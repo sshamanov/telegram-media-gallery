@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Dialog } from '../../types/telegram'
+  import OfflineDialogButton from './OfflineDialogButton.svelte'
 
   export let dialog: Dialog
   export let isGallery: boolean
@@ -19,9 +20,12 @@
     <div class="title">{dialog.title}</div>
     <div class="meta muted">{dialog.subtitle}</div>
   </div>
-  <button class={`button ${isGallery ? 'danger' : 'secondary'}`} type="button" on:click|stopPropagation={() => onToggle(dialog.id)} data-testid="dialog-toggle-button">
-    {isGallery ? 'Remove' : 'Add'}
-  </button>
+  <div class="button-group">
+    <OfflineDialogButton {dialog} />
+    <button class={`button ${isGallery ? 'danger' : 'secondary'}`} type="button" on:click|stopPropagation={() => onToggle(dialog.id)} data-testid="dialog-toggle-button">
+      {isGallery ? 'Remove' : 'Add'}
+    </button>
+  </div>
 </div>
 
 <style>
@@ -32,6 +36,12 @@
     gap: 14px;
     padding: 14px 16px;
     cursor: pointer;
+  }
+
+  .button-group {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
   }
 
   .avatar-wrap,

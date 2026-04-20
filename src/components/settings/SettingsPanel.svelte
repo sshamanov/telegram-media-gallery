@@ -19,6 +19,7 @@
   import type { GalleryFilterId } from '../../types/telegram'
 
   import CacheIndicator from '../ui/CacheIndicator.svelte'
+  import OfflineDialogsSection from './OfflineDialogsSection.svelte'
 
    let draft = $settings
   let storageInfo: StorageUsage | null = null
@@ -307,6 +308,8 @@
     <button class="button" type="button" on:click={save}>Save Settings</button>
     <button class="button secondary" type="button" on:click={loadStorageInfo}>Refresh storage info</button>
   </div>
+
+  <OfflineDialogsSection />
 </section>
 
 <style>

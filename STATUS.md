@@ -111,7 +111,7 @@
 
 ### Offline‑Media Browsing (Active)
 - `completed` Phase 1: Background sync for uploads - implemented upload queue, service worker sync, adapter integration
-- `pending` Phase 2: Pre‑fetching UI and background download
+- `completed` Phase 2: Pre‑fetching UI and background download - implemented prefetch module, offline dialog button, settings panel
 - `pending` Phase 3: Enhanced cache management UI  
 - `pending` Phase 4: Offline search
 - `pending` Phase 5: Validation and integration
@@ -241,6 +241,7 @@ Plan: `.kilo/plans/1776640073475‑offline‑media‑browsing.md`
 - **Ready for next work**: Choose between implementing offline‑media browsing (background sync + pre‑fetching) or picking up deferred optional code‑quality blocks.
 
 ## Plan And Todo History
+- 2026-04-20 14:10 +02:00 - Completed offline‑media browsing Phase 2 validation: short test suite passes 32/32. All Phase 2 features implemented and validated. Prefetch module with background download worker, offline dialog button in dialog list, offline dialogs section in settings panel.
 - 2026-04-20 13:45 +02:00 - Completed offline‑media browsing Phase 1 validation: short test suite passes 32/32. All Phase 1 features implemented and validated.
 - 2026-04-20 13:30 +02:00 - Recorded offline‑media browsing Phase 1 implementation commit `bafb6f1` (`feat: implement background sync for uploads - Phase 1 complete`). Updated mtcute and mock adapters to queue uploads when offline, added service worker sync, implemented queue processing.
 - 2026-04-20 13:26 +02:00 - Recorded offline‑media browsing Phase 1 groundwork commit `9afad8a` (`feat: begin offline media browsing implementation - Phase 1 groundwork`). IndexedDB schema extended to version 3, upload queue module created, settings panel updated.
