@@ -107,7 +107,10 @@
   - `completed` Task 9: Refactor large modules (plan: `.kilo/plans/1776540483163-task9-refactor-large-modules.md`) - GalleryGrid and ViewerWrapper refactored with utility modules
  - `completed` Task 9.1: Refactor GalleryGrid.svelte (plan: `.kilo/plans/1776578917940-task9-1-gallerygrid-refactor.md`)
   - `completed` Task 9.2: Refactor ViewerWrapper.svelte (plan: `.kilo/plans/1776578917940-task9-2-viewerwrapper-refactor.md`) - utilities integrated, type check passes, tests pass
-  - `deferred` Task 10: Write unit tests (plan: `.kilo/plans/1776540483164-task10-write-unit-tests.md`) - deferred as low priority, framework not yet set up
+  - `deferred` Task 10: Write unit tests (plan: `.kilo/plans/1776540483164-task10-write-unit-tests.md`) - deferred as low priority; existing Playwright coverage sufficient for current validation
+
+### Offline‑Media Browsing (Planned)
+- `pending` Offline‑media browsing – background sync & pre‑fetching (plan: `.kilo/plans/1776640073475‑offline‑media‑browsing.md`)
 
 ### Happy Tiger Plan (Code Quality Hardening)
 - `completed` Block 1: Restore `replaceImageSource` correctness
@@ -229,10 +232,11 @@
 - `completed` Task 20: UI refinements (Block 6.1) (FB006, FB007) (commit 715d7f5)
 
 ## Next Execution Order
-- **Proud Comet plan completed**: All 5 blocks implemented successfully. Stale plans cleaned up, APPLICATION_SPEC.md updated, Task 10 deferred, offline gaps identified.
-- **Ready for next work**: Repository is in a clean state with accurate documentation and no stale active plans.
+- **Crisp Star plan completed**: Stale plans archived, Task 10 evaluated (remains deferred), offline‑media browsing gaps researched, detailed implementation plan created.
+- **Ready for next work**: Choose between implementing offline‑media browsing (background sync + pre‑fetching) or picking up deferred optional code‑quality blocks.
 
 ## Plan And Todo History
+- 2026-04-20 01:54 +02:00 - Activated Crisp Star plan (`.kilo/plans/1776640073474‑crisp‑star.md`): archive stale plans, evaluate Task 10 readiness, research offline‑media browsing gaps, create detailed implementation plan.
 - 2026-04-20 00:33 +02:00 - Recorded Proud Comet final commit `82168bb` (`chore: complete Proud Comet plan - cleanup and documentation updates`).
 - 2026-04-20 00:33 +02:00 - Completed Proud Comet Block 5: validation and final commit. Updated Proud Comet plan status to completed. All 5 blocks implemented successfully. Type check passes: 0 errors, 0 warnings. Markdown consistency verified.
 - 2026-04-20 00:32 +02:00 - Recorded Proud Comet Block 4 commit `dcb9b1d` (`docs: update STATUS.md with Block 4 completion`).
