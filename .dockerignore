@@ -1,0 +1,81 @@
+# Docker ignore file for Telegram Gallery
+# Excludes unnecessary files from Docker build context
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Test files and directories
+tests/
+test-results/
+playwright-report/
+playwright/.cache/
+coverage/
+*.spec.ts
+*.spec.js
+*.test.ts
+*.test.js
+
+# Sample data
+samples/
+
+# Documentation
+*.md
+!README.md
+!package.json
+!package-lock.json
+
+# Docker files
+Dockerfile
+Dockerfile.prod
+docker-compose*.yml
+!.github/
+
+# Development and build artifacts
+dist/
+build/
+.cache/
+.tmp/
+tmp/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Kilo configuration
+.kilo/
+AGENTS.md
+APPLICATION_SPEC.md
+STATUS.md
+TESTING_STRATEGY.md
+
+# Source maps
+*.map
+
+# Note: package.json and package-lock.json are needed for npm install
+# Note: src/ directory is needed for source code
+# Note: scripts/ directory is needed for custom server
+# Note: public/ directory is needed for static assets (if any)
+# Note: README.md is kept for reference in image

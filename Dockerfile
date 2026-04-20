@@ -12,8 +12,13 @@ COPY package.json package-lock.json* ./
 # Install all dependencies (including dev) for building
 RUN npm ci
 
-# Copy source code
-COPY . .
+# Copy source code and configuration files needed for build
+COPY src/ ./src/
+COPY scripts/ ./scripts/
+COPY public/ ./public/
+COPY vite.config.ts ./
+COPY tsconfig.json ./
+COPY index.html ./
 
 # Build the application
 RUN npm run build
