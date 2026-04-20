@@ -1,4 +1,4 @@
-name: Build and Push Docker Image
+name: Build and Push Hardened Docker Image
 
 on:
   push:
@@ -51,11 +51,15 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
+          file: ./Dockerfile.prod
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          build-args: |
+            USER_ID=1001
+            GROUP_ID=1001
 
       - name: Run type check
         run: |

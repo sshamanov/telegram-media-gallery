@@ -1,0 +1,3 @@
+# Only exclude kilo/agentic/readme files as requested
+.kilo/agentic/
+README.md
