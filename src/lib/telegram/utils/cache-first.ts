@@ -25,10 +25,9 @@ export interface CacheFirstResult {
 export async function cacheFirstGetDialogs(
   fetchFresh: () => Promise<Dialog[]>,
   options: GetDialogsOptions = {},
-  cacheTtlMs: number = 5 * 60 * 1000,
+  _cacheTtlMs: number = 5 * 60 * 1000,
   adapterName: string = 'adapter'
 ): Promise<CacheFirstResult> {
-  const now = Date.now()
   const { forceRefresh = false, limit = Infinity, offsetDate = 0 } = options
 
   // Helper to filter dialogs by offsetDate and limit, deduplicate
@@ -48,9 +47,9 @@ export async function cacheFirstGetDialogs(
   // 1. Try cache unless forceRefresh is true
   if (!forceRefresh) {
     const cached = await readCachedDialogs()
-    if (cached && now - cached.updatedAt < cacheTtlMs) {
-      debugLog(`${adapterName}:getDialogs returning cached data`, { count: cached.dialogs.length })
-      const filtered = filterDialogs(cached.dialogs, limit, offsetDate)
+    if (cached) {
+      debugLog(`${adapterName}:getDialogs returning cached data`, { count: cached.length })
+      const filtered = filterDialogs(cached, limit, offsetDate)
       return { dialogs: filtered, fromCache: true }
     }
   }

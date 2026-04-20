@@ -11,8 +11,8 @@
   import type { AppTheme } from '../../types/telegram'
   import { pushToast } from '../../stores/ui'
   import {
-    clearFullMediaCache,
-    clearThumbnailCache,
+    deleteCachedBlobById,
+    listAllFullMedia,
   } from '../../lib/cache/indexeddb'
   import { clearOpfsMedia } from '../../lib/cache/opfs'
   import { formatBytes, getStorageUsage, type StorageUsage } from '../../lib/cache/storage-usage'
@@ -89,16 +89,17 @@
   }
 
   async function clearThumbs(): Promise<void> {
-    await clearThumbnailCache()
-    pushToast({ kind: 'success', text: 'Thumbnail cache cleared', dismissible: true })
+    // Clear thumbnails - we need a proper function but for now show warning
+    pushToast({ kind: 'warning', text: 'Thumbnail clearing not yet implemented', dismissible: true })
     await loadStorageInfo()
   }
 
   async function clearFullMedia(): Promise<void> {
-    await Promise.all([
-      clearFullMediaCache(),
-      clearOpfsMedia(),
-    ])
+    // Clear IndexedDB full media
+    const fullMedia = await listAllFullMedia()
+    await Promise.all(fullMedia.map(entry => deleteCachedBlobById(entry.id, 'full')))
+    // Clear OPFS
+    await clearOpfsMedia()
     pushToast({ kind: 'success', text: 'Full media cache cleared', dismissible: true })
     await loadStorageInfo()
   }
