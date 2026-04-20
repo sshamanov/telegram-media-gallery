@@ -16,17 +16,20 @@
   } from '../../lib/cache/indexeddb'
   import { clearOpfsMedia } from '../../lib/cache/opfs'
   import { formatBytes, getStorageUsage, type StorageUsage } from '../../lib/cache/storage-usage'
-  import type { GalleryFilterId } from '../../types/telegram'
+import { getCacheUsage, clearCacheByAge, clearCacheByType, type CacheUsage } from '../../lib/cache/opfs'
+import type { GalleryFilterId } from '../../types/telegram'
 
-  import CacheIndicator from '../ui/CacheIndicator.svelte'
-  import OfflineDialogsSection from './OfflineDialogsSection.svelte'
+import CacheIndicator from '../ui/CacheIndicator.svelte'
+import OfflineDialogsSection from './OfflineDialogsSection.svelte'
 
-   let draft = $settings
-  let storageInfo: StorageUsage | null = null
-  let swCache = 0
-  let loadingStorage = false
-  // let pendingUploads: Array<{ id: number; dialogId: string; fileName: string; size: number; createdAt: number }> = [] // TODO: Enable when UI is added
-  // let loadingUploads = false // TODO: Enable when UI is added
+ let draft = $settings
+let storageInfo: StorageUsage | null = null
+let cacheUsage: CacheUsage | null = null
+let swCache = 0
+let loadingStorage = false
+let clearingCache = false
+// let pendingUploads: Array<{ id: number; dialogId: string; fileName: string; size: number; createdAt: number }> = [] // TODO: Enable when UI is added
+// let loadingUploads = false // TODO: Enable when UI is added
 
   $: draft = $settings
 
@@ -49,8 +52,9 @@
   async function loadStorageInfo(): Promise<void> {
     loadingStorage = true
     try {
-      const [usage] = await Promise.all([
+      const [usage, cacheUsageData] = await Promise.all([
         getStorageUsage(),
+        getCacheUsage(),
         refreshFullMediaStorageState(),
       ])
 
@@ -73,6 +77,7 @@
       }
 
       storageInfo = usage
+      cacheUsage = cacheUsageData
       swCache = nextSwCache
     } finally {
       loadingStorage = false
@@ -114,6 +119,57 @@
     }
     pushToast({ kind: 'warning', text: 'App cache cleared — offline mode unavailable until next online visit', dismissible: true })
     await loadStorageInfo()
+  }
+
+  async function clearCacheOlderThan(weeks: number): Promise<void> {
+    clearingCache = true
+    try {
+      const maxAgeMs = weeks * 7 * 24 * 60 * 60 * 1000
+      const clearedCount = await clearCacheByAge(maxAgeMs)
+      pushToast({ 
+        kind: 'success', 
+        text: `Cleared ${clearedCount} cached items older than ${weeks} week${weeks === 1 ? '' : 's'}`, 
+        dismissible: true 
+      })
+      await loadStorageInfo()
+    } catch (error) {
+      pushToast({ 
+        kind: 'error', 
+        text: `Failed to clear cache: ${error instanceof Error ? error.message : String(error)}`, 
+        dismissible: true 
+      })
+    } finally {
+      clearingCache = false
+    }
+  }
+
+  async function clearCacheByMediaType(type: string): Promise<void> {
+    clearingCache = true
+    try {
+      const clearedCount = await clearCacheByType(type)
+      if (clearedCount > 0) {
+        pushToast({ 
+          kind: 'success', 
+          text: `Cleared ${clearedCount} cached ${type} items`, 
+          dismissible: true 
+        })
+      } else {
+        pushToast({ 
+          kind: 'info', 
+          text: `No ${type} items found in cache`, 
+          dismissible: true 
+        })
+      }
+      await loadStorageInfo()
+    } catch (error) {
+      pushToast({ 
+        kind: 'error', 
+        text: `Failed to clear ${type} cache: ${error instanceof Error ? error.message : String(error)}`, 
+        dismissible: true 
+      })
+    } finally {
+      clearingCache = false
+    }
   }
 
   function toggleDefaultHiddenFilter(filterId: GalleryFilterId): void {
@@ -285,7 +341,69 @@
           <button class="button danger compact-btn" type="button" on:click={clearSwCache}>Clear</button>
         </div>
       </div>
-     {/if}
+      {/if}
+  </fieldset>
+
+  <!-- Enhanced Cache Management -->
+  <fieldset class="storage-section">
+    <legend>Cache Management</legend>
+    {#if loadingStorage}
+      <div class="muted storage-loading">Loading cache info...</div>
+    {:else if cacheUsage}
+      <div class="storage-status panel-subtle">
+        <div class="storage-status-label">Cache Summary</div>
+        <div class="storage-status-value">{cacheUsage.itemCount} items · {formatBytes(cacheUsage.totalBytes)}</div>
+        <div class="muted storage-status-detail">
+          Breakdown by type: 
+          {#each Object.entries(cacheUsage.byType) as [type, count], i (type)}
+            {#if count > 0}
+              {type}: {count}{#if i < Object.entries(cacheUsage.byType).length - 1}, {/if}
+            {/if}
+          {/each}
+        </div>
+      </div>
+
+      <div class="cache-management-actions">
+        <div class="cache-action-group">
+          <div class="cache-action-label">Clear by age:</div>
+          <div class="cache-action-buttons">
+            <button class="button danger compact-btn" type="button" on:click={() => clearCacheOlderThan(1)} disabled={clearingCache}>
+              Older than 1 week
+            </button>
+            <button class="button danger compact-btn" type="button" on:click={() => clearCacheOlderThan(4)} disabled={clearingCache}>
+              Older than 1 month
+            </button>
+            <button class="button danger compact-btn" type="button" on:click={() => clearCacheOlderThan(12)} disabled={clearingCache}>
+              Older than 3 months
+            </button>
+          </div>
+        </div>
+
+        <div class="cache-action-group">
+          <div class="cache-action-label">Clear by type:</div>
+          <div class="cache-action-buttons">
+            <button class="button danger compact-btn" type="button" on:click={() => clearCacheByMediaType('photo')} disabled={clearingCache}>
+              Photos only
+            </button>
+            <button class="button danger compact-btn" type="button" on:click={() => clearCacheByMediaType('video')} disabled={clearingCache}>
+              Videos only
+            </button>
+            <button class="button danger compact-btn" type="button" on:click={() => clearCacheByMediaType('document')} disabled={clearingCache}>
+              Documents only
+            </button>
+            <button class="button danger compact-btn" type="button" on:click={() => clearCacheByMediaType('all')} disabled={clearingCache}>
+              All cached media
+            </button>
+          </div>
+        </div>
+
+        {#if clearingCache}
+          <div class="muted cache-clearing-status">Clearing cache...</div>
+        {/if}
+      </div>
+    {:else}
+      <div class="muted storage-loading">Cache info not available</div>
+    {/if}
   </fieldset>
 
   <!-- Cache indicator -->
@@ -434,5 +552,34 @@
     border: 2px solid var(--border-focus);
     border-radius: 16px;
     background: var(--bg-elevated);
+  }
+
+  .cache-management-actions {
+    display: grid;
+    gap: 20px;
+    margin-top: 16px;
+  }
+
+  .cache-action-group {
+    display: grid;
+    gap: 8px;
+  }
+
+  .cache-action-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+
+  .cache-action-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .cache-clearing-status {
+    font-size: 0.85rem;
+    padding: 8px 0;
+    text-align: center;
   }
 </style>

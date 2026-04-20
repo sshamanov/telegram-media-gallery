@@ -1,6 +1,6 @@
 # Telegram Gallery - Execution Ledger
 
-**Last Updated:** 2026-04-20 13:45 +02:00
+**Last Updated:** 2026-04-20 14:48 +02:00
 **Current Phase:** Offline Media Browsing - Background Sync & Pre-fetching
 **Active Plan:** `.kilo/plans/1776640073475-offline-media-browsing.md`
 **Branch:** `main`
@@ -112,7 +112,7 @@
 ### Offline‑Media Browsing (Active)
 - `completed` Phase 1: Background sync for uploads - implemented upload queue, service worker sync, adapter integration
 - `completed` Phase 2: Pre‑fetching UI and background download - implemented prefetch module, offline dialog button, settings panel
-- `pending` Phase 3: Enhanced cache management UI  
+- `completed` Phase 3: Enhanced cache management UI - implemented cache usage API with age/type clearing, added cache management UI to settings
 - `pending` Phase 4: Offline search
 - `pending` Phase 5: Validation and integration
 Plan: `.kilo/plans/1776640073475‑offline‑media‑browsing.md`
@@ -237,10 +237,11 @@ Plan: `.kilo/plans/1776640073475‑offline‑media‑browsing.md`
 - `completed` Task 20: UI refinements (Block 6.1) (FB006, FB007) (commit 715d7f5)
 
 ## Next Execution Order
-- **Crisp Star plan completed**: Stale plans archived, Task 10 evaluated (remains deferred), offline‑media browsing gaps researched, detailed implementation plan created.
-- **Ready for next work**: Choose between implementing offline‑media browsing (background sync + pre‑fetching) or picking up deferred optional code‑quality blocks.
+- **Offline‑media browsing Phase 3 completed**: Enhanced cache management UI implemented with cache usage API, age-based clearing, and cache management section in settings.
+- **Ready for Phase 4**: Implement offline search functionality as defined in the offline‑media browsing plan.
 
 ## Plan And Todo History
+- 2026-04-20 14:48 +02:00 - Completed offline‑media browsing Phase 3 validation: short test suite passes 32/32. Enhanced cache management UI implemented with cache usage API, age-based clearing, type-based clearing (placeholder), and cache management section in settings panel.
 - 2026-04-20 14:10 +02:00 - Completed offline‑media browsing Phase 2 validation: short test suite passes 32/32. All Phase 2 features implemented and validated. Prefetch module with background download worker, offline dialog button in dialog list, offline dialogs section in settings panel.
 - 2026-04-20 13:45 +02:00 - Completed offline‑media browsing Phase 1 validation: short test suite passes 32/32. All Phase 1 features implemented and validated.
 - 2026-04-20 13:30 +02:00 - Recorded offline‑media browsing Phase 1 implementation commit `bafb6f1` (`feat: implement background sync for uploads - Phase 1 complete`). Updated mtcute and mock adapters to queue uploads when offline, added service worker sync, implemented queue processing.

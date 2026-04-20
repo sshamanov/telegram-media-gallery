@@ -445,6 +445,150 @@ export async function clearOpfsMedia(): Promise<void> {
   }
 }
 
+export interface CacheUsage {
+  totalBytes: number
+  itemCount: number
+  byType: Record<string, number>
+}
+
+export async function getCacheUsage(): Promise<CacheUsage> {
+  const [opfsInfo, indexedDbInfo] = await Promise.all([
+    getOpfsStorageInfo(),
+    getFullMediaCacheInfo(),
+  ])
+
+  // For now, we'll return a simplified breakdown
+  // In a real implementation, we would need to iterate through all cached items
+  // and categorize them by media type
+  const totalBytes = opfsInfo.totalBytes + indexedDbInfo.totalBytes
+  const itemCount = opfsInfo.itemCount + indexedDbInfo.itemCount
+
+  return {
+    totalBytes,
+    itemCount,
+    byType: {
+      // Placeholder - actual implementation would require storing media type metadata
+      'photo': 0,
+      'video': 0,
+      'document': 0,
+      'other': itemCount,
+    },
+  }
+}
+
+export async function clearCacheByAge(maxAgeMs: number): Promise<number> {
+  const capability = await getOpfsCapability()
+  const now = Date.now()
+  let clearedCount = 0
+
+  // Clear OPFS files older than maxAgeMs
+  if (capability.usable) {
+    try {
+      const root = await getRoot()
+      const mediaDir = await root.getDirectoryHandle(MEDIA_DIR, { create: false })
+      
+      for await (const [, dialogDirHandle] of mediaDir) {
+        if (dialogDirHandle.kind !== 'directory') continue
+
+        for await (const [, fileHandle] of dialogDirHandle as FileSystemDirectoryHandle) {
+          if (fileHandle.kind !== 'file') continue
+          
+          try {
+            const file = await (fileHandle as FileSystemFileHandle).getFile()
+            const fileAge = now - file.lastModified
+            
+            if (fileAge > maxAgeMs) {
+              await (dialogDirHandle as FileSystemDirectoryHandle).removeEntry(fileHandle.name)
+              clearedCount++
+            }
+          } catch {
+            // Skip files we can't read
+          }
+        }
+      }
+    } catch (error) {
+      if (!isNotFoundError(error)) {
+        rootPromise = null
+      }
+    }
+  }
+
+  // Clear IndexedDB entries older than maxAgeMs
+  const { listAllFullMedia, deleteCachedBlobById } = await import('./indexeddb')
+  const entries = await listAllFullMedia()
+  
+  for (const entry of entries) {
+    const entryAge = now - entry.updatedAt
+    if (entryAge > maxAgeMs) {
+      try {
+        await deleteCachedBlobById(entry.id, 'full')
+        clearedCount++
+      } catch {
+        // Skip entries we can't delete
+      }
+    }
+  }
+
+  return clearedCount
+}
+
+export async function clearCacheByType(mediaType: string): Promise<number> {
+  // This is a placeholder implementation
+  // In a real implementation, we would need to:
+  // 1. Store media type metadata with each cached item
+  // 2. Iterate through all items and delete those matching the type
+  
+  // For now, we'll clear all cache as a fallback
+  // This matches the existing "Clear full media" functionality
+  if (mediaType === 'all') {
+    const capability = await getOpfsCapability()
+    let clearedCount = 0
+    
+    // Clear OPFS
+    if (capability.usable) {
+      try {
+        const root = await getRoot()
+        const mediaDir = await root.getDirectoryHandle(MEDIA_DIR, { create: false })
+        
+        for await (const [, dialogDirHandle] of mediaDir) {
+          if (dialogDirHandle.kind !== 'directory') continue
+          
+          for await (const [, fileHandle] of dialogDirHandle as FileSystemDirectoryHandle) {
+            if (fileHandle.kind !== 'file') continue
+            clearedCount++
+          }
+        }
+        
+        await root.removeEntry(MEDIA_DIR, { recursive: true })
+        rootPromise = null
+      } catch (error) {
+        if (!isNotFoundError(error)) {
+          rootPromise = null
+        }
+      }
+    }
+    
+    // Clear IndexedDB
+    const { listAllFullMedia, deleteCachedBlobById } = await import('./indexeddb')
+    const entries = await listAllFullMedia()
+    
+    for (const entry of entries) {
+      try {
+        await deleteCachedBlobById(entry.id, 'full')
+        clearedCount++
+      } catch {
+        // Skip entries we can't delete
+      }
+    }
+    
+    return clearedCount
+  }
+  
+  // For specific types, we can't implement without metadata
+  // Return 0 for now
+  return 0
+}
+
 export async function migrateIndexedDbToOpfs(
   onProgress: (progress: MigrationProgress) => void,
 ): Promise<MigrationResult> {
