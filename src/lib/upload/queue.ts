@@ -5,6 +5,7 @@ import {
   updateUploadRetry as dbUpdateUploadRetry
 } from '../cache/indexeddb'
 import { debugLog, debugWarn } from '../debug'
+import { getTelegramAdapter } from '../telegram/adapter'
 
 const MAX_RETRY_COUNT = 3
 
@@ -68,12 +69,27 @@ export async function processQueue(): Promise<void> {
     }
     
     try {
-      // TODO: Replace with actual upload adapter call
-      // For now, simulate success after 1s
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Convert ArrayBuffer back to File
+      const file = new File([item.file.data], item.file.name, {
+        type: item.file.type,
+      })
+      
+      // Use default mode 'media' since we don't store the original mode
+      // This is acceptable because the uploadMediaType function will handle fallback
+      const adapter = getTelegramAdapter()
+      await adapter.uploadAndSend(item.dialogId, file, 'media')
       
       await dbRemoveUpload(item.id!)
       debugLog('upload-queue: upload succeeded', { id: item.id })
+      
+      // Show success toast
+      import('../../stores/ui').then(({ pushToast }) => {
+        pushToast({
+          kind: 'success',
+          text: `Upload completed: ${item.file.name}`,
+          dismissible: true,
+        })
+      })
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error)
       const newRetryCount = item.retryCount + 1
@@ -87,6 +103,14 @@ export async function processQueue(): Promise<void> {
       
       if (newRetryCount >= MAX_RETRY_COUNT) {
         debugLog('upload-queue: max retries reached, item will be skipped', { id: item.id })
+        // Show failure toast for final failure
+        import('../../stores/ui').then(({ pushToast }) => {
+          pushToast({
+            kind: 'error',
+            text: `Upload failed after ${MAX_RETRY_COUNT} attempts: ${item.file.name}`,
+            dismissible: true,
+          })
+        })
       }
     }
   }

@@ -20,10 +20,12 @@
 
   import CacheIndicator from '../ui/CacheIndicator.svelte'
 
-  let draft = $settings
+   let draft = $settings
   let storageInfo: StorageUsage | null = null
   let swCache = 0
   let loadingStorage = false
+  // let pendingUploads: Array<{ id: number; dialogId: string; fileName: string; size: number; createdAt: number }> = [] // TODO: Enable when UI is added
+  // let loadingUploads = false // TODO: Enable when UI is added
 
   $: draft = $settings
 
@@ -120,7 +122,7 @@
     draft = { ...draft, defaultHiddenFilters: next }
   }
 
-  onMount(() => {
+   onMount(() => {
     void loadStorageInfo()
   })
 </script>

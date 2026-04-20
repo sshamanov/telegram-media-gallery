@@ -10,6 +10,7 @@ import {
   resolveSampleFileName
 } from './mock-data'
 import { delay } from './mock-delay'
+import { enqueueUpload } from '../upload/queue'
 
 export class MockTelegramAdapter implements TelegramAdapter {
   private session: string | null = 'mock-session-' + Date.now()
@@ -299,7 +300,28 @@ export class MockTelegramAdapter implements TelegramAdapter {
     return fileData
   }
 
-  async uploadAndSend(_dialogId: string, _file: File, _mode: UploadMode, onProgress?: (pct: number) => void, abortSignal?: AbortSignal): Promise<void> {
+  async uploadAndSend(dialogId: string, file: File, _mode: UploadMode, onProgress?: (pct: number) => void, abortSignal?: AbortSignal): Promise<void> {
+    // Check if offline
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+      // Queue upload for background sync
+      try {
+        await enqueueUpload(dialogId, file)
+        // Show toast notification
+        import('../../stores/ui').then(({ pushToast }) => {
+          pushToast({
+            kind: 'info',
+            text: `Upload queued (${file.name}); will send when online.`,
+            dismissible: true,
+          })
+        })
+        return // Exit early - upload is queued
+      } catch (error) {
+        debugWarn('Failed to queue upload for background sync', error)
+        // Fall through to attempt immediate upload (will likely fail)
+      }
+    }
+
+    // Online or queue failed - simulate upload
     await delay(100)
     
     if (abortSignal?.aborted) {

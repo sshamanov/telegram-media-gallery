@@ -3,6 +3,7 @@ import { debugLog, debugWarn, DEBUG_MEDIA_SIZES } from '../debug'
 import { throttle } from '../files'
 import { emit } from '../events'
 import { cacheFirstGetDialogs } from './utils/cache-first'
+import { enqueueUpload } from '../upload/queue'
 import {
   errorMessage,
   isPasswordRequired,
@@ -391,6 +392,27 @@ class MtcuteTelegramAdapter implements TelegramAdapter {
   }
 
   async uploadAndSend(dialogId: string, file: File, mode: UploadMode, onProgress?: (pct: number) => void, abortSignal?: AbortSignal): Promise<void> {
+    // Check if offline
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+      // Queue upload for background sync
+      try {
+        await enqueueUpload(dialogId, file)
+        // Show toast notification
+        import('../../stores/ui').then(({ pushToast }) => {
+          pushToast({
+            kind: 'info',
+            text: `Upload queued (${file.name}); will send when online.`,
+            dismissible: true,
+          })
+        })
+        return // Exit early - upload is queued
+      } catch (error) {
+        debugWarn('Failed to queue upload for background sync', error)
+        // Fall through to attempt immediate upload (will likely fail)
+      }
+    }
+
+    // Online or queue failed - attempt immediate upload
     const client = this.getClient()
     await client.sendMedia(Number(dialogId), {
       type: uploadMediaType(file, mode),
