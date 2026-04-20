@@ -2,6 +2,7 @@ import { readCachedBlob, writeCachedBlob } from './cache/indexeddb'
 import { readFullMediaBlob, writeFullMediaBlob } from './cache/opfs'
 import { getTelegramAdapter } from './telegram/adapter'
 import { emit } from './events'
+import { indexMediaItemForSearch } from './search/offline'
 import type { MediaItem } from '../types/telegram'
 
 export type CachedMediaKind = 'thumb' | 'full'
@@ -51,6 +52,10 @@ export async function writeMediaBlobToCache(item: MediaItem, kind: CachedMediaKi
 
   if (kind === 'full') {
     await writeFullMediaBlob(cacheKey, item.dialogId, item.messageId, item.mimeType || 'application/octet-stream', blob)
+    // Index the media item for offline search when full media is cached
+    await indexMediaItemForSearch(item).catch(error => {
+      console.warn('Failed to index media item for search:', error)
+    })
     return
   }
 

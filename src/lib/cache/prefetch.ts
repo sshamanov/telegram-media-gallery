@@ -5,6 +5,8 @@ export { getAllPrefetches, type PrefetchQueueItem }
 import { debugLog } from '../debug'
 import { readOpfsBlob, writeFullMediaBlob } from './opfs'
 import { getTelegramAdapter } from '../telegram/adapter'
+import { batchIndexMediaItems } from '../search/offline'
+import { classifyMediaType } from '../media'
 import type { Message } from '../../types/telegram'
 
 function cloneBufferToBlob(buffer: Uint8Array, type: string): Blob {
@@ -38,6 +40,7 @@ function classifyMessage(message: Message) {
     messageId: message.id,
     filename,
     mimeType,
+    type: classifyMediaType(message.media),
     width: message.media.width ?? (message.media.kind === 'photo' || message.media.kind === 'video' ? 1600 : 0),
     height: message.media.height ?? (message.media.kind === 'photo' || message.media.kind === 'video' ? 1200 : 0),
     size: message.media.size ?? 0,
@@ -207,6 +210,16 @@ async function startDialogPrefetch(prefetch: PrefetchQueueItem): Promise<void> {
     await upsertPrefetch(updated)
     
     debugLog('prefetch', `Dialog ${dialogId} has ${totalItems} media items to prefetch`)
+    
+    // Index all media items for offline search
+    try {
+      // Filter out null items and cast to MediaItem[]
+      const mediaItems = allMediaItems.filter((item): item is NonNullable<typeof item> => item !== null)
+      await batchIndexMediaItems(mediaItems)
+      debugLog('prefetch', `Indexed ${mediaItems.length} media items for offline search`)
+    } catch (error) {
+      debugLog('prefetch', `Failed to index media items for search: ${error}`)
+    }
     
     // Download each media item
     for (let i = 0; i < totalItems; i++) {

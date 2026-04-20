@@ -1,14 +1,15 @@
 import type { Dialog } from '../../types/telegram'
 
 const DB_NAME = 'telegram-gallery-cache'
-const DB_VERSION = 3
+const DB_VERSION = 4
 const THUMBS = 'thumbnails'
 const FULL = 'full-media'
 const DIALOG_METADATA = 'dialog-metadata'
 const UPLOAD_QUEUE = 'upload-queue'
 const PREFETCH_QUEUE = 'prefetch-queue'
+const SEARCH_INDEX = 'search-index'
 
-type StoreName = typeof THUMBS | typeof FULL | typeof DIALOG_METADATA | typeof UPLOAD_QUEUE | typeof PREFETCH_QUEUE
+type StoreName = typeof THUMBS | typeof FULL | typeof DIALOG_METADATA | typeof UPLOAD_QUEUE | typeof PREFETCH_QUEUE | typeof SEARCH_INDEX
 
 interface CacheRow {
   id: string
@@ -42,6 +43,15 @@ export interface PrefetchQueueItem {
   error: string | null
 }
 
+export interface SearchIndexItem {
+  mediaId: string
+  dialogId: string
+  filename: string
+  date: number
+  sender: string | null
+  type: string
+}
+
 let dbPromise: Promise<IDBDatabase> | null = null
 
 function getDb(): Promise<IDBDatabase> {
@@ -67,6 +77,16 @@ function getDb(): Promise<IDBDatabase> {
           }
           if (!db.objectStoreNames.contains(PREFETCH_QUEUE)) {
             db.createObjectStore(PREFETCH_QUEUE, { keyPath: 'dialogId' })
+          }
+        }
+        
+        // Version 3 → 4: add SEARCH_INDEX
+        if (oldVersion < 4) {
+          if (!db.objectStoreNames.contains(SEARCH_INDEX)) {
+            const store = db.createObjectStore(SEARCH_INDEX, { keyPath: 'mediaId' })
+            store.createIndex('by-dialog', 'dialogId')
+            store.createIndex('by-filename', 'filename')
+            store.createIndex('by-sender', 'sender')
           }
         }
         
@@ -277,5 +297,83 @@ export async function removePrefetch(dialogId: string): Promise<void> {
     const request = store.delete(dialogId)
     request.onsuccess = () => resolve(undefined)
     request.onerror = () => reject(request.error ?? new Error('Failed to remove prefetch'))
+  })
+}
+
+// Search Index Functions
+export async function indexMediaItem(item: SearchIndexItem): Promise<void> {
+  return withStore(SEARCH_INDEX, 'readwrite', (store, resolve, reject) => {
+    const request = store.put(item)
+    request.onsuccess = () => resolve(undefined)
+    request.onerror = () => reject(request.error ?? new Error('Failed to index media item'))
+  })
+}
+
+export async function removeFromSearchIndex(mediaId: string): Promise<void> {
+  return withStore(SEARCH_INDEX, 'readwrite', (store, resolve, reject) => {
+    const request = store.delete(mediaId)
+    request.onsuccess = () => resolve(undefined)
+    request.onerror = () => reject(request.error ?? new Error('Failed to remove from search index'))
+  })
+}
+
+export async function searchIndex(query: string, dialogId?: string): Promise<SearchIndexItem[]> {
+  return withStore<SearchIndexItem[]>(SEARCH_INDEX, 'readonly', (store, resolve) => {
+    const request = store.getAll()
+    request.onsuccess = () => {
+      const allItems = (request.result as SearchIndexItem[]) ?? []
+      const normalizedQuery = query.toLowerCase().trim()
+      
+      const filtered = allItems.filter(item => {
+        // Filter by dialog if specified
+        if (dialogId && item.dialogId !== dialogId) return false
+        
+        // Search in filename and sender
+        const filenameMatch = item.filename.toLowerCase().includes(normalizedQuery)
+        const senderMatch = item.sender?.toLowerCase().includes(normalizedQuery) ?? false
+        
+        return filenameMatch || senderMatch
+      })
+      
+      resolve(filtered)
+    }
+    request.onerror = () => resolve([])
+  })
+}
+
+export async function clearSearchIndexForDialog(dialogId: string): Promise<void> {
+  return withStore(SEARCH_INDEX, 'readwrite', (store, resolve, reject) => {
+    const index = store.index('by-dialog')
+    const request = index.openCursor(IDBKeyRange.only(dialogId))
+    
+    const deletions: Promise<void>[] = []
+    
+    request.onsuccess = () => {
+      const cursor = request.result
+      if (cursor) {
+        deletions.push(
+          new Promise<void>((res, rej) => {
+            const deleteRequest = store.delete(cursor.primaryKey)
+            deleteRequest.onsuccess = () => res()
+            deleteRequest.onerror = () => rej(deleteRequest.error)
+          })
+        )
+        cursor.continue()
+      } else {
+        // Wait for all deletions to complete
+        Promise.all(deletions)
+          .then(() => resolve(undefined))
+          .catch(error => reject(error))
+      }
+    }
+    request.onerror = () => reject(request.error ?? new Error('Failed to clear search index for dialog'))
+  })
+}
+
+export async function clearSearchIndex(): Promise<void> {
+  return withStore(SEARCH_INDEX, 'readwrite', (store, resolve, reject) => {
+    const request = store.clear()
+    request.onsuccess = () => resolve(undefined)
+    request.onerror = () => reject(request.error ?? new Error('Failed to clear search index'))
   })
 }

@@ -6,6 +6,7 @@ import { blobToFile, getCachedBlob, getCachedOrDownloadBlob, parseFloodWaitSecon
 import { getSizeLimitForMediaType } from '../lib/telegram/constants'
 import { navigateToViewer, getRouter } from '../lib/routing'
 import { isOffline, pushToast } from './ui'
+import { searchOfflineMedia } from '../lib/search/offline'
 import type { Dialog, GalleryViewMode, GalleryFilterId, MediaItem, Message, UploadMode, UploadQueueItem, UploadQueueState, UploadState, DownloadQueueState, DownloadQueueItem, ForwardQueueState, ForwardQueueItem, ShareQueueState, ShareQueueItem, CopyQueueState, CopyQueueItem } from '../types/telegram'
 import { persisted } from './persisted'
 import { settings } from './settings'
@@ -48,6 +49,7 @@ export const viewerItems = writable<MediaItem[]>([])
 export const viewerIndex = writable<number | null>(null)
 export const loadState = writable<'idle' | 'loading' | 'error'>('idle')
 export const isLoadingMore = writable(false)
+export const gallerySearch = writable('')
 export const hasMoreMedia = writable(false)
 export const currentLoadId = writable(0)
 export const lastOffset = writable<{ id: number; date: number } | null>(null)
@@ -130,6 +132,49 @@ export const filteredMediaItems = derived(
     })
   }
 )
+
+export const searchedMediaItems = derived(
+  [filteredMediaItems, gallerySearch, currentDialog, isOffline],
+  ([$filteredMediaItems, $gallerySearch, $currentDialog, $isOffline], set) => {
+    if (!$gallerySearch.trim()) {
+      set($filteredMediaItems)
+      return
+    }
+    
+    const query = $gallerySearch.trim()
+    
+    // If offline, use offline search index
+    if ($isOffline && $currentDialog) {
+      searchOfflineMedia(query, $currentDialog.id)
+        .then(searchResults => {
+          // Convert search index results back to media items
+          const searchResultIds = new Set(searchResults.map(r => r.mediaId))
+          const filtered = $filteredMediaItems.filter(item => searchResultIds.has(item.id))
+          set(filtered)
+        })
+        .catch(error => {
+          console.warn('Offline search failed, falling back to client-side search:', error)
+          // Fall back to client-side search
+          performClientSideSearch($filteredMediaItems, query, set)
+        })
+    } else {
+      // Online or no dialog: use client-side search
+      performClientSideSearch($filteredMediaItems, query, set)
+    }
+  }
+)
+
+function performClientSideSearch(items: MediaItem[], query: string, set: (value: MediaItem[]) => void) {
+  const normalizedQuery = query.toLowerCase().trim()
+  const filtered = items.filter(item => {
+    const filenameMatch = item.filename.toLowerCase().includes(normalizedQuery)
+    const senderMatch = item.sender?.toLowerCase().includes(normalizedQuery) ?? false
+    const captionMatch = item.caption?.toLowerCase().includes(normalizedQuery) ?? false
+    return filenameMatch || senderMatch || captionMatch
+  })
+  
+  set(filtered)
+}
 
 let loadedMessageIds = new Set<number>()
 let activeUploadAbortController: AbortController | null = null

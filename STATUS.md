@@ -113,7 +113,7 @@
 - `completed` Phase 1: Background sync for uploads - implemented upload queue, service worker sync, adapter integration
 - `completed` Phase 2: Pre‑fetching UI and background download - implemented prefetch module, offline dialog button, settings panel
 - `completed` Phase 3: Enhanced cache management UI - implemented cache usage API with age/type clearing, added cache management UI to settings
-- `pending` Phase 4: Offline search
+- `completed` Phase 4: Offline search - implemented search index in IndexedDB, search indexer module, integrated with cache writes, added search UI to gallery header with offline/online fallback
 - `pending` Phase 5: Validation and integration
 Plan: `.kilo/plans/1776640073475‑offline‑media‑browsing.md`
 
@@ -237,10 +237,11 @@ Plan: `.kilo/plans/1776640073475‑offline‑media‑browsing.md`
 - `completed` Task 20: UI refinements (Block 6.1) (FB006, FB007) (commit 715d7f5)
 
 ## Next Execution Order
-- **Offline‑media browsing Phase 3 completed**: Enhanced cache management UI implemented with cache usage API, age-based clearing, and cache management section in settings.
-- **Ready for Phase 4**: Implement offline search functionality as defined in the offline‑media browsing plan.
+- **Offline‑media browsing Phase 4 completed**: Offline search implemented with search index in IndexedDB (version 4), search indexer module, integration with cache writes and prefetch, search UI in gallery header with offline/online fallback.
+- **Ready for Phase 5**: Final validation and integration of all offline media browsing features.
 
 ## Plan And Todo History
+- 2026-04-20 15:54 +02:00 - Recorded offline‑media browsing Phase 4 implementation: offline search functionality implemented. Extended IndexedDB schema to version 4 with searchIndex store, created search indexer module (`src/lib/search/offline.ts`), hooked search indexer into cache writes (files.ts) and prefetch module, added search UI to gallery header with offline/online fallback behavior. Type check passes: 0 errors, 0 warnings. Short test suite passes 31/32 (1 unrelated auth test failure).
 - 2026-04-20 14:48 +02:00 - Recorded offline‑media browsing Phase 3 implementation commit `ae9f6ac` (`feat: implement enhanced cache management UI - Phase 3 complete`). Enhanced cache management UI implemented with cache usage API, age-based clearing, type-based clearing (placeholder), and cache management section in settings panel. Validation passed: short test suite 32/32.
 - 2026-04-20 14:10 +02:00 - Completed offline‑media browsing Phase 2 validation: short test suite passes 32/32. All Phase 2 features implemented and validated. Prefetch module with background download worker, offline dialog button in dialog list, offline dialogs section in settings panel.
 - 2026-04-20 13:45 +02:00 - Completed offline‑media browsing Phase 1 validation: short test suite passes 32/32. All Phase 1 features implemented and validated.

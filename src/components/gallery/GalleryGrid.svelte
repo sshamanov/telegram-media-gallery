@@ -43,6 +43,7 @@
       mediaItems,
       selectedFilter,
       filteredMediaItems,
+      searchedMediaItems,
       openViewer,
       setGalleryViewMode,
       totalMessageCount,
@@ -72,6 +73,7 @@
       retryUploadQueueItem,
       storeScrollPosition,
       scrollPositions,
+      gallerySearch,
     } from '../../stores/gallery'
    import { galleryIds, toggleGallery } from '../../stores/dialogs'
    import { isOffline, pushToast } from '../../stores/ui'
@@ -149,7 +151,8 @@
 
    $: hiddenFilters = $settings.defaultHiddenFilters ?? []
   $: counts = countFilters($mediaItems)
-  $: visibleItems = $filteredMediaItems
+  let visibleItems: MediaItem[] = []
+  $: visibleItems = $gallerySearch.trim() ? ($searchedMediaItems as MediaItem[]) : $filteredMediaItems
   $: selectedItems = visibleItems.filter((item) => $selectedMediaIds.has(item.id))
     $: effectiveColumns = $settings.gridColumns
    $: gridTemplate = `repeat(${effectiveColumns}, minmax(0, 1fr))`
@@ -888,10 +891,20 @@
             data-testid="gallery-upload-toggle"
           >
             Upload
-          </button>
-        </div>
-      </header>
-    {/if}
+           </button>
+         </div>
+
+         <div class="gallery-search">
+           <input
+             type="text"
+             placeholder="Search media..."
+             bind:value={$gallerySearch}
+             class="search-input"
+             data-testid="gallery-search"
+           />
+         </div>
+       </header>
+     {/if}
 
     {#if showUploadSheet}
       <div class="panel upload-sheet" data-testid="gallery-upload-sheet">
@@ -1112,13 +1125,33 @@
     font-size: 0.9rem;
   }
 
-  .actions {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-  }
+   .actions {
+     display: flex;
+     gap: 10px;
+     align-items: center;
+     flex-wrap: wrap;
+     justify-content: flex-end;
+   }
+
+   .gallery-search {
+     flex: 0 0 200px;
+   }
+
+   .gallery-search .search-input {
+     width: 100%;
+     padding: 8px 12px;
+     border: 1px solid var(--border);
+     border-radius: 8px;
+     background: var(--bg-surface);
+     color: var(--text-primary);
+     font-size: 0.9rem;
+   }
+
+   .gallery-search .search-input:focus {
+     outline: none;
+     border-color: var(--accent);
+     box-shadow: 0 0 0 2px var(--accent-translucent);
+   }
 
   .upload-sheet {
     display: flex;
