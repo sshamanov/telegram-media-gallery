@@ -24,7 +24,7 @@
 - **Plan file:** `.kilo/plans/1776687189000-review-deferred-tasks.md`
 - **Goal:** Review all deferred tasks from completed plans, evaluate their priority, and identify the next high‑priority work items for execution.
 - **Execution strategy:** 3 phases: 1. Inventory and prioritization; 2. Implementation planning; 3. Validation.
-- **Status:** Phase 1 pending
+- **Status:** Phase 1 completed, Phase 2 pending
 
 ## Completed Plans
 - **Plan file:** `.kilo/plans/1776619529000-brisk-harbor.md`
@@ -109,13 +109,19 @@
   - `completed` Task 9.2: Refactor ViewerWrapper.svelte (plan: `.kilo/plans/1776578917940-task9-2-viewerwrapper-refactor.md`) - utilities integrated, type check passes, tests pass
   - `deferred` Task 10: Write unit tests (plan: `.kilo/plans/1776540483164-task10-write-unit-tests.md`) - deferred as low priority; existing Playwright coverage sufficient for current validation
 
-### Offline‑Media Browsing (Active)
+### Offline‑Media Browsing (Completed)
 - `completed` Phase 1: Background sync for uploads - implemented upload queue, service worker sync, adapter integration
 - `completed` Phase 2: Pre‑fetching UI and background download - implemented prefetch module, offline dialog button, settings panel
 - `completed` Phase 3: Enhanced cache management UI - implemented cache usage API with age/type clearing, added cache management UI to settings
-- `completed` Phase 4: Offline search - implemented search index in IndexedDB, search indexer module, integrated with cache writes, added search UI to gallery header with offline/online fallback
+- `completed` Phase 4: Offline search - implemented search index in IndexedDB, search indexer module, integrated with cache writes, added search UI in gallery header with offline/online fallback
 - `completed` Phase 5: Validation and integration - comprehensive validation passed: type check 0 errors/0 warnings, short test suite 32/32 passed, long test suite 12/12 passed (5 skipped), documentation updated
 Plan: `.kilo/plans/1776640073475‑offline‑media‑browsing.md`
+
+### Review‑Deferred‑Tasks (Active)
+- `completed` Phase 1: Inventory and prioritization - reviewed all deferred tasks, assessed value, created priority matrix
+- `pending` Phase 2: Implementation planning
+- `pending` Phase 3: Validation
+Plan: `.kilo/plans/1776687189000‑review‑deferred‑tasks.md`
 
 ### Happy Tiger Plan (Code Quality Hardening)
 - `completed` Block 1: Restore `replaceImageSource` correctness
@@ -237,10 +243,12 @@ Plan: `.kilo/plans/1776640073475‑offline‑media‑browsing.md`
 - `completed` Task 20: UI refinements (Block 6.1) (FB006, FB007) (commit 715d7f5)
 
 ## Next Execution Order
-- **Review deferred tasks plan activated**: Phase 1 (inventory and prioritization) ready to start.
-- **Execution order**: 1. Review Task 10 (unit tests); 2. Review Happy Tiger deferred blocks; 3. Review Kind Island Block 6; 4. Review Silent Knight deferred blocks; 5. Create priority matrix.
+- **Review deferred tasks Phase 1 completed**: All deferred tasks reviewed and assessed.
+- **Ready for Phase 2**: Implementation planning for next high‑priority work.
+- **Candidate next work**: 1. Pull‑to‑refresh implementation; 2. Enhanced keyboard navigation; 3. Gallery onboarding hints.
 
 ## Plan And Todo History
+- 2026-04-20 17:10 +02:00 - Completed review‑deferred‑tasks Phase 1 (inventory and prioritization). All deferred tasks reviewed: Task 10 (unit tests) remains deferred (low priority, high effort); Happy Tiger Blocks 5‑7 already implemented; Kind Island Block 6 correctly deferred; Silent Knight Blocks 4‑5 correctly deferred. Updated APPLICATION_SPEC.md to remove implemented features from "Still Planned" list.
 - 2026-04-20 16:53 +02:00 - Activated review‑deferred‑tasks plan (`.kilo/plans/1776687189000‑review‑deferred‑tasks.md`): review all deferred tasks, evaluate priority, identify next high‑priority work. Plan registered, Phase 1 pending.
 - 2026-04-20 16:25 +02:00 - Recorded offline‑media browsing Phase 5 completion commit `63e07cc` (`docs: complete offline-media browsing plan - Phase 5 validation and documentation`). Comprehensive validation passed: type check 0 errors/0 warnings, short test suite 32/32 passed, long test suite 12/12 passed (5 skipped). Updated APPLICATION_SPEC.md to mark background sync, pre‑fetching, enhanced cache management, and offline search as implemented. Updated STATUS.md with Phase 5 completion. All offline‑media browsing features are now fully implemented and validated.
 - 2026-04-20 15:54 +02:00 - Recorded offline‑media browsing Phase 4 implementation commit `e3d02f2` (`feat: implement offline search - Phase 4 complete`). Offline search functionality implemented. Extended IndexedDB schema to version 4 with searchIndex store, created search indexer module (`src/lib/search/offline.ts`), hooked search indexer into cache writes (files.ts) and prefetch module, added search UI to gallery header with offline/online fallback behavior. Type check passes: 0 errors, 0 warnings. Short test suite passes 31/32 (1 unrelated auth test failure).

@@ -203,9 +203,6 @@ The accepted gallery baseline is limited to the currently restored behavior:
 
 ### Advanced Gallery Features Still Planned Or Not Yet Accepted
 Do not claim end-to-end support for these until they are rebuilt and revalidated:
-- service worker offline shell behavior
-- masonry layout
-- desktop layout variants
 - keyboard gallery navigation beyond validated viewer baseline behavior
 - pull-to-refresh
 - gallery onboarding hints
