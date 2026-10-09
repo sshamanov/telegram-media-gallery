@@ -937,6 +937,7 @@ Plan: `.kilo/plans/1776687189000‑review‑deferred‑tasks.md`
 ## Recent Commit Log
 | Commit | Date | Description |
 |--------|------|-------------|
+| `e7c8be0` | 2026-10-09 | feat: read Telegram API credentials from container env at runtime |
 | `74d8b1b` | 2026-04-20 | fix: scope GHCR workflow to image publish |
 | `eb4e335` | 2026-04-19 | chore: remove unused legacy root app files |
 | `6362ea8` | 2026-04-19 | fix: avoid hijacking gallery control keyboard input |
