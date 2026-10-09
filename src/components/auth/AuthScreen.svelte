@@ -1,11 +1,12 @@
 <script lang="ts">
+  import { TELEGRAM_API_HASH, TELEGRAM_API_ID } from '../../lib/config'
   import { onMount } from 'svelte'
   import PhoneForm from './PhoneForm.svelte'
   import QRForm from './QRForm.svelte'
   let mode: 'phone' | 'qr' = 'phone'
   let webCryptoAvailable = true
 
-  const hideCredentials = Boolean(import.meta.env.VITE_TELEGRAM_API_ID && import.meta.env.VITE_TELEGRAM_API_HASH)
+  const hideCredentials = Boolean(TELEGRAM_API_ID && TELEGRAM_API_HASH)
 
   onMount(() => {
     webCryptoAvailable = Boolean(window.isSecureContext && window.crypto?.subtle)

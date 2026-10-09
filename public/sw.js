@@ -49,6 +49,11 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
+  if (url.pathname === '/config.js') {
+    event.respondWith(networkFirst(request))
+    return
+  }
+
   if (isAppShellAsset(url.pathname)) {
     event.respondWith(cacheFirst(request))
   }
@@ -92,6 +97,23 @@ async function cacheFirst(request) {
   }
 
   return response
+}
+
+async function networkFirst(request) {
+  try {
+    const response = await fetch(request)
+    if (response.ok) {
+      const cache = await caches.open(APP_SHELL_CACHE)
+      await cache.put(request, response.clone())
+    }
+    return response
+  } catch {
+    const cachedResponse = await caches.match(request)
+    if (cachedResponse) {
+      return cachedResponse
+    }
+    throw new Error('Network unavailable and no cached response')
+  }
 }
 
 // Background sync for uploads

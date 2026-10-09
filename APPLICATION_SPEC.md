@@ -72,6 +72,8 @@ All Telegram API calls go through `src/lib/telegram/adapter.ts`. Feature code mu
 - `docker-compose.yml` is reserved for manual app-server usage and must not force mock mode.
 - `docker-compose.test.yml` is the dedicated Playwright/agent test compose path and may force mock mode for deterministic test runs.
 - `docker-compose.test.yml` also defines the production preview path used to validate offline shell bootstrap from `dist/`.
+- Telegram API credentials resolve in order: user-entered values in `localStorage`, runtime `window.__APP_CONFIG__` from `/config.js`, then build-time `VITE_TELEGRAM_API_ID`/`VITE_TELEGRAM_API_HASH` (see `src/lib/config.ts`).
+- `scripts/serve-dist.mjs` serves `/config.js` from the `TELEGRAM_API_ID`/`TELEGRAM_API_HASH` environment variables; the production image never bakes credentials in. `public/config.js` is an empty placeholder for `npm run dev`. The service worker fetches `/config.js` network-first with cache fallback for offline starts.
 
 ### Mock Mode Behavior
 - **Phone**: any phone number is accepted

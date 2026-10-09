@@ -26,9 +26,24 @@ const mimeTypes = new Map([
   ['.webmanifest', 'application/manifest+json; charset=utf-8'],
 ])
 
+// Runtime client config, read from the container environment at startup.
+const runtimeConfigScript = `window.__APP_CONFIG__ = ${JSON.stringify({
+  telegramApiId: process.env.TELEGRAM_API_ID || '',
+  telegramApiHash: process.env.TELEGRAM_API_HASH || '',
+})}\n`
+
 const server = createServer(async (request, response) => {
   try {
     const requestUrl = new URL(request.url || '/', `http://${request.headers.host || 'localhost'}`)
+    if (requestUrl.pathname === '/config.js') {
+      response.writeHead(200, {
+        'Content-Type': 'text/javascript; charset=utf-8',
+        'Cache-Control': 'no-cache',
+      })
+      response.end(runtimeConfigScript)
+      return
+    }
+
     const candidatePath = requestUrl.pathname === '/'
       ? '/index.html'
       : requestUrl.pathname

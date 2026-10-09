@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { TELEGRAM_API_HASH, TELEGRAM_API_ID } from '../../lib/config'
   import { onDestroy, onMount } from 'svelte'
   import QRCode from 'qrcode'
   import { debugLog, debugWarn } from '../../lib/debug'
@@ -9,15 +10,15 @@
   let expiresIn = 0
   let countdown: number | null = null
   let running = false
-  let apiId = localStorage.getItem('telegram.apiId') ?? import.meta.env.VITE_TELEGRAM_API_ID ?? ''
-  let apiHash = localStorage.getItem('telegram.apiHash') ?? import.meta.env.VITE_TELEGRAM_API_HASH ?? ''
+  let apiId = localStorage.getItem('telegram.apiId') || TELEGRAM_API_ID
+  let apiHash = localStorage.getItem('telegram.apiHash') || TELEGRAM_API_HASH
 
   // 2FA state — only shown when Telegram asks for it mid-login
   let needs2FA = false
   let password2FA = ''
   let passwordResolver: ((pw: string) => void) | null = null
 
-  const hideCredentials = Boolean(import.meta.env.VITE_TELEGRAM_API_ID && import.meta.env.VITE_TELEGRAM_API_HASH)
+  const hideCredentials = Boolean(TELEGRAM_API_ID && TELEGRAM_API_HASH)
 
   function clearCountdown(): void {
     if (countdown !== null) {

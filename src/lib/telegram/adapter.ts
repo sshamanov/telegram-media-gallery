@@ -1,3 +1,4 @@
+import { TELEGRAM_API_HASH, TELEGRAM_API_ID } from '../config'
 import type { Dialog, Message, TgMedia, UploadMode } from '../../types/telegram'
 
 export interface MessagePage {
@@ -23,8 +24,8 @@ export interface TelegramAdapter {
 }
 
 let currentAdapter: TelegramAdapter | null = null
-let storedApiId = localStorage.getItem('telegram.apiId') ?? import.meta.env.VITE_TELEGRAM_API_ID ?? ''
-let storedApiHash = localStorage.getItem('telegram.apiHash') ?? import.meta.env.VITE_TELEGRAM_API_HASH ?? ''
+let storedApiId = localStorage.getItem('telegram.apiId') || TELEGRAM_API_ID
+let storedApiHash = localStorage.getItem('telegram.apiHash') || TELEGRAM_API_HASH
 let useMock = false
 
 export function setTelegramAdapter(adapter: TelegramAdapter): void {

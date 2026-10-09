@@ -1,3 +1,4 @@
+import { TELEGRAM_API_HASH, TELEGRAM_API_ID } from '../lib/config'
 import { writable } from 'svelte/store'
 import type { AuthState, SessionSnapshot } from '../types/telegram'
 import type { TelegramAdapter } from '../lib/telegram/adapter'
@@ -9,7 +10,7 @@ import { clearDialogSnapshot, resetDialogsState } from './dialogs'
 import { clearDialogCache } from '../lib/cache/indexeddb'
 
 // For testing: default to mock adapter if no API credentials are set or if env var is set
-const hasApiCredentials = localStorage.getItem('telegram.apiId') || import.meta.env.VITE_TELEGRAM_API_ID
+const hasApiCredentials = localStorage.getItem('telegram.apiId') || TELEGRAM_API_ID
 const envUseMockValue = import.meta.env.VITE_USE_MOCK_ADAPTER
 const envUseMock = envUseMockValue === 'true' || envUseMockValue === '1' || envUseMockValue === 'True' || envUseMockValue === 'TRUE'
 
@@ -27,8 +28,8 @@ if (envUseMockValue !== undefined) {
 
 setTelegramAdapter(useMock ? mockAdapter : mtcuteAdapter)
 setTelegramApiCredentials(
-  localStorage.getItem('telegram.apiId') ?? import.meta.env.VITE_TELEGRAM_API_ID ?? '',
-  localStorage.getItem('telegram.apiHash') ?? import.meta.env.VITE_TELEGRAM_API_HASH ?? '',
+  localStorage.getItem('telegram.apiId') || TELEGRAM_API_ID,
+  localStorage.getItem('telegram.apiHash') || TELEGRAM_API_HASH,
 )
 
 export type ReconnectState = 'idle' | 'reconnecting' | 'failed'

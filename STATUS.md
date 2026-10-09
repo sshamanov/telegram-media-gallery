@@ -244,12 +244,13 @@ Plan: `.kilo/plans/1776687189000‑review‑deferred‑tasks.md`
 
 ## Next Execution Order
 - **GitHub Actions workflow scope fix in progress**: keep the GHCR workflow production-image-only by removing dev/test validation steps from the publish pipeline.
-- **GitHub Actions secret bake-in update in progress**: pass `VITE_TELEGRAM_API_ID` and `VITE_TELEGRAM_API_HASH` into `Dockerfile.prod` at build time for GHCR images.
+- **Runtime Telegram credentials completed**: GHCR image no longer bakes `VITE_TELEGRAM_API_*`; set `TELEGRAM_API_ID`/`TELEGRAM_API_HASH` on the container (served via `/config.js`). The `VITE_TELEGRAM_API_*` GitHub secrets are no longer used and can be deleted.
 - **Hardened Docker build plan completed**: Dockerfile.prod created for restricted environments.
 - **Pull‑to‑refresh plan reactivated**: Resume Phase 1 (research & planning).
 - **Execution order**: 1. Analyze current refresh flow; 2. Research pull‑to‑refresh patterns; 3. Design implementation; 4. Create component structure.
 
 ## Plan And Todo History
+- 2026-10-09 - Public-release prep: replaced build-time credential bake-in with runtime env (`TELEGRAM_API_ID`/`TELEGRAM_API_HASH` -> `/config.js` -> `src/lib/config.ts`). Removed build args from `Dockerfile.prod` and the GHCR workflow. Verified no API credentials exist in git history. Todo: completed.
 - 2026-04-20 19:34 +02:00 - Recorded workflow-scope fix commit `74d8b1b` (`fix: scope GHCR workflow to image publish`). Production GHCR workflow now excludes type-check and Playwright dev/test validation steps by design.
 - 2026-04-20 19:32 +02:00 - Confirmed workflow-scope drift: GitHub Actions publish workflow still contained type-check and Playwright short-test steps even though this pipeline should only publish the production GHCR image. Removed type-check, Playwright install, and short-test steps so dev/test validation remains outside the production image workflow.
 - 2026-04-20 19:27 +02:00 - Diagnosed GitHub Actions failure in run `#5`: published image succeeded, but `Run type check` failed because validation containers invoked project-local npm scripts without first installing dependencies. Updated workflow to run `npm ci` inside the type-check, Playwright install, dev-server, and short-test containers.
@@ -481,6 +482,7 @@ Plan: `.kilo/plans/1776687189000‑review‑deferred‑tasks.md`
 ## Current Blockers And Known Gaps
 
 ### Product blockers
+- `tests/e2e/long/offline.spec.ts` "disables offline download, forward, and share actions" fails on `main` (as of `a93aee4`): `⬇` button not found. Not yet investigated.
 - Upload mode selector (Send as media vs Send as file) now auto‑adjusts for large files with size limits and warning toast. *Implemented.*
 - Task 5 video preview exit behavior is now fully resolved. Real-data verification confirms the fix works correctly with actual Telegram adapter.
 
@@ -515,6 +517,11 @@ Plan: `.kilo/plans/1776687189000‑review‑deferred‑tasks.md`
 - ℹ️ Historical references to `.kilo/status.md` remain in dated records by design and are not treated as active drift.
 
 ## Last Validation
+- 2026-10-09 - Runtime credentials change.
+  - `npm run check`: passed, 0 errors / 0 warnings.
+  - `docker-compose -f docker-compose.test.yml up app playwright` (short suite): passed, 32/32.
+  - `serve-dist.mjs` with `TELEGRAM_API_ID=111 TELEGRAM_API_HASH=abc`: `/config.js` returns the values with `Cache-Control: no-cache`.
+  - Production offline suite (`app-prod` + `playwright-prod`): 4 passed, 1 failed (`disables offline download, forward, and share actions`, cannot find the `⬇` button). Same failure reproduced on `a93aee4` without this change, so it was already there; logged as a known gap.
 - 2026-04-20 19:32 +02:00 - GitHub Actions workflow-scope fix: removed dev/test validation steps from the production GHCR publish workflow.
   - Result: deferred
   - Main note: workflow/docs-only change by request; no code-path change in app/runtime. Validation intentionally deferred because the change narrows CI scope rather than modifying executable product behavior.

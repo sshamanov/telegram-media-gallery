@@ -21,12 +21,6 @@ COPY vite.config.ts ./
 COPY tsconfig.json ./
 COPY index.html ./
 
-# Bake Vite frontend config at build time
-ARG VITE_TELEGRAM_API_ID
-ARG VITE_TELEGRAM_API_HASH
-ENV VITE_TELEGRAM_API_ID=${VITE_TELEGRAM_API_ID}
-ENV VITE_TELEGRAM_API_HASH=${VITE_TELEGRAM_API_HASH}
-
 # Build the application
 RUN npm run build
 
@@ -69,6 +63,8 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:4173/ || exit 1
 
 # Default environment variables
+# Telegram credentials are supplied at runtime (not baked into the image):
+#   docker run -e TELEGRAM_API_ID=... -e TELEGRAM_API_HASH=... ...
 ENV NODE_ENV=production \
     PORT=4173 \
     HOST=0.0.0.0

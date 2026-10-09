@@ -73,5 +73,3 @@ jobs:
           build-args: |
             USER_ID=1001
             GROUP_ID=1001
-            VITE_TELEGRAM_API_ID=${{ secrets.VITE_TELEGRAM_API_ID }}
-            VITE_TELEGRAM_API_HASH=${{ secrets.VITE_TELEGRAM_API_HASH }}

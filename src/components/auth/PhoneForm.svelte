@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { TELEGRAM_API_HASH, TELEGRAM_API_ID } from '../../lib/config'
   import { setTelegramApiCredentials } from '../../lib/telegram/adapter'
   import { debugLog, debugWarn } from '../../lib/debug'
   import { authState, authStatus, phone, phoneCodeHash, session, getCurrentAdapter } from '../../stores/telegram'
@@ -6,8 +7,8 @@
 
   export let hideCredentials: boolean
 
-  let apiId = import.meta.env.VITE_TELEGRAM_API_ID ?? ''
-  let apiHash = import.meta.env.VITE_TELEGRAM_API_HASH ?? ''
+  let apiId = TELEGRAM_API_ID
+  let apiHash = TELEGRAM_API_HASH
   let code = ''
   let password = ''
   
