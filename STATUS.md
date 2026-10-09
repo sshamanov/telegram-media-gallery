@@ -244,12 +244,13 @@ Plan: `.kilo/plans/1776687189000‑review‑deferred‑tasks.md`
 
 ## Next Execution Order
 - **GitHub Actions workflow scope fix in progress**: keep the GHCR workflow production-image-only by removing dev/test validation steps from the publish pipeline.
-- **Runtime Telegram credentials completed**: GHCR image no longer bakes `VITE_TELEGRAM_API_*`; set `TELEGRAM_API_ID`/`TELEGRAM_API_HASH` on the container (served via `/config.js`). The `VITE_TELEGRAM_API_*` GitHub secrets are no longer used and can be deleted.
+- **Runtime Telegram credentials completed**: GHCR image no longer bakes `VITE_TELEGRAM_API_*`; set `TELEGRAM_API_ID`/`TELEGRAM_API_HASH` on the container (served via `/config.js`). The `VITE_TELEGRAM_API_*` GitHub secrets and the old keyed image versions have been deleted.
 - **Hardened Docker build plan completed**: Dockerfile.prod created for restricted environments.
 - **Pull‑to‑refresh plan reactivated**: Resume Phase 1 (research & planning).
 - **Execution order**: 1. Analyze current refresh flow; 2. Research pull‑to‑refresh patterns; 3. Design implementation; 4. Create component structure.
 
 ## Plan And Todo History
+- 2026-10-09 - Pushed runtime-credentials change; CI run 37965871342 succeeded. Verified the new GHCR `latest` (version 1362866779) contains no API ID/hash in `/app/dist` or its env. Deleted old package version 1362517520 and the `VITE_TELEGRAM_API_ID`/`VITE_TELEGRAM_API_HASH` repo secrets.
 - 2026-10-09 - Public-release prep: replaced build-time credential bake-in with runtime env (`TELEGRAM_API_ID`/`TELEGRAM_API_HASH` -> `/config.js` -> `src/lib/config.ts`). Removed build args from `Dockerfile.prod` and the GHCR workflow. Verified no API credentials exist in git history. Todo: completed.
 - 2026-04-20 19:34 +02:00 - Recorded workflow-scope fix commit `74d8b1b` (`fix: scope GHCR workflow to image publish`). Production GHCR workflow now excludes type-check and Playwright dev/test validation steps by design.
 - 2026-04-20 19:32 +02:00 - Confirmed workflow-scope drift: GitHub Actions publish workflow still contained type-check and Playwright short-test steps even though this pipeline should only publish the production GHCR image. Removed type-check, Playwright install, and short-test steps so dev/test validation remains outside the production image workflow.
